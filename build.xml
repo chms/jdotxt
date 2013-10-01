@@ -1,4 +1,4 @@
-<project name="jdotxt" default="dist" basedir=".">
+<project name="jdotxt" default="jar" basedir=".">
     <description>
         another open source cross-platform GUI for todo.txt files
     </description>
@@ -22,7 +22,7 @@
     </copy>
   </target>
 
-  <target name="dist" depends="compile" description="generate the distribution" >
+  <target name="jar" depends="compile" description="generate the distribution" >
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}"/>
     <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
