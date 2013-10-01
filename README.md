@@ -3,10 +3,14 @@ jdotxt
 
 Copyright 2013 Christian M. Schmid
 
-another cross-platform GUI for the todo.txt file format
+another open source cross-platform GUI for the todo.txt file format
 
-http://todotxt.com/
-more information on todo.txt in general
+#### Documentation
 
-http://jdotxt.chschmid.com/
-more informatoin on jdotxt
+- [jdotxt in a nutshell](http://jdotxt.chschmid.com/)
+
+#### Links
+
+- [todo.txt](http://todotxt.com/) is a simple file format for managing your todos
+- [jdotxt](http://jdotxt.chschmid.com/) is an easy to use GUI for the todo.txt file format
+

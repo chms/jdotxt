@@ -4,3 +4,13 @@
 *.jar
 *.war
 *.ear
+
+# Build directories #
+dist/
+build/
+
+# Eclipse stuff #
+dist/
+build/
+.settings/
+bin/
