@@ -1,0 +1,7 @@
+Section: productivity
+Priority: optional
+Architecture: all
+Maintainer: Christian M. Schmid <christian@chschmid.com>
+Description: another open source cross-platform GUI for todo.txt files
+Depends: openjdk-8-jre | openjdk-7-jre | oracle-java8-installer | oracle-java7-installer
+Homepage: http://jdotxt.chschmid.com

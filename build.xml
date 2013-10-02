@@ -5,7 +5,7 @@
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
   <property name="build" location="build"/>
-  <property name="dist"  location="dist"/>
+  <property name="jar"  location="jar"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -22,16 +22,16 @@
     </copy>
   </target>
 
-  <target name="jar" depends="compile" description="generate the distribution" >
-    <!-- Create the distribution directory -->
-    <mkdir dir="${dist}"/>
-    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <jar jarfile="${dist}/jdotxt.jar" basedir="${build}" manifest="manifest"/>
+  <target name="jar" depends="compile" description="generate the jar" >
+    <!-- Create the jar directory -->
+    <mkdir dir="${jar}"/>
+    <!-- Put everything in ${build} into the jar file -->
+    <jar jarfile="${jar}/jdotxt.jar" basedir="${build}" manifest="manifest"/>
   </target>
 
   <target name="clean" description="clean up" >
-    <!-- Delete the ${build} and ${dist} directory trees -->
+    <!-- Delete the ${build} and ${jar} directory trees -->
     <delete dir="${build}"/>
-    <delete dir="${dist}"/>
+    <delete dir="${jar}"/>
   </target>
 </project>

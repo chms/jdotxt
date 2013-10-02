@@ -1,16 +1,18 @@
 *.class
+*~
 
 # Package Files #
 *.jar
 *.war
 *.ear
+*.deb
 
 # Build directories #
 dist/
 build/
 
 # Eclipse stuff #
-dist/
+jar/
 build/
 .settings/
 bin/
