@@ -24,12 +24,12 @@ public class Jdotxt {
 	{
 		loadPreferences();
 		JdotxtGUI.loadLookAndFeel(userPrefs.get("lang", "English"));
-		
+
 		if (firstRun) {
 			JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
 			settingsDialog.setVisible(true);
 		}
-		
+
 		Runnable viewGUI = new Runnable() {
 			@Override
 			public void run() {
@@ -37,7 +37,7 @@ public class Jdotxt {
 				mainGUI.setVisible(true);
 			}
 		};
-						
+
 		EventQueue.invokeLater(viewGUI);
 	}
 	

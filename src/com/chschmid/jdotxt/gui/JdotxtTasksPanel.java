@@ -159,6 +159,7 @@ public class JdotxtTasksPanel extends JPanel {
 		public void onTextUpdate(Task t) {
 			taskBag.update(t);
 			jdotxtgui.updateFilterPanes();
+			updateTaskPanel();
 		}
 
 		@Override
@@ -169,8 +170,8 @@ public class JdotxtTasksPanel extends JPanel {
 		public void onTaskDeleted(Task t) {
 			taskPanels.remove(findTaskPanel(t));
 			taskBag.delete(t);
-			jdotxtgui.updateFilterPanes();
 			JdotxtTasksPanel.this.requestFocus();
+			jdotxtgui.updateFilterPanes();
 			updateTaskPanel();
 		}
 	}
@@ -197,6 +198,7 @@ public class JdotxtTasksPanel extends JPanel {
 			JdotxtTasksPanel.this.requestFocus();
 			jdotxtgui.updateFilterPanes();
 			updateTaskPanel();
+			addTaskPanel.setFocusText();
 		}
 
 		@Override

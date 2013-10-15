@@ -350,7 +350,10 @@ public class JdotxtGUI extends JFrame {
 			projectsPane.setViewportView(projects);
 			contextsPane.setViewportView(contexts);
 		}
-		projectsListener.forceValueChanged();
+		
+		if (selectedProjectsIndices.size() == 0) projectsListener.forceValueChanged();
+		else if (selectedContextsIndices.size() == 0) contextsListener.forceValueChanged();
+		
 		projects.addListSelectionListener(projectsListener);
 		contexts.addListSelectionListener(contextsListener);
 	}

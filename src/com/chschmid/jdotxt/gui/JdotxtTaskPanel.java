@@ -77,6 +77,7 @@ public class JdotxtTaskPanel extends JPanel {
 		textContent.setSelectionColor(JdotxtGUI.COLOR_PRESSED);
 		textContent.getDocument().addDocumentListener(new TextListener());
 		textContent.addFocusListener(new TextFocusListener());
+		textContent.addActionListener(new TextActionListener());
 		textContent.setPreferredSize(new Dimension(0, textContent.getPreferredSize().height));
 		
 		textDate.setFont(JdotxtGUI.fontR.deriveFont(12f));
@@ -158,6 +159,10 @@ public class JdotxtTaskPanel extends JPanel {
 		textPriority.setSelectionStart(1);
 		textPriority.setSelectionEnd(2);
 	}
+	
+	public void setFocusText() {
+		textContent.requestFocus();
+	}
 
 	public Dimension getMaximumSize() {
 		Dimension d = getPreferredSize();
@@ -166,32 +171,42 @@ public class JdotxtTaskPanel extends JPanel {
 	}
 	
 	private class TextListener implements DocumentListener {
-
 		@Override
 		public void changedUpdate(DocumentEvent arg0) {
 		}
 		@Override
 		public void insertUpdate(DocumentEvent arg0) {
 			task.update(task.inFileFormatHeader() + textContent.getText());
-			tasklistener.onTextUpdate(task);
 		}
 		@Override
 		public void removeUpdate(DocumentEvent arg0) {
 			task.update(task.inFileFormatHeader() + textContent.getText());
-			tasklistener.onTextUpdate(task);
 		}
-		
 	}
 	
 	private class TextFocusListener implements FocusListener {
-
 		@Override
 		public void focusGained(FocusEvent arg0) {
+			if (isNewTask) {
+				if (textContent.getText().startsWith(JdotxtGUI.lang.getWord("New_task"))){
+					textContent.setSelectionStart(0);
+					textContent.setSelectionEnd(JdotxtGUI.lang.getWord("New_task").length());
+				}
+			}
 		}
 
 		@Override
 		public void focusLost(FocusEvent arg0) {
 			textContent.setCaretPosition(0);
+			if (tasklistener != null) tasklistener.onTextUpdate(task);
+		}
+	}
+	
+	private class TextActionListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (isNewTask && tasklistener != null) tasklistener.onNewTask(task);
+			else if (tasklistener != null) tasklistener.onTextUpdate(task);
 		}
 	}
 	
