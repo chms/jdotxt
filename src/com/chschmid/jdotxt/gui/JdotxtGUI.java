@@ -243,6 +243,8 @@ public class JdotxtGUI extends JFrame {
 		jdotxtToolbar.setEnabled(false);
 		projectsPane.setViewportView(loadingp);
 		contextsPane.setViewportView(loadingc);
+		projects.clearSelection();
+		contexts.clearSelection();
 		projects.removeAll();
 		contexts.removeAll();
 		tasksPanel.reset();

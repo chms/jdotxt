@@ -11,7 +11,7 @@ import com.todotxt.todotxttouch.task.TaskBag;
 import com.todotxt.todotxttouch.task.TaskBagFactory;
 
 public class Jdotxt {
-	public static final String VERSION = "0.1";
+	public static final String VERSION = "0.1.5";
 	
 	public static TaskBag taskBag;
 	public static Preferences userPrefs;
@@ -61,17 +61,4 @@ public class Jdotxt {
 		userPrefs = Preferences.userNodeForPackage(Jdotxt.class);
 		firstRun = userPrefs.getBoolean("firstRun", true);
 	}
-	
-	/*public static void loadDefaultSettings() {
-		String todoFile = System.getProperty("user.home") + File.separator + "jdotxt" + File.separator + "todo.txt";
-		String doneFile = System.getProperty("user.home") + File.separator + "jdotxt" + File.separator + "done.txt";
-		
-		config.setProperty("x", "0");
-		config.setProperty("y", "0");
-		config.setProperty("width", Integer.toString(JdotxtGUI.MIN_WIDTH));
-		config.setProperty("height", Integer.toString(JdotxtGUI.MIN_HEIGHT));
-		config.setProperty("version", VERSION);
-		config.setProperty("isMaximized", Boolean.toString(false));
-		config.setProperty("autoSave", Boolean.toString(false));
-	}*/
 }
