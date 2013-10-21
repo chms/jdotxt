@@ -44,7 +44,7 @@ public class JdotxtSettingsDialog extends JDialog{
 	private void initGUI() {
 		this.setModal(true);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		this.setTitle(JdotxtGUI.lang.getWord("Jdotxt") + " " + JdotxtGUI.lang.getWord("Settings"));
+		this.setTitle(JdotxtGUI.lang.getWord("jdotxt") + " " + JdotxtGUI.lang.getWord("Settings"));
 		
 		tabbedPane = new JTabbedPane();
 		tabbedPane.setFont(JdotxtGUI.fontR);
@@ -112,7 +112,7 @@ public class JdotxtSettingsDialog extends JDialog{
 		panelInfo.setBackground(Color.WHITE);
 		panelInfo.setOpaque(true);
 		
-		JLabel labelTitle = new JLabel(JdotxtGUI.lang.getWord("Jdotxt") + " (Version " + Jdotxt.VERSION + ")");
+		JLabel labelTitle = new JLabel(JdotxtGUI.lang.getWord("jdotxt") + " (Version " + Jdotxt.VERSION + ")");
 		labelTitle.setFont(JdotxtGUI.fontB.deriveFont(16f));
 		panelInfo.add(labelTitle);
 		

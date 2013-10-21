@@ -2,7 +2,6 @@
 *~
 
 # Package Files #
-*.jar
 *.war
 *.ear
 *.deb
@@ -10,9 +9,9 @@
 # Build directories #
 dist/
 build/
+jar/
 
 # Eclipse stuff #
-jar/
 build/
 .settings/
 bin/

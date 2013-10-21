@@ -16,9 +16,9 @@
 
   <target name="compile" depends="init" description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac includeantruntime="false" srcdir="${src}" destdir="${build}"/>
-	<copy todir="build">
-		<fileset dir="src" includes="**/*.png,**/*.properties,**/*.ttf" />
+    <javac includeantruntime="false" srcdir="${src}" destdir="${build}" classpath="libs/jna-4.0.0.jar"/>
+    <copy todir="build">
+        <fileset dir="src" includes="**/*.png,**/*.properties,**/*.ttf" />
     </copy>
   </target>
 
@@ -26,7 +26,9 @@
     <!-- Create the jar directory -->
     <mkdir dir="${jar}"/>
     <!-- Put everything in ${build} into the jar file -->
-    <jar jarfile="${jar}/jdotxt.jar" basedir="${build}" manifest="manifest"/>
+    <jar jarfile="${jar}/jdotxt.jar" basedir="${build}" manifest="manifest">
+        <zipgroupfileset dir="libs" includes="**/*.jar"/>
+    </jar>
   </target>
 
   <target name="clean" description="clean up" >

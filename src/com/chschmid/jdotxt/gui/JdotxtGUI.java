@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -89,7 +90,7 @@ public class JdotxtGUI extends JFrame {
 	
 	private void initGUI() {
 		// Style main window
-		this.setTitle(lang.getWord("Jdotxt"));
+		this.setTitle(lang.getWord("jdotxt"));
 		this.setIconImage(icon.getImage());
 		this.setBackground(Color.WHITE);
 		
@@ -204,7 +205,10 @@ public class JdotxtGUI extends JFrame {
 		
 		if (Jdotxt.userPrefs.getBoolean("isMaximized", false)) this.setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		else {
-			this.setLocation(new Point(Jdotxt.userPrefs.getInt("x", 0), Jdotxt.userPrefs.getInt("y", 0)));
+			Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+			int x = (int) ((dimension.getWidth() - this.getWidth()) / 2);
+			int y = (int) ((dimension.getHeight() - this.getHeight()) / 2);
+			this.setLocation(new Point(Jdotxt.userPrefs.getInt("x", x), Jdotxt.userPrefs.getInt("y", y)));
 			this.setSize(Jdotxt.userPrefs.getInt("width", MIN_WIDTH), Jdotxt.userPrefs.getInt("height", MIN_HEIGHT));
 		}
 		
@@ -221,7 +225,7 @@ public class JdotxtGUI extends JFrame {
             public void windowClosing(WindowEvent e) {
             	int result = 1;
             	if (taskBag.hasChanged()) {
-            		result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_save_changes"), lang.getWord("Jdotxt"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+            		result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_save_changes"), lang.getWord("jdotxt"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
             		if (result == 0) taskBag.store();
             	}
             	
