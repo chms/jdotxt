@@ -22,8 +22,11 @@ I use Ubuntu as a build system, simply run
 to set up your build system.
 
 To build jdotxt
+
 1. Download the latest sources from github (e.g., "git clone https://github.com/chms/jdotxt.git")
+
 2. Move into the directory (e.g., "cd jdotxt")
+
 3. Run ant (i.e., "ant")
 
 You can run the resulting jar file by executing
