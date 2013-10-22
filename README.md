@@ -16,7 +16,9 @@ to build jdotxt from its sources, you will need
 - Apache Ant as build system http://ant.apache.org/
 
 I use Ubuntu as a build system, simply run
+
 - sudo apt-get install openjdk-7-jdk ant
+
 to set up your build system.
 
 To build jdotxt
