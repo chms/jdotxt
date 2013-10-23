@@ -60,7 +60,7 @@ public class JdotxtTasksPanel extends JPanel {
 	
 	public void reset() {
 		tasksDisplayed = null;
-		
+		taskBag = null;
 		this.removeAll();
 		this.add(loading);
 		revalidate();
@@ -68,7 +68,6 @@ public class JdotxtTasksPanel extends JPanel {
 	}
 	
 	public void setTaskbag(TaskBag taskBag) {
-		this.taskBag = taskBag;
 		taskPanels.clear();
 		taskPanels.ensureCapacity(taskBag.size());
 		
@@ -79,14 +78,17 @@ public class JdotxtTasksPanel extends JPanel {
 			tp.setTaskListener(tasksPanelTaskListener);
 			taskPanels.add(tp);
 		}
+		
+		this.taskBag = taskBag;
 	}
 	
 	public void updateTaskPanel() {
+		if (taskBag == null) return;
 		tasks = taskBag.getTasks(filter, Sort.PRIORITY_DESC.getComparator());
 		if (!isUpToDate()) forceUpdateTaskPanel();
 	}
 	
-	public void forceUpdateTaskPanel() {
+	private void forceUpdateTaskPanel() {
 		this.removeAll();
 		tasksDisplayed = new long[tasks.size()];
 		
@@ -97,7 +99,7 @@ public class JdotxtTasksPanel extends JPanel {
 		}
 		
 		int k1 = 0;
-		for (Task t: tasks){
+		for (Task t: tasks){ 
 			this.add(findTaskPanel(t));
 			tasksDisplayed[k1] = t.getId();
 			k1++;
@@ -141,11 +143,13 @@ public class JdotxtTasksPanel extends JPanel {
 			taskBag.update(t);
 			updateTaskPanel();
 			for (int k1 = 0; k1 < tasksDisplayed.length; k1++) if (taskPanels.get(k1).getTask().equals(t)) taskPanels.get(k1).setFocusPriority();
+			jdotxtgui.setEnableSave(true);
 		}
 
 		@Override
 		public void onDateUpdate(Task t) {
 			taskBag.update(t);
+			jdotxtgui.setEnableSave(true);
 		}
 
 		@Override
@@ -153,13 +157,21 @@ public class JdotxtTasksPanel extends JPanel {
 			JdotxtTasksPanel.this.requestFocus();
 			taskBag.update(t);
 			updateTaskPanel();
+			jdotxtgui.setEnableSave(true);
 		}
 
 		@Override
 		public void onTextUpdate(Task t) {
 			taskBag.update(t);
-			jdotxtgui.updateFilterPanes();
-			updateTaskPanel();
+			jdotxtgui.setEnableSave(true);
+		}
+		
+		@Override
+		public void onForceTextUpdate(Task t) {
+			if (taskBag != null) {
+				jdotxtgui.updateFilterPanes();
+				updateTaskPanel();
+			}
 		}
 
 		@Override
@@ -168,11 +180,16 @@ public class JdotxtTasksPanel extends JPanel {
 
 		@Override
 		public void onTaskDeleted(Task t) {
+			JdotxtTasksPanel.this.remove(findTaskPanel(t));
 			taskPanels.remove(findTaskPanel(t));
 			taskBag.delete(t);
 			JdotxtTasksPanel.this.requestFocus();
+			revalidate();
+			repaint();
+			
 			jdotxtgui.updateFilterPanes();
-			updateTaskPanel();
+			jdotxtgui.setEnableSave(true);
+			
 		}
 	}
 	
@@ -186,6 +203,8 @@ public class JdotxtTasksPanel extends JPanel {
 		public void onCompletionUpdate(Task t) {}
 		@Override
 		public void onTextUpdate(Task t) {}
+		@Override
+		public void onForceTextUpdate(Task t) {}
 
 		@Override
 		public void onNewTask(Task t) {
@@ -197,6 +216,7 @@ public class JdotxtTasksPanel extends JPanel {
 			addTaskPanel.setTask(new Task(0, emptyTaskString, new Date()));
 			JdotxtTasksPanel.this.requestFocus();
 			jdotxtgui.updateFilterPanes();
+			jdotxtgui.setEnableSave(true);
 			updateTaskPanel();
 			addTaskPanel.setFocusText();
 		}

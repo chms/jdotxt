@@ -8,10 +8,13 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GridLayout;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -107,46 +110,10 @@ public class JdotxtGUI extends JFrame {
 		tasksPane = new JScrollPane();
 		
 		jdotxtToolbar.getTextfieldSearch().setDocumentListener(new SearchListener());
-		jdotxtToolbar.setSaveListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent arg0) {
-				Thread t = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						taskBag.store();
-					}
-				});
-				t.start();
-			}
-		});
-		jdotxtToolbar.setReloadListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				reset();
-				reloadTasks();
-			}
-		});
-		jdotxtToolbar.setArchiveListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				reset();
-				Thread starter = new Thread(new TaskLoader(true));
-		    	starter.start();
-			}
-		});
-		jdotxtToolbar.setSettingsListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
-				String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR); 
-				settingsDialog.setVisible(true);
-				String newPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
-				if (!currentPath.equals(newPath)) {
-					reset();
-					reloadTasks();
-				}
-			}
-		});
+		jdotxtToolbar.setSaveListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { saveTasks(); } });
+		jdotxtToolbar.setReloadListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { reloadTasks(); } });
+		jdotxtToolbar.setArchiveListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { archiveTasks(); } });
+		jdotxtToolbar.setSettingsListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { showSettingsDialog(); } });
 		
 		filterPanel.setPreferredSize(new Dimension(300,100));
 		
@@ -241,6 +208,10 @@ public class JdotxtGUI extends JFrame {
             	}
             }
         });
+		
+		// KeyDispatcher for global shortcuts
+		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+		manager.addKeyEventDispatcher(new KeyDispatcher());
 	}
 	
 	public void reset() {
@@ -254,8 +225,33 @@ public class JdotxtGUI extends JFrame {
 		tasksPanel.reset();
 	}
 	
+	// Toolbar functions
+	public void saveTasks() {
+		setEnableSave(false);
+		updateFilterPanes();
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				taskBag.store();
+			}
+		});
+		t.start();
+	}
 	public void reloadTasks() {
+		reset();
 		Thread starter = new Thread(new TaskLoader());
+    	starter.start();
+	}
+	public void showSettingsDialog() {
+		JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
+		String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR); 
+		settingsDialog.setVisible(true);
+		String newPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
+		if (!currentPath.equals(newPath)) reloadTasks();
+	}
+	public void archiveTasks() {
+		reset();
+		Thread starter = new Thread(new TaskLoader(true));
     	starter.start();
 	}
 	
@@ -269,9 +265,12 @@ public class JdotxtGUI extends JFrame {
 			public void run() {
 				forceUpdateFilterPanes();
 				jdotxtToolbar.setEnabled(true);
+				setEnableSave(false);
 			}
 		});
 	}
+	
+	public void setEnableSave(boolean enable) { jdotxtToolbar.setEnableSave(enable); }
 	
 	public static void loadLookAndFeel(String language) {
 		fontR  = new Font("Ubuntu Light", Font.PLAIN, 14);
@@ -309,9 +308,7 @@ public class JdotxtGUI extends JFrame {
         icon = Util.createImageIcon("/res/drawable/jdo256.png");
 	}
 	
-	public void updateFilterPanes() {
-		if (!isFilterPaneUpToDate()) forceUpdateFilterPanes();
-	}
+	public void updateFilterPanes() { if (!isFilterPaneUpToDate()) forceUpdateFilterPanes(); }
 	
 	public void forceUpdateFilterPanes() {
 		projects.removeListSelectionListener(projectsListener);
@@ -470,11 +467,24 @@ public class JdotxtGUI extends JFrame {
 			this.doArchive = doArchive;
 		}
 		
-		@Override
 		public void run() {
 			if (doArchive) Jdotxt.archiveTodos();
 			Jdotxt.loadTodos();
 			setTaskBag(Jdotxt.taskBag);
 		}
+	}
+	
+	// Custom KeyDispatcher
+	class KeyDispatcher implements KeyEventDispatcher {
+		public boolean dispatchKeyEvent(KeyEvent e) {
+	        if(e.getID() == KeyEvent.KEY_PRESSED) {
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S) saveTasks();
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_R) reloadTasks(); // Reload tasks
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) jdotxtToolbar.getTextfieldSearch().requestFocus(); // Jump to search bar
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N); // New task
+	        }
+	        //Allow the event to be redispatched
+	        return false;
+	    }
 	}
 }

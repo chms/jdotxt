@@ -78,12 +78,12 @@ public class JdotxtTaskPanel extends JPanel {
 		textContent.getDocument().addDocumentListener(new TextListener());
 		textContent.addFocusListener(new TextFocusListener());
 		textContent.addActionListener(new TextActionListener());
+		textContent.addKeyListener(new TextKeyListener());
 		textContent.setPreferredSize(new Dimension(0, textContent.getPreferredSize().height));
 		
 		textDate.setFont(JdotxtGUI.fontR.deriveFont(12f));
 		textDate.setBorder(BorderFactory.createLineBorder(Color.WHITE,4));
 		textDate.setSelectionColor(JdotxtGUI.COLOR_PRESSED);
-		textContent.getDocument().addDocumentListener(new TextListener());
 		
 		checkDone.setBackground(Color.WHITE);
 		checkDone.setAlignmentX(CENTER_ALIGNMENT);
@@ -141,6 +141,12 @@ public class JdotxtTaskPanel extends JPanel {
 		textPriority.setPriority(task.getPriority().getCode().charAt(0));
 		checkDone.setIcon(JdotxtTaskPanel.imgIncomplete);
 	}
+	
+	public Dimension getMaximumSize() {
+		Dimension d = getPreferredSize();
+		d.setSize(Integer.MAX_VALUE, d.height);
+		return d;
+	}
 
 	public Task getTask() { return task; }
 	public void setTask(Task task) {
@@ -150,24 +156,24 @@ public class JdotxtTaskPanel extends JPanel {
 		textDate.setText(task.getPrependedDate());
 	}
 	
-	public void setTaskListener(TaskListener tasklistener) {
-		this.tasklistener = tasklistener;
-	}
+	public void setTaskListener(TaskListener tasklistener) { this.tasklistener = tasklistener; }
 	
 	public void setFocusPriority() {
 		textPriority.requestFocus();
 		textPriority.setSelectionStart(1);
 		textPriority.setSelectionEnd(2);
 	}
-	
-	public void setFocusText() {
-		textContent.requestFocus();
-	}
+	public void setFocusText() { textContent.requestFocus(); }
 
-	public Dimension getMaximumSize() {
-		Dimension d = getPreferredSize();
-		d.setSize(Integer.MAX_VALUE, d.height);
-		return d;
+	private void setTaskToggleComplete() {
+		if (task.isCompleted()) {
+			task.markIncomplete();
+			markIncomplete();
+		} else {
+			task.markComplete(new Date());
+			markComplete();
+		}
+		if (tasklistener != null) tasklistener.onCompletionUpdate(task);
 	}
 	
 	private class TextListener implements DocumentListener {
@@ -177,11 +183,21 @@ public class JdotxtTaskPanel extends JPanel {
 		@Override
 		public void insertUpdate(DocumentEvent arg0) {
 			task.update(task.inFileFormatHeader() + textContent.getText());
+			if (tasklistener != null) tasklistener.onTextUpdate(task);
 		}
 		@Override
 		public void removeUpdate(DocumentEvent arg0) {
 			task.update(task.inFileFormatHeader() + textContent.getText());
+			if (tasklistener != null) tasklistener.onTextUpdate(task);
 		}
+	}
+	
+	private class TextKeyListener implements KeyListener {
+		public void keyPressed(KeyEvent event) {
+			processShortcuts(event);
+		}
+		public void keyReleased(KeyEvent event) {}
+		public void keyTyped(KeyEvent event) {}
 	}
 	
 	private class TextFocusListener implements FocusListener {
@@ -197,8 +213,9 @@ public class JdotxtTaskPanel extends JPanel {
 
 		@Override
 		public void focusLost(FocusEvent arg0) {
+			System.out.println("fl");
 			textContent.setCaretPosition(0);
-			if (tasklistener != null) tasklistener.onTextUpdate(task);
+			if (tasklistener != null) tasklistener.onForceTextUpdate(task);
 		}
 	}
 	
@@ -206,29 +223,16 @@ public class JdotxtTaskPanel extends JPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (isNewTask && tasklistener != null) tasklistener.onNewTask(task);
-			else if (tasklistener != null) tasklistener.onTextUpdate(task);
+			else if (tasklistener != null) tasklistener.onForceTextUpdate(task);
 		}
 	}
 	
 	private class DoneListener implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent event) {
-			if (task.isCompleted()) {
-				task.markIncomplete();
-				markIncomplete();
-			} else {
-				task.markComplete(new Date());
-				markComplete();
-			}
-			if (tasklistener != null) tasklistener.onCompletionUpdate(task);
-		}
+		public void actionPerformed(ActionEvent event) { setTaskToggleComplete(); }
 	}
 	
 	private class DeleteListener implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent event) {
-			if (tasklistener != null) tasklistener.onTaskDeleted(task);
-		}
+		public void actionPerformed(ActionEvent event) { if (tasklistener != null) tasklistener.onTaskDeleted(task); }
 	}
 	
 	private class AddTaskListener implements ActionListener {
@@ -290,6 +294,7 @@ public class JdotxtTaskPanel extends JPanel {
 		private class PriorityTextFieldKeyListener implements KeyListener {
 			@Override
 			public void keyPressed(KeyEvent event) {
+				processShortcuts(event);
 				event.consume();
 			}
 
@@ -371,6 +376,8 @@ public class JdotxtTaskPanel extends JPanel {
 						text.setCaretPosition(pos);
 					}
 				}
+				
+				processShortcuts(event);
 				event.consume();
 			}
 
@@ -437,7 +444,7 @@ public class JdotxtTaskPanel extends JPanel {
 		
 		public void setDate(String date) {
 			if (isValidEditingDate(date)) {
-				setForeground(Color.BLACK);
+				if (!task.isCompleted()) setForeground(Color.BLACK);
 				if (isValidDate(date)) this.date = date;
 			} else {
 				setForeground(JdotxtGUI.COLOR_GRAY_PANEL);
@@ -462,5 +469,13 @@ public class JdotxtTaskPanel extends JPanel {
 		}
 		
 		private boolean isNumeric(char c) { return ((c >= '0') && (c <= '9')); }
+	}
+	
+	private void processShortcuts(KeyEvent event) {
+		System.out.println("sc");
+		if (event.isControlDown() && event.isShiftDown() && event.getKeyCode() == KeyEvent.VK_D) { if (tasklistener != null) tasklistener.onTaskDeleted(task); } //Delete
+		else if (event.isControlDown() && event.getKeyCode() == KeyEvent.VK_D) setTaskToggleComplete(); //Toggle complete
+		else if (event.isControlDown() && event.getKeyCode() == KeyEvent.VK_UP);   //Priority goes up
+		else if (event.isControlDown() && event.getKeyCode() == KeyEvent.VK_DOWN); //Priority goes down
 	}
 }

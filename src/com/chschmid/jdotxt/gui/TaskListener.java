@@ -7,6 +7,7 @@ public interface TaskListener {
 	public void onDateUpdate(Task t);
 	public void onCompletionUpdate(Task t);
 	public void onTextUpdate(Task t);
+	public void onForceTextUpdate(Task t);
 	public void onNewTask(Task t);
 	public void onTaskDeleted(Task t);
 }

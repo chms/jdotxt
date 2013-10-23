@@ -24,20 +24,22 @@ public class Jdotxt {
 	public static final String DEFAULT_DIR = System.getProperty("user.home") + File.separator + "jdotxt";
 	
 	private static native NativeLong SetCurrentProcessExplicitAppUserModelID(WString appID);
-	private static boolean firstRun;
 	
 	public static void main( String[] args )
 	{
 		loadPreferences();
 		JdotxtGUI.loadLookAndFeel(userPrefs.get("lang", "English"));
 		
+		// Windows taskbar fix
 		if (isWindows()) provideAppUserModelID();
 
-		if (firstRun) {
+		// Show settings on first run
+		if (userPrefs.getBoolean("firstRun", true)) {
 			JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
 			settingsDialog.setVisible(true);
 		}
-
+		
+		// Start main GUI
 		Runnable viewGUI = new Runnable() {
 			@Override
 			public void run() {
@@ -45,9 +47,10 @@ public class Jdotxt {
 				mainGUI.setVisible(true);
 			}
 		};
-
 		EventQueue.invokeLater(viewGUI);
 	}
+	
+	public static void loadPreferences() { userPrefs = Preferences.userNodeForPackage(Jdotxt.class); }
 	
 	public static void loadTodos() {
 		String dataDir  = userPrefs.get("dataDir", DEFAULT_DIR);
@@ -60,16 +63,10 @@ public class Jdotxt {
 		taskBag = TaskBagFactory.getTaskBag();
 		taskBag.reload();
 	}
+	public static void archiveTodos() { taskBag.archive(); }
 	
-	public static void archiveTodos() {
-		taskBag.archive();
-	}
-	
-	public static void loadPreferences() {
-		userPrefs = Preferences.userNodeForPackage(Jdotxt.class);
-		firstRun = userPrefs.getBoolean("firstRun", true);
-	}
-	
+	// Windows taskbar fix
+	public static boolean isWindows() {	return System.getProperty("os.name").startsWith("Windows"); }
 	public static void provideAppUserModelID() {
 		try {
 			NativeLibrary lib = NativeLibrary.getInstance("shell32");
@@ -82,8 +79,5 @@ public class Jdotxt {
 			return;
 		}
 	}
-
-	public static boolean isWindows() {	
-		return System.getProperty("os.name").startsWith("Windows");
-	}
+	
 }

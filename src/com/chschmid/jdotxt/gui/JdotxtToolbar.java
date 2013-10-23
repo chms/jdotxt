@@ -74,6 +74,7 @@ public class JdotxtToolbar extends Box{
 		textfieldSearch.setEnabled(enabled);
 		super.setEnabled(enabled);
 	}
+	public void setEnableSave(boolean enabled) { buttonSave.setEnabled(enabled);}
 	
 	public boolean isEnabled() {return enabled;}
 	
@@ -143,7 +144,10 @@ public class JdotxtToolbar extends Box{
 		
 		public void setDocumentListener(DocumentListener listener) {
 			this.listener = listener;
+			
 		}
+		
+		public void requestFocus() { search.requestFocus(); }
 		
 		private void loadIcons() {
 			buttonSearch  = Util.createImageIcon("/res/drawable/search.png");
