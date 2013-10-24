@@ -16,7 +16,13 @@
 
   <target name="compile" depends="init" description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac includeantruntime="false" srcdir="${src}" destdir="${build}" classpath="libs/jna-4.0.0.jar"/>
+    <javac includeantruntime="false" srcdir="${src}" destdir="${build}">	
+		<classpath>
+			<fileset dir="libs">
+			<include name="*.jar" />
+			</fileset>
+		</classpath> 
+	</javac>
     <copy todir="build">
         <fileset dir="src" includes="**/*.png,**/*.properties,**/*.ttf" />
     </copy>

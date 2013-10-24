@@ -213,7 +213,6 @@ public class JdotxtTaskPanel extends JPanel {
 
 		@Override
 		public void focusLost(FocusEvent arg0) {
-			System.out.println("fl");
 			textContent.setCaretPosition(0);
 			if (tasklistener != null) tasklistener.onForceTextUpdate(task);
 		}
@@ -472,7 +471,6 @@ public class JdotxtTaskPanel extends JPanel {
 	}
 	
 	private void processShortcuts(KeyEvent event) {
-		System.out.println("sc");
 		if (event.isControlDown() && event.isShiftDown() && event.getKeyCode() == KeyEvent.VK_D) { if (tasklistener != null) tasklistener.onTaskDeleted(task); } //Delete
 		else if (event.isControlDown() && event.getKeyCode() == KeyEvent.VK_D) setTaskToggleComplete(); //Toggle complete
 		else if (event.isControlDown() && event.getKeyCode() == KeyEvent.VK_UP);   //Priority goes up

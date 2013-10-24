@@ -25,12 +25,15 @@ package com.todotxt.todotxttouch.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.mozilla.universalchardet.UniversalDetector;
 
 import com.todotxt.todotxttouch.task.Task;
 
@@ -42,7 +45,10 @@ import com.todotxt.todotxttouch.task.Task;
 public class TaskIo {
 	private final static String TAG = TaskIo.class.getSimpleName();
 
+	public static final String DEFAULT_ENCODING = "UTF-8";
+	
 	private static boolean sWindowsLineBreaks = false;
+	private static String encoding = DEFAULT_ENCODING;
 	
 	private static String readLine(BufferedReader r) throws IOException {
 		StringBuilder sb = new StringBuilder();
@@ -68,16 +74,16 @@ public class TaskIo {
 		return sb.length() == 0 ? null : sb.toString();
 	}
 	
-	public static ArrayList<Task> loadTasksFromFile(File file)
-			throws IOException {
+	public static ArrayList<Task> loadTasksFromFile(File file) throws IOException {
 		ArrayList<Task> items = new ArrayList<Task>();
 		BufferedReader in = null;
 		if (!file.exists()) {
 			System.out.printf(file.getAbsolutePath() + " does not exist!");
 		} else {
+			encoding = detectEncoding(file);
 			InputStream is = new FileInputStream(file);
 			try {
-				in = new BufferedReader(new InputStreamReader(is));
+				in = new BufferedReader(new InputStreamReader(is, encoding));
 				String line;
 				long counter = 0L;
 				sWindowsLineBreaks = false;
@@ -100,14 +106,14 @@ public class TaskIo {
 		writeToFile(tasks, file, false);
 	}
 
-	public static void writeToFile(List<Task> tasks, File file,
-			boolean append) {
+	public static void writeToFile(List<Task> tasks, File file, boolean append) {
 		try {
 			if (!Util.isDeviceWritable()) {
 				throw new IOException("Device is not writable!");
 			}
 			Util.createParentDirectory(file);
-			FileWriter fw = new FileWriter(file, append);
+			OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(file, append), encoding);
+			//FileWriter fw = new FileWriter(file, append);
 			for (int i = 0; i < tasks.size(); ++i) {
 				String fileFormat = tasks.get(i).inFileFormat();
 				fw.write(fileFormat);
@@ -123,5 +129,21 @@ public class TaskIo {
 		} catch (Exception e) {
 			System.out.printf(TAG, e.getMessage());
 		}
+	}
+	
+	private static String detectEncoding(File file) throws IOException {
+		byte[] buf = new byte[4096];
+
+		FileInputStream  fis = new FileInputStream(file);
+		UniversalDetector detector = new UniversalDetector(null);
+		
+	    int nread;
+	    while ((nread = fis.read(buf)) > 0 && !detector.isDone()) detector.handleData(buf, 0, nread);
+
+	    detector.dataEnd();
+	    String encoding = detector.getDetectedCharset();
+	    
+	    if (encoding == null) encoding = DEFAULT_ENCODING;
+		return encoding;
 	}
 }
