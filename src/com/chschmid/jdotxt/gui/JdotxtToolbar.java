@@ -7,12 +7,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.event.DocumentListener;
 
 import com.todotxt.todotxttouch.util.Util;
@@ -87,6 +92,7 @@ public class JdotxtToolbar extends Box{
 
 		private static final long serialVersionUID = -304940174540744161L;
     	
+		private final static String CANCEL_ACTION = "cancel_search";
 		private JTextField search;
 		private JButton button;
 		
@@ -114,6 +120,10 @@ public class JdotxtToolbar extends Box{
 			search.setMaximumSize(search.getPreferredSize());
 			search.addFocusListener(new SearchFocusListener());
 			search.setSelectionColor(JdotxtGUI.COLOR_PRESSED);
+			InputMap im = search.getInputMap(JComponent.WHEN_FOCUSED);
+	        ActionMap am = search.getActionMap();
+	        im.put(KeyStroke.getKeyStroke("ESCAPE"), CANCEL_ACTION);
+	        am.put(CANCEL_ACTION, new CancelAction());
 			
 			button.setFocusable(false);
 			button.setBorder(null);
@@ -189,7 +199,6 @@ public class JdotxtToolbar extends Box{
 		}
 		
 		private class SearchButtonListener implements ActionListener {
-
 			@Override
 			public void actionPerformed(ActionEvent ae) {
 				if (ae.getSource() == button) {
@@ -198,7 +207,12 @@ public class JdotxtToolbar extends Box{
 					search.setFocusable(true);
 				}
 			}
-			
 		}
+		
+		private class CancelAction extends AbstractAction {
+	        public void actionPerformed(ActionEvent ev) {
+	        	search.setText("");
+	        }
+	    }
     }
 }
