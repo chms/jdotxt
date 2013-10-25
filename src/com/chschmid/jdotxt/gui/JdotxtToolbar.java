@@ -66,9 +66,9 @@ public class JdotxtToolbar extends Box{
 		this.setOpaque(true);
 	}
 	
-	public ImageButton getButtonSave()      {return buttonSave;}
-	public ImageButton getButtonSettings()  {return buttonSettings;}
-	public SearchField   getTextfieldSearch() {return textfieldSearch;}
+	public ImageButton getButtonSave()        { return buttonSave; }
+	public ImageButton getButtonSettings()    { return buttonSettings; }
+	public SearchField   getTextfieldSearch() { return textfieldSearch; }
 	
 	public void setEnabled (boolean enabled){
 		this.enabled = enabled;
@@ -209,6 +209,7 @@ public class JdotxtToolbar extends Box{
 			}
 		}
 		
+		@SuppressWarnings("serial")
 		private class CancelAction extends AbstractAction {
 	        public void actionPerformed(ActionEvent ev) {
 	        	search.setText("");

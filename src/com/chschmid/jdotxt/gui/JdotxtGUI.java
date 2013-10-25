@@ -86,6 +86,8 @@ public class JdotxtGUI extends JFrame {
 	private ArrayList<String> filterProjects = new ArrayList<String>();
 	private String search = "";
 	
+	private Object loadLock = new Object();
+	
 	public JdotxtGUI() {
 		super();
 		initGUI();
@@ -468,9 +470,11 @@ public class JdotxtGUI extends JFrame {
 		}
 		
 		public void run() {
-			if (doArchive) Jdotxt.archiveTodos();
-			Jdotxt.loadTodos();
-			setTaskBag(Jdotxt.taskBag);
+			synchronized (loadLock) {
+				if (doArchive) Jdotxt.archiveTodos();
+				Jdotxt.loadTodos();
+				setTaskBag(Jdotxt.taskBag);
+			}
 		}
 	}
 	

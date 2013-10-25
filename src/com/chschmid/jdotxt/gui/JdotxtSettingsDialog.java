@@ -33,7 +33,7 @@ import com.chschmid.jdotxt.Jdotxt;
 public class JdotxtSettingsDialog extends JDialog{
 	JTabbedPane tabbedPane;
 	Box okCancelBar;
-	JPanel about, settings;
+	JPanel about, settings, help;
 	JTextField directory;
 	
 	public JdotxtSettingsDialog() {
@@ -48,10 +48,12 @@ public class JdotxtSettingsDialog extends JDialog{
 		
 		tabbedPane = new JTabbedPane();
 		tabbedPane.setFont(JdotxtGUI.fontR);
-		about    = getAboutPanel();
 		settings = getSettingsPanel();
+		about    = getAboutPanel();
+		help    = getHelpPanel();
 		
 		tabbedPane.addTab(JdotxtGUI.lang.getWord("Settings"), settings);
+		tabbedPane.addTab(JdotxtGUI.lang.getWord("Help"), help);
 		tabbedPane.addTab(JdotxtGUI.lang.getWord("About"), about);
 		
 		okCancelBar = new Box(BoxLayout.X_AXIS);
@@ -225,6 +227,60 @@ public class JdotxtSettingsDialog extends JDialog{
 		});
 		
 		panel.add(Box.createVerticalGlue());
+		return panel;
+	}
+	
+	private JPanel getHelpPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		panel.setBackground(Color.WHITE);
+		panel.setOpaque(true);
+		
+		JLabel labelIcon = new JLabel(new ImageIcon(JdotxtGUI.icon.getImage().getScaledInstance(64, 64, java.awt.Image.SCALE_SMOOTH)));
+		labelIcon.setVerticalAlignment(SwingConstants.TOP);
+		panel.add(labelIcon, BorderLayout.WEST);
+		labelIcon.setPreferredSize(new Dimension(100, 100));
+		
+		JPanel panelInfo = new JPanel();
+		panel.add(panelInfo, BorderLayout.CENTER);
+		panelInfo.setLayout(new BoxLayout(panelInfo, BoxLayout.Y_AXIS));
+		panelInfo.add(Box.createRigidArea(new Dimension(0, 10)));
+		panelInfo.setBackground(Color.WHITE);
+		panelInfo.setOpaque(true);
+		
+		JLabel labelTitle = new JLabel(JdotxtGUI.lang.getWord("jdotxt") + " (Version " + Jdotxt.VERSION + ")");
+		labelTitle.setFont(JdotxtGUI.fontB.deriveFont(16f));
+		panelInfo.add(labelTitle);
+		
+		panelInfo.add(Box.createRigidArea(new Dimension(0, 20)));
+		
+		JEditorPane textInfo = new JEditorPane();
+		textInfo.setContentType("text/html");
+		textInfo.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+		textInfo.setFont(JdotxtGUI.fontR);
+		textInfo.setText(JdotxtGUI.lang.getWord("Text_help"));
+		textInfo.setEditable(false);
+		textInfo.setFocusable(false);
+		textInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
+		textInfo.setBorder(BorderFactory.createEmptyBorder());
+		textInfo.addHyperlinkListener(new HyperlinkListener() {
+		    public void hyperlinkUpdate(HyperlinkEvent e) {
+		        if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+		        	if(Desktop.isDesktopSupported()) {
+		        		try {
+							Desktop.getDesktop().browse(e.getURL().toURI());
+						} catch (IOException e1) {
+							// Let's just not open the website
+						} catch (URISyntaxException e1) {
+							// Let's just not open the website
+						}
+		        	}
+		        }
+		    }
+		});
+		panelInfo.add(textInfo);
+		
+		
 		return panel;
 	}
 }

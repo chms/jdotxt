@@ -140,6 +140,8 @@ public class TaskIo {
 	    int nread;
 	    while ((nread = fis.read(buf)) > 0 && !detector.isDone()) detector.handleData(buf, 0, nread);
 
+	    Util.closeStream(fis);
+	    
 	    detector.dataEnd();
 	    String encoding = detector.getDetectedCharset();
 	    

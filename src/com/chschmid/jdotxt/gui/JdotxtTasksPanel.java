@@ -1,6 +1,7 @@
 package com.chschmid.jdotxt.gui;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -68,8 +69,7 @@ public class JdotxtTasksPanel extends JPanel {
 	}
 	
 	public void setTaskbag(TaskBag taskBag) {
-		taskPanels.clear();
-		taskPanels.ensureCapacity(taskBag.size());
+		ArrayList<JdotxtTaskPanel> taskPanels = new  ArrayList<JdotxtTaskPanel>(taskBag.size());
 		
 		JdotxtTaskPanel tp;
 		
@@ -79,7 +79,23 @@ public class JdotxtTasksPanel extends JPanel {
 			taskPanels.add(tp);
 		}
 		
-		this.taskBag = taskBag;
+		EventQueue.invokeLater(new SetTaskBag(taskPanels, taskBag));
+	}
+	
+	private class SetTaskBag implements Runnable {
+		ArrayList<JdotxtTaskPanel> tp;
+		TaskBag tb;
+		
+		public SetTaskBag(ArrayList<JdotxtTaskPanel> tp, TaskBag tb) {
+			this.tp = tp;
+			this.tb = tb;
+		}
+		
+		public void run() {
+			taskBag = tb;
+			taskPanels = tp;
+		}
+		
 	}
 	
 	public void updateTaskPanel() {
