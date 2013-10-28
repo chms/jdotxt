@@ -16,6 +16,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
@@ -35,6 +36,8 @@ public class JdotxtSettingsDialog extends JDialog{
 	Box okCancelBar;
 	JPanel about, settings, help;
 	JTextField directory;
+	JCheckBox useDates;
+	
 	
 	public JdotxtSettingsDialog() {
 		super();
@@ -80,6 +83,7 @@ public class JdotxtSettingsDialog extends JDialog{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				Jdotxt.userPrefs.put("dataDir", directory.getText());
+				Jdotxt.userPrefs.putBoolean("useDates", useDates.isSelected());
 				JdotxtSettingsDialog.this.dispose();
 			}
 		});
@@ -190,14 +194,14 @@ public class JdotxtSettingsDialog extends JDialog{
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		//panel.add(Box.createVerticalGlue());
-		panel.add(Box.createVerticalStrut(15));
+		panel.add(Box.createVerticalStrut(10));
 		
-		JLabel lblTextpath = new JLabel("Path where you want to store your todo.txt and your done.txt files:");
+		JLabel lblTextpath = new JLabel(JdotxtGUI.lang.getWord("Text_path"));
 		lblTextpath.setAlignmentX(Component.CENTER_ALIGNMENT);
 		lblTextpath.setFont(JdotxtGUI.fontR);
 		panel.add(lblTextpath);
 		
-		panel.add(Box.createVerticalStrut(15));
+		panel.add(Box.createVerticalStrut(10));
 		
 		directory = new JTextField();
 		directory.setFont(JdotxtGUI.fontR);
@@ -225,6 +229,15 @@ public class JdotxtSettingsDialog extends JDialog{
 		         }
 			}
 		});
+		panel.add(Box.createVerticalStrut(25));
+		useDates = new JCheckBox();
+		useDates.setText(JdotxtGUI.lang.getWord("Text_use_creation_date"));
+		useDates.setFont(JdotxtGUI.fontR);
+		JPanel date = new JPanel();
+		date.add(useDates);
+		useDates.setSelected(Jdotxt.userPrefs.getBoolean("useDates", true));
+		
+		panel.add(date);
 		
 		panel.add(Box.createVerticalGlue());
 		return panel;
@@ -244,7 +257,7 @@ public class JdotxtSettingsDialog extends JDialog{
 		JPanel panelInfo = new JPanel();
 		panel.add(panelInfo, BorderLayout.CENTER);
 		panelInfo.setLayout(new BoxLayout(panelInfo, BoxLayout.Y_AXIS));
-		panelInfo.add(Box.createRigidArea(new Dimension(0, 10)));
+		panelInfo.add(Box.createVerticalStrut(10));
 		panelInfo.setBackground(Color.WHITE);
 		panelInfo.setOpaque(true);
 		
@@ -252,7 +265,7 @@ public class JdotxtSettingsDialog extends JDialog{
 		labelTitle.setFont(JdotxtGUI.fontB.deriveFont(16f));
 		panelInfo.add(labelTitle);
 		
-		panelInfo.add(Box.createRigidArea(new Dimension(0, 20)));
+		panelInfo.add(Box.createRigidArea(new Dimension(20, 20)));
 		
 		JEditorPane textInfo = new JEditorPane();
 		textInfo.setContentType("text/html");
@@ -263,24 +276,33 @@ public class JdotxtSettingsDialog extends JDialog{
 		textInfo.setFocusable(false);
 		textInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
 		textInfo.setBorder(BorderFactory.createEmptyBorder());
-		textInfo.addHyperlinkListener(new HyperlinkListener() {
-		    public void hyperlinkUpdate(HyperlinkEvent e) {
-		        if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-		        	if(Desktop.isDesktopSupported()) {
-		        		try {
-							Desktop.getDesktop().browse(e.getURL().toURI());
-						} catch (IOException e1) {
-							// Let's just not open the website
-						} catch (URISyntaxException e1) {
-							// Let's just not open the website
-						}
-		        	}
-		        }
-		    }
-		});
+		textInfo.setMaximumSize(textInfo.getPreferredSize());
+		
 		panelInfo.add(textInfo);
 		
+		panelInfo.add(Box.createVerticalStrut(20));
 		
+		JLabel labelShortcuts = new JLabel(JdotxtGUI.lang.getWord("Shortcuts"));
+		labelShortcuts.setFont(JdotxtGUI.fontB.deriveFont(14f));
+		panelInfo.add(labelShortcuts);
+		
+		panelInfo.add(Box.createVerticalStrut(20));
+		
+		JEditorPane textShortcuts = new JEditorPane();
+		textShortcuts.setContentType("text/html");
+		textShortcuts.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+		textShortcuts.setFont(JdotxtGUI.fontR);
+		textShortcuts.setText(JdotxtGUI.lang.getWord("Text_shortcuts"));
+		textShortcuts.setEditable(false);
+		textShortcuts.setFocusable(false);
+		textShortcuts.setAlignmentX(Component.LEFT_ALIGNMENT);
+		textShortcuts.setBorder(BorderFactory.createEmptyBorder());
+		textShortcuts.setMaximumSize(textShortcuts.getPreferredSize());
+		
+		panelInfo.add(textShortcuts);
+		panelInfo.add(Box.createVerticalGlue());
+		
+		panel.revalidate();
 		return panel;
 	}
 }

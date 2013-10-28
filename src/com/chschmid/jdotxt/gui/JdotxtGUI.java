@@ -239,21 +239,35 @@ public class JdotxtGUI extends JFrame {
 		});
 		t.start();
 	}
+	
 	public void reloadTasks() {
 		reset();
-		Thread starter = new Thread(new TaskLoader());
+		Thread starter = new Thread(new TaskLoader(TaskLoader.RELOAD));
     	starter.start();
 	}
+	
+	public void refreshGUI() {
+		reset();
+		Thread starter = new Thread(new TaskLoader(TaskLoader.REFRESH_GUI));
+    	starter.start();
+	}
+	
 	public void showSettingsDialog() {
 		JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
-		String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR); 
+		String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
+		boolean currentUseDates = Jdotxt.userPrefs.getBoolean("useDates", true);
+		
 		settingsDialog.setVisible(true);
 		String newPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
+		boolean newUseDates = Jdotxt.userPrefs.getBoolean("useDates", true);
+		
 		if (!currentPath.equals(newPath)) reloadTasks();
+		else if (currentUseDates != newUseDates) refreshGUI();
 	}
+	
 	public void archiveTasks() {
 		reset();
-		Thread starter = new Thread(new TaskLoader(true));
+		Thread starter = new Thread(new TaskLoader(TaskLoader.ARCHIVE));
     	starter.start();
 	}
 	
@@ -267,7 +281,7 @@ public class JdotxtGUI extends JFrame {
 			public void run() {
 				forceUpdateFilterPanes();
 				jdotxtToolbar.setEnabled(true);
-				setEnableSave(false);
+				setEnableSave(JdotxtGUI.this.taskBag.hasChanged());
 			}
 		});
 	}
@@ -458,21 +472,26 @@ public class JdotxtGUI extends JFrame {
 	}
 	
 	public class TaskLoader implements Runnable {
-		private boolean doArchive = false;
+		private short mode = REFRESH_GUI;
+		
+		public static final short REFRESH_GUI = 0;
+		public static final short RELOAD = 1;
+		public static final short ARCHIVE = 2;
 		
 		public TaskLoader(){
 			super();
+			mode = RELOAD;
 		}
 		
-		public TaskLoader(boolean doArchive){
+		public TaskLoader(short mode){
 			super();
-			this.doArchive = doArchive;
+			this.mode = mode;
 		}
 		
 		public void run() {
 			synchronized (loadLock) {
-				if (doArchive) Jdotxt.archiveTodos();
-				Jdotxt.loadTodos();
+				if (mode == ARCHIVE) Jdotxt.archiveTodos();
+				if (mode != REFRESH_GUI) Jdotxt.loadTodos();
 				setTaskBag(Jdotxt.taskBag);
 			}
 		}
@@ -485,7 +504,10 @@ public class JdotxtGUI extends JFrame {
 	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S) saveTasks();
 	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_R) reloadTasks(); // Reload tasks
 	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) jdotxtToolbar.getTextfieldSearch().requestFocus(); // Jump to search bar
-	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N); // New task
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N) {
+	        		jdotxtToolbar.getTextfieldSearch().clearSearch();
+	        		tasksPanel.focusNewTask(); // New task
+	        	}
 	        }
 	        //Allow the event to be redispatched
 	        return false;

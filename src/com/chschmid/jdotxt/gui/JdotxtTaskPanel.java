@@ -19,6 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import com.chschmid.jdotxt.Jdotxt;
 import com.todotxt.todotxttouch.task.Priority;
 import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.util.Util;
@@ -43,6 +44,8 @@ public class JdotxtTaskPanel extends JPanel {
 	private TaskListener tasklistener;
 	private boolean isNewTask;
 	
+	private int iD;
+	
 	public static final ImageIcon imgComplete   = Util.createImageIcon("/res/drawable/check.png");
 	public static final ImageIcon imgIncomplete = Util.createImageIcon("/res/drawable/uncheck.png");
 	public static final ImageIcon imgDelete     = Util.createImageIcon("/res/drawable/delete.png");
@@ -61,6 +64,8 @@ public class JdotxtTaskPanel extends JPanel {
 	
 	private void initLayout() {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		
+		boolean useDates = Jdotxt.userPrefs.getBoolean("useDates", true);
 
 		panelTodoInfo     = new JPanel();
 		panelTodoCommands = new JPanel();
@@ -95,13 +100,15 @@ public class JdotxtTaskPanel extends JPanel {
 		
 		panelTodoInfo.setLayout(new BoxLayout(panelTodoInfo, BoxLayout.Y_AXIS));
 		panelTodoInfo.add(textContent);
-		panelTodoInfo.add(textDate);
+		if (useDates) panelTodoInfo.add(textDate); // No-Date-mod
 		panelTodoInfo.setBorder(BorderFactory.createEmptyBorder());
 		panelTodoInfo.setBackground(Color.WHITE);
 		panelTodoInfo.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelTodoInfo.getPreferredSize().height));
 		panelTodoInfo.setAlignmentY(TOP_ALIGNMENT);
 		
-		panelTodoCommands.setLayout(new BoxLayout(panelTodoCommands, BoxLayout.Y_AXIS));
+		if (useDates) panelTodoCommands.setLayout(new BoxLayout(panelTodoCommands, BoxLayout.Y_AXIS));
+		else panelTodoCommands.setLayout(new BoxLayout(panelTodoCommands, BoxLayout.X_AXIS));
+		
 		panelTodoCommands.add(checkDone);
 		panelTodoCommands.add(buttonDelete);
 		panelTodoCommands.setBorder(BorderFactory.createEmptyBorder());
@@ -109,7 +116,8 @@ public class JdotxtTaskPanel extends JPanel {
 		panelTodoCommands.setAlignmentY(TOP_ALIGNMENT);
 		
 		if (isNewTask) {
-			buttonNewTask = new ImageButton(Util.createImageIcon("/res/drawable/add.png"));
+			if (useDates) buttonNewTask = new ImageButton(Util.createImageIcon("/res/drawable/add.png"));
+			else buttonNewTask = new ImageButton(Util.createImageIcon("/res/drawable/add_25.png"));
 			buttonNewTask.setAlignmentY(TOP_ALIGNMENT);
 			buttonNewTask.setActionListener(new AddTaskListener());
 			this.setBorder(BorderFactory.createMatteBorder(2, 0, 2, 0, JdotxtGUI.COLOR_HOVER));
@@ -164,6 +172,14 @@ public class JdotxtTaskPanel extends JPanel {
 		textPriority.setSelectionEnd(2);
 	}
 	public void setFocusText() { textContent.requestFocus(); }
+	public void setFocusText(boolean setToEnd) {
+		textContent.requestFocus();
+		if (setToEnd) textContent.setCaretPosition(textContent.getDocument().getLength());
+	}
+	public void setFocusDate() { textDate.requestFocus(); }
+	
+	public void setID(int iD) { this.iD = iD; }
+	public int getID() { return iD; }
 
 	private void setTaskToggleComplete() {
 		if (task.isCompleted()) {
@@ -195,6 +211,8 @@ public class JdotxtTaskPanel extends JPanel {
 	private class TextKeyListener implements KeyListener {
 		public void keyPressed(KeyEvent event) {
 			processShortcuts(event);
+			if (textContent.getCaretPosition() == 0 && event.getKeyCode() == KeyEvent.VK_LEFT) setFocusPriority();
+			if (textContent.getCaretPosition() == textContent.getDocument().getLength() && event.getKeyCode() == KeyEvent.VK_RIGHT) setFocusDate();
 		}
 		public void keyReleased(KeyEvent event) {}
 		public void keyTyped(KeyEvent event) {}
@@ -294,6 +312,9 @@ public class JdotxtTaskPanel extends JPanel {
 			@Override
 			public void keyPressed(KeyEvent event) {
 				processShortcuts(event);
+				int kc = event.getKeyCode();
+				if (kc == KeyEvent.VK_RIGHT) textContent.requestFocus();
+				if (kc == KeyEvent.VK_UP || kc == KeyEvent.VK_DOWN) return;
 				event.consume();
 			}
 
@@ -336,6 +357,7 @@ public class JdotxtTaskPanel extends JPanel {
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				setDate(getText());
+				setCaretPosition(0);
 			}
 		}
 		
@@ -346,7 +368,9 @@ public class JdotxtTaskPanel extends JPanel {
 				StringBuilder tempDate = new StringBuilder(text.getText());
 				int cc = event.getKeyCode();
 				
+				if (textDate.getCaretPosition() == 0 && cc == KeyEvent.VK_LEFT) setFocusText(true);
 				if (cc == KeyEvent.VK_RIGHT || cc == KeyEvent.VK_KP_RIGHT || cc == KeyEvent.VK_LEFT || cc == KeyEvent.VK_KP_RIGHT) return;
+				if (cc == KeyEvent.VK_UP || cc == KeyEvent.VK_DOWN || cc == KeyEvent.VK_HOME || cc == KeyEvent.VK_END) return;
 				
 				int pos = text.getCaretPosition();
 				
