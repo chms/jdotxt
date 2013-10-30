@@ -36,7 +36,7 @@ public class JdotxtSettingsDialog extends JDialog{
 	Box okCancelBar;
 	JPanel about, settings, help;
 	JTextField directory;
-	JCheckBox useDates;
+	JCheckBox compactMode;
 	
 	
 	public JdotxtSettingsDialog() {
@@ -83,7 +83,7 @@ public class JdotxtSettingsDialog extends JDialog{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				Jdotxt.userPrefs.put("dataDir", directory.getText());
-				Jdotxt.userPrefs.putBoolean("useDates", useDates.isSelected());
+				Jdotxt.userPrefs.putBoolean("compactMode", compactMode.isSelected());
 				JdotxtSettingsDialog.this.dispose();
 			}
 		});
@@ -230,12 +230,12 @@ public class JdotxtSettingsDialog extends JDialog{
 			}
 		});
 		panel.add(Box.createVerticalStrut(25));
-		useDates = new JCheckBox();
-		useDates.setText(JdotxtGUI.lang.getWord("Text_use_creation_date"));
-		useDates.setFont(JdotxtGUI.fontR);
+		compactMode = new JCheckBox();
+		compactMode.setText(JdotxtGUI.lang.getWord("Text_compact_mode"));
+		compactMode.setFont(JdotxtGUI.fontR);
 		JPanel date = new JPanel();
-		date.add(useDates);
-		useDates.setSelected(Jdotxt.userPrefs.getBoolean("useDates", true));
+		date.add(compactMode);
+		compactMode.setSelected(Jdotxt.userPrefs.getBoolean("compactMode", false));
 		
 		panel.add(date);
 		
@@ -265,7 +265,7 @@ public class JdotxtSettingsDialog extends JDialog{
 		labelTitle.setFont(JdotxtGUI.fontB.deriveFont(16f));
 		panelInfo.add(labelTitle);
 		
-		panelInfo.add(Box.createRigidArea(new Dimension(20, 20)));
+		panelInfo.add(Box.createVerticalStrut(20));
 		
 		JEditorPane textInfo = new JEditorPane();
 		textInfo.setContentType("text/html");

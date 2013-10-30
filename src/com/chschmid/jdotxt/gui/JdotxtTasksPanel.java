@@ -269,11 +269,15 @@ public class JdotxtTasksPanel extends JPanel {
 	}
 	
 	public void setFocus(int iD) {
+		boolean found = false;
 		for (int k1 = 0; k1 < tasksDisplayed.length; k1++) {
 			if (taskPanels.get(k1).getID() == iD) {
 				taskPanels.get(k1).setFocusText();
+				found = true;
 				break;
 			}
 		}
+		
+		if (!found && iD >= 1) setFocus(iD - 1);
 	}
 }

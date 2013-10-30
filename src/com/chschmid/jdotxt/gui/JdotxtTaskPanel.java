@@ -65,7 +65,7 @@ public class JdotxtTaskPanel extends JPanel {
 	private void initLayout() {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-		boolean useDates = Jdotxt.userPrefs.getBoolean("useDates", true);
+		boolean compactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
 
 		panelTodoInfo     = new JPanel();
 		panelTodoCommands = new JPanel();
@@ -100,13 +100,13 @@ public class JdotxtTaskPanel extends JPanel {
 		
 		panelTodoInfo.setLayout(new BoxLayout(panelTodoInfo, BoxLayout.Y_AXIS));
 		panelTodoInfo.add(textContent);
-		if (useDates) panelTodoInfo.add(textDate); // No-Date-mod
+		if (!compactMode) panelTodoInfo.add(textDate); // No-Date-mod
 		panelTodoInfo.setBorder(BorderFactory.createEmptyBorder());
 		panelTodoInfo.setBackground(Color.WHITE);
 		panelTodoInfo.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelTodoInfo.getPreferredSize().height));
 		panelTodoInfo.setAlignmentY(TOP_ALIGNMENT);
 		
-		if (useDates) panelTodoCommands.setLayout(new BoxLayout(panelTodoCommands, BoxLayout.Y_AXIS));
+		if (!compactMode) panelTodoCommands.setLayout(new BoxLayout(panelTodoCommands, BoxLayout.Y_AXIS));
 		else panelTodoCommands.setLayout(new BoxLayout(panelTodoCommands, BoxLayout.X_AXIS));
 		
 		panelTodoCommands.add(checkDone);
@@ -116,7 +116,7 @@ public class JdotxtTaskPanel extends JPanel {
 		panelTodoCommands.setAlignmentY(TOP_ALIGNMENT);
 		
 		if (isNewTask) {
-			if (useDates) buttonNewTask = new ImageButton(Util.createImageIcon("/res/drawable/add.png"));
+			if (!compactMode) buttonNewTask = new ImageButton(Util.createImageIcon("/res/drawable/add.png"));
 			else buttonNewTask = new ImageButton(Util.createImageIcon("/res/drawable/add_25.png"));
 			buttonNewTask.setAlignmentY(TOP_ALIGNMENT);
 			buttonNewTask.setActionListener(new AddTaskListener());

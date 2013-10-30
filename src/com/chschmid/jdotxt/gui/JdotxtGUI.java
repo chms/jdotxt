@@ -255,14 +255,14 @@ public class JdotxtGUI extends JFrame {
 	public void showSettingsDialog() {
 		JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
 		String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
-		boolean currentUseDates = Jdotxt.userPrefs.getBoolean("useDates", true);
+		boolean currentCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
 		
 		settingsDialog.setVisible(true);
 		String newPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
-		boolean newUseDates = Jdotxt.userPrefs.getBoolean("useDates", true);
+		boolean newCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
 		
 		if (!currentPath.equals(newPath)) reloadTasks();
-		else if (currentUseDates != newUseDates) refreshGUI();
+		else if (currentCompactMode != newCompactMode) refreshGUI();
 	}
 	
 	public void archiveTasks() {
