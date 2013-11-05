@@ -39,10 +39,12 @@ jdotxt uses code and libraries from the following open source projects:
 
 - [todo.txt-android](https://github.com/ginatrapani/todo.txt-android): jdotxt uses the same datastructures and IO functions that the official Android client uses.
 - [Java Native Access (JNA)](https://github.com/twall/jna#readme): for fixing some Windows 7 taskbar issues.
+- [juniversalchardet](http://code.google.com/p/juniversalchardet/): for automatically detecting the encoding scheme of your todo files.
 
 #### Links
 
+- [Java Native Access (JNA)](https://github.com/twall/jna#readme) provides Java programs easy access to native shared libraries (DLLs on Windows)
+- [jdotxt](http://jdotxt.chschmid.com/), binaries and help for this very program.
+- [juniversalchardet](http://code.google.com/p/juniversalchardet/) is a Java port of 'universalchardet', that is the encoding detector library of Mozilla.
 - [todo.txt](http://todotxt.com/) is a simple file format for managing your todos.
 - [todo.txt-android](https://github.com/ginatrapani/todo.txt-android) an open source todo.txt Android client
-- [Java Native Access (JNA)](https://github.com/twall/jna#readme) provides Java programs easy access to native shared libraries (DLLs on Windows)
-- [jdotxt](http://jdotxt.chschmid.com/), well binaries and help for this very program.
