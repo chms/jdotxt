@@ -133,6 +133,8 @@ public class JdotxtTasksPanel extends JPanel {
 		
 		revalidate();
 		repaint();
+		
+		jdotxtgui.setStatusText(tasks.size() + " " + JdotxtGUI.lang.getWord("tasks"));
 	}
 
 	public JdotxtTaskPanel findTaskPanel(Task task) {

@@ -15,7 +15,7 @@ import com.todotxt.todotxttouch.task.TaskBag;
 import com.todotxt.todotxttouch.task.TaskBagFactory;
 
 public class Jdotxt {
-	public static final String VERSION = "0.2.0";
+	public static final String VERSION = "0.2.1";
 	public static final String APPID = "chschmid.jdotxt";
 	
 	public static TaskBag taskBag;
@@ -32,17 +32,18 @@ public class Jdotxt {
 		
 		// Windows taskbar fix
 		if (isWindows()) provideAppUserModelID();
-
-		// Show settings on first run
-		if (userPrefs.getBoolean("firstRun", true)) {
-			JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
-			settingsDialog.setVisible(true);
-		}
 		
-		// Start main GUI
+		// Start GUI
 		Runnable viewGUI = new Runnable() {
 			@Override
 			public void run() {
+				// Show settings on first run
+				if (userPrefs.getBoolean("firstRun", true)) {
+					JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
+					settingsDialog.setVisible(true);
+				}
+				
+				// Main window
 				JdotxtGUI mainGUI = new JdotxtGUI();
 				mainGUI.setVisible(true);
 			}

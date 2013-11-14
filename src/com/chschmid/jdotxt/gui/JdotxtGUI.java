@@ -78,6 +78,7 @@ public class JdotxtGUI extends JFrame {
 	private JList<String> loadingp;
 	private JList<String> loadingc;
 	private JdotxtTasksPanel tasksPanel;
+	private JdotxtStatusBar statusBar;
 	
 	FilterSelectionListener projectsListener, contextsListener;
 	
@@ -110,6 +111,7 @@ public class JdotxtGUI extends JFrame {
 		contextsPane = new JScrollPane();
 		tasksPanel = new JdotxtTasksPanel(this);
 		tasksPane = new JScrollPane();
+		statusBar = new JdotxtStatusBar(lang.getWord("Loading..."));
 		
 		jdotxtToolbar.getTextfieldSearch().setDocumentListener(new SearchListener());
 		jdotxtToolbar.setSaveListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { saveTasks(); } });
@@ -168,6 +170,7 @@ public class JdotxtGUI extends JFrame {
 		this.add(jdotxtToolbar, BorderLayout.PAGE_START);
 		this.add(filterPanel, BorderLayout.LINE_START);
 		this.add(tasksPane, BorderLayout.CENTER);
+		this.add(statusBar, BorderLayout.PAGE_END);
 		
 		this.setMinimumSize(new Dimension(MIN_WIDTH, MIN_HEIGHT));
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -216,6 +219,10 @@ public class JdotxtGUI extends JFrame {
 		manager.addKeyEventDispatcher(new KeyDispatcher());
 	}
 	
+	public void setStatusText(String text) {
+		statusBar.setText(text);
+	}
+	
 	public void reset() {
 		jdotxtToolbar.setEnabled(false);
 		projectsPane.setViewportView(loadingp);
@@ -225,6 +232,7 @@ public class JdotxtGUI extends JFrame {
 		projects.removeAll();
 		contexts.removeAll();
 		tasksPanel.reset();
+		statusBar.setText(lang.getWord("Loading..."));
 	}
 	
 	// Toolbar functions
@@ -512,5 +520,36 @@ public class JdotxtGUI extends JFrame {
 	        //Allow the event to be redispatched
 	        return false;
 	    }
+	}
+	
+	public class AutoSaver implements Runnable {
+		public static final int DEFAULT_AUTOSAVE_INTERVAL = 2000;
+		
+		private int autoSaveInterval;
+		
+		public AutoSaver() {
+			super();
+			autoSaveInterval = DEFAULT_AUTOSAVE_INTERVAL;
+		}
+		
+		public AutoSaver(int autoSaveInterval) {
+			this.autoSaveInterval = autoSaveInterval;
+		}
+		
+		public void run() {
+			while (!Thread.currentThread().isInterrupted()) {
+				try {
+					Thread.sleep(autoSaveInterval);
+					autoSave();
+				} catch (InterruptedException e) {
+		              Thread.currentThread().interrupt();
+		              return;
+		        }
+		    }
+		}
+		
+		private void autoSave() {
+			
+		}
 	}
 }
