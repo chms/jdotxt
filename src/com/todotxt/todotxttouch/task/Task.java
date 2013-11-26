@@ -64,6 +64,10 @@ public class Task implements Serializable {
 	public Task(long id, String rawText) {
 		this(id, rawText, null);
 	}
+	
+	public Task(Task task) {
+		this(task.getId(), task.toString(), null);
+	}
 
 	public void update(String rawText) {
 		this.init(rawText, null);

@@ -2,9 +2,10 @@ package com.chschmid.jdotxt.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
@@ -14,6 +15,8 @@ import com.chschmid.jdotxt.gui.controls.JdotxtDateField;
 import com.chschmid.jdotxt.gui.controls.JdotxtImageButton;
 import com.chschmid.jdotxt.gui.controls.JdotxtImageCheckBox;
 import com.chschmid.jdotxt.gui.controls.JdotxtPriorityField;
+import com.chschmid.jdotxt.gui.controls.JdotxtTaskPanel2;
+import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.util.Util;
 
 @SuppressWarnings("serial")
@@ -24,6 +27,8 @@ public class JdotxtGUItest extends JFrame {
 	ImageIcon iconSave     = Util.createImageIcon("/res/drawable/save.png");
 	public static final ImageIcon selected   = Util.createImageIcon("/res/drawable/check.png");
 	public static final ImageIcon unselected = Util.createImageIcon("/res/drawable/uncheck.png");
+	
+	JdotxtImageCheckBox cb;
 	
 	public JdotxtGUItest() {
 		super();
@@ -70,10 +75,33 @@ public class JdotxtGUItest extends JFrame {
 	
 	private void testJdotxtImageButton() {
 		JdotxtImageButton ib = new JdotxtImageButton(iconSave);
-		
+		ib.setFocusable(true);
+		ib.addActionListener(new JdotxtImageButtonListener("save"));
 		this.add(ib, BorderLayout.LINE_START);
-		JdotxtImageCheckBox cb = new JdotxtImageCheckBox(unselected, selected);
-		this.add(cb, BorderLayout.CENTER);
+		cb = new JdotxtImageCheckBox(unselected, selected);
+		cb.addActionListener(new JdotxtImageCheckBoxListener("cb"));
+		this.add(cb, BorderLayout.LINE_END);
+		
+		JdotxtTaskPanel2 tp = new JdotxtTaskPanel2(new Task(1,"2013-12-01 blub"));
+		this.add(tp, BorderLayout.CENTER);
 		//this.add(new JTextField("Test3"), BorderLayout.LINE_END);
+	}
+	
+	private class JdotxtImageButtonListener implements ActionListener {
+		String element;
+		public JdotxtImageButtonListener(String element) {this.element = element;}
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			System.out.println(element + ": actionPerformed");
+		}
+	}
+	
+	private class JdotxtImageCheckBoxListener implements ActionListener {
+		String element;
+		public JdotxtImageCheckBoxListener(String element) {this.element = element;}
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			System.out.println(element + ": " + cb.isSelected());
+		}
 	}
 }

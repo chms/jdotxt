@@ -64,8 +64,8 @@ public class Jdotxt {
 				}
 				
 				// Main window
-				//JdotxtGUI mainGUI = new JdotxtGUI();
-				JdotxtGUItest mainGUI = new JdotxtGUItest();
+				JdotxtGUI mainGUI = new JdotxtGUI();
+				//JdotxtGUItest mainGUI = new JdotxtGUItest();
 				mainGUI.setVisible(true);
 			}
 		};

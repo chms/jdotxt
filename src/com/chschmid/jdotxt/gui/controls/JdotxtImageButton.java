@@ -22,82 +22,116 @@ package com.chschmid.jdotxt.gui.controls;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
 
 @SuppressWarnings("serial")
 public class JdotxtImageButton extends JLabel {
+	private boolean mouseIsOverButton;
+	private boolean mouseIsDown;
+	private boolean focused;
+	
+	public JdotxtImageButton() {
+		super();
+		initGUI();
+	}
+	
+	public JdotxtImageButton(ImageIcon icon) {
+		super();
+		initGUI();
+		this.setIcon(icon);
+	}
+	
+	private void initGUI() {
+		this.setFocusable(false);
+		this.setBorder(null);
 		
-		private MouseAdapter mouseListener;
-		private boolean mouseIsOverButton;
-		
-		public JdotxtImageButton(ImageIcon icon) {
-			super();
-			this.setFocusable(false);
-			this.setBorder(null);
-			this.setIcon(icon);
+		MouseAdapter mouseListener = new MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+            	mouseIsOverButton = true;
+            	if (mouseIsDown) setButtonBackground(JdotxtGUI.COLOR_PRESSED);
+            	else setButtonBackground(JdotxtGUI.COLOR_HOVER);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+            	mouseIsOverButton = false;
+            	if (!focused) setButtonBackground(null);
+            	else setButtonBackground(JdotxtGUI.COLOR_HOVER);
+            }
+            
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+            	if (SwingUtilities.isLeftMouseButton(evt)) {
+            		mouseIsDown = true;
+            		setButtonBackground(JdotxtGUI.COLOR_PRESSED);
+            	}
+            }
+            
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+            	mouseIsDown = false;
+            	if (!isEnabled() || !SwingUtilities.isLeftMouseButton(evt)) return;
+            	if (mouseIsOverButton) fireActionPerformed(new ActionEvent(JdotxtImageButton.this, ActionEvent.ACTION_PERFORMED, "Click"));
+            	if (mouseIsOverButton || focused) setButtonBackground(JdotxtGUI.COLOR_HOVER);
+            	else setButtonBackground(null);
+            }
+        };
+        addMouseListener(mouseListener);
+        
+        FocusListener focusListener = new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				focused = false;
+				if (!mouseIsOverButton) setButtonBackground(null);
+			}
 			
-			mouseListener = new MouseAdapter() {
-	            @Override
-	            public void mouseEntered(java.awt.event.MouseEvent evt) {
-	            	setButtonBackground(JdotxtGUI.COLOR_HOVER);
-	            	mouseIsOverButton = true;
-	            }
-
-	            @Override
-	            public void mouseExited(java.awt.event.MouseEvent evt) {
-	            	setButtonBackground(null);
-	            	mouseIsOverButton = false;
-	            }
-	            
-	            @Override
-	            public void mousePressed(java.awt.event.MouseEvent evt) {
-	            	setButtonBackground(JdotxtGUI.COLOR_PRESSED);
-	            }
-	            
-	            @Override
-	            public void mouseReleased(java.awt.event.MouseEvent evt) {
-	            	if (mouseIsOverButton && isEnabled()) {
-	            		setButtonBackground(JdotxtGUI.COLOR_HOVER);
-	            		fireActionPerformed(new ActionEvent(JdotxtImageButton.this, ActionEvent.ACTION_PERFORMED, "Click"));
-	            	}
-	            }
-	        };
-	        addMouseListener(mouseListener);
-		}
-		
-		public void setEnabled(boolean enabled) {
-			super.setEnabled(enabled);
-			if (mouseIsOverButton) setButtonBackground(JdotxtGUI.COLOR_HOVER);
-		}
-		
-		private void setButtonBackground(Color color) {
-			setBackground(color);
-			if (color == null || !isEnabled()) setOpaque(false);
-			else setOpaque(true);
-		}
-		
-	    public void addActionListener(ActionListener l) {
-	        listenerList.add(ActionListener.class, l);
-	    }
-
-	    public void removeActionListener(ActionListener l) {
-	    	listenerList.remove(ActionListener.class, l);
-	    }
-	    
-	    public ActionListener[] getActionListeners() {
-	        return listenerList.getListeners(ActionListener.class);
-	    }
-	    
-	    protected void fireActionPerformed(ActionEvent event) {
-	    	Object[] listeners = listenerList.getListeners(ActionListener.class);
-	        
-	        for (int i = 0; i < listeners.length; i++) {
-	            ((ActionListener)listeners[i]).actionPerformed(event);
-	        }
-	    }
+			@Override
+			public void focusGained(FocusEvent arg0) {
+				focused = true;
+				setButtonBackground(JdotxtGUI.COLOR_HOVER);
+			}
+		};
+		addFocusListener(focusListener);
+	}
+	
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		setButtonBackground(null);
+		if (mouseIsOverButton || focused) setButtonBackground(JdotxtGUI.COLOR_HOVER);
+	}
+	
+	private void setButtonBackground(Color color) {
+		setBackground(color);
+		if (color == null || !isEnabled()) setOpaque(false);
+		else setOpaque(true);
+	}
+	
+    public void addActionListener(ActionListener l) {
+        listenerList.add(ActionListener.class, l);
     }
+
+    public void removeActionListener(ActionListener l) {
+    	listenerList.remove(ActionListener.class, l);
+    }
+    
+    public ActionListener[] getActionListeners() {
+        return listenerList.getListeners(ActionListener.class);
+    }
+    
+    protected void fireActionPerformed(ActionEvent event) {
+    	Object[] listeners = listenerList.getListeners(ActionListener.class);
+        
+        for (int i = 0; i < listeners.length; i++) {
+            ((ActionListener)listeners[i]).actionPerformed(event);
+        }
+    }
+}

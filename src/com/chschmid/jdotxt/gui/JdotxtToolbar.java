@@ -67,20 +67,6 @@ public class JdotxtToolbar extends Box{
 		this.add(Box.createRigidArea(new Dimension(4,1)));
 		this.add(buttonSettings);
 		
-		JButton bat = new JButton();
-		bat.setText("Test");
-		bat.setFont(JdotxtGUI.fontR);
-		bat.setOpaque(true);
-		bat.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(JdotxtToolbar.this, "Eggs are not supposed to be green.");
-			}
-		});
-		
-		this.add(bat);
-		
 		this.setOpaque(true);
 	}
 	
