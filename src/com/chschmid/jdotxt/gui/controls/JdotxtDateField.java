@@ -1,49 +1,84 @@
-package com.chschmid.jdotxt.gui.elements;
+/**
+* Copyright (C) 2013 Christian M. Schmid
+*
+* This file is part of the jdotxt.
+*
+* PILight is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package com.chschmid.jdotxt.gui.controls;
 
 import java.awt.Color;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
 
 @SuppressWarnings("serial")
-public class JdoDateField extends JTextField {
+public class JdotxtDateField extends JTextField {
 	private String DEFAULT_DATE_STRING = "----------";
 	private String date;
 	private Color foreground;
+	private DocumentListener listener;
 	
-	public JdoDateField(String date) {
+	public JdotxtDateField(String date) {
 		super();
-		foreground = getForeground();
-		setDate(date);
-		this.addFocusListener(new JdoDateFieldFocusListener());
-		this.addKeyListener(new JdoDateFieldKeyListener());
+		initDateField(date);
 	}
 	
-	private class JdoDateFieldFocusListener implements FocusListener {
+	public JdotxtDateField() {
+		super();
+		initDateField(DEFAULT_DATE_STRING);
+	}
+	
+	private void initDateField(String date) {
+		setDate(date);
+		foreground = getForeground();
+		this.addFocusListener(new JdotxtDateFieldFocusListener());
+		this.addKeyListener(new JdotxtDateFieldKeyListener());
+		this.getDocument().addDocumentListener(new JdotxtDateDocumentListener());
+		setCaretPosition(0);
+	}
+	
+	private class JdotxtDateFieldFocusListener implements FocusListener {
 		@Override
-		public void focusGained(FocusEvent arg0) {
-		}
-
+		public void focusGained(FocusEvent arg0) { }
 		@Override
 		public void focusLost(FocusEvent arg0) {
-			setDate(getText());
+			if (!isValidDate(getText())) setDate(DEFAULT_DATE_STRING);
 			setCaretPosition(0);
 		}
 	}
 	
-	private class JdoDateFieldKeyListener implements KeyListener {
+	private class JdotxtDateFieldKeyListener implements KeyListener {
 		@Override
 		public void keyPressed(KeyEvent event) {
 			JTextField text = (JTextField)event.getSource();
 			StringBuilder tempDate = new StringBuilder(text.getText());
 			int cc = event.getKeyCode();
 			
-			//if (textDate.getCaretPosition() == 0 && cc == KeyEvent.VK_LEFT) setFocusText(true);
+			if (getCaretPosition() == 0 && cc == KeyEvent.VK_LEFT) {
+				KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent();
+				return;
+			}
 			if (cc == KeyEvent.VK_RIGHT || cc == KeyEvent.VK_KP_RIGHT || cc == KeyEvent.VK_LEFT || cc == KeyEvent.VK_KP_RIGHT) return;
 			if (cc == KeyEvent.VK_UP || cc == KeyEvent.VK_DOWN || cc == KeyEvent.VK_HOME || cc == KeyEvent.VK_END) return;
 			
@@ -73,13 +108,11 @@ public class JdoDateField extends JTextField {
 				}
 			}
 			
-			//processShortcuts(event);
 			event.consume();
 		}
 
 		@Override
-		public void keyReleased(KeyEvent event) {
-		}
+		public void keyReleased(KeyEvent event) { }
 
 		@Override
 		public void keyTyped(KeyEvent event) {
@@ -102,7 +135,40 @@ public class JdoDateField extends JTextField {
 		}
 	}
 	
-	private boolean isValidDate(String date){
+	private class JdotxtDateDocumentListener implements DocumentListener {
+		@Override
+		public void insertUpdate(DocumentEvent e) { if (isValidDate(date) && listener != null) listener.insertUpdate(e); }
+		@Override
+		public void removeUpdate(DocumentEvent e) { if (isValidDate(date) && listener != null) listener.removeUpdate(e); }
+		@Override
+		public void changedUpdate(DocumentEvent e) { if (isValidDate(date) && listener != null) listener.changedUpdate(e); }
+	}
+	
+	public void setDate(String date) {
+		if (isValidDate(date)) this.date = date;
+		else this.date = DEFAULT_DATE_STRING;
+		
+		if (isValidEditingDate(date) && !date.equals(DEFAULT_DATE_STRING)) {
+			super.setForeground(foreground);
+			setText(date);
+		} else {
+			setText(DEFAULT_DATE_STRING);
+			super.setForeground(JdotxtGUI.COLOR_GRAY_PANEL);
+		}
+	}
+	
+	public String getDate() { return date; }
+	
+	public void setForeground(Color fg) {
+		foreground = fg;
+		super.setForeground(foreground);
+	}
+	
+	public void setDateListener(DocumentListener listener) { this.listener = listener; }
+	
+	private boolean isNumeric(char c) { return ((c >= '0') && (c <= '9')); }
+	
+	public boolean isValidDate(String date){
 		boolean isValid;
 		if (date.length() != 10) return false;
 		isValid = isNumeric(date.charAt(0));
@@ -115,6 +181,7 @@ public class JdoDateField extends JTextField {
 		isValid = isValid && (date.charAt(7) == '-');
 		isValid = isValid && isNumeric(date.charAt(8));
 		isValid = isValid && isNumeric(date.charAt(9));
+		isValid = isValid || date.equals(DEFAULT_DATE_STRING);
 		return isValid;
 	}
 	
@@ -131,41 +198,6 @@ public class JdoDateField extends JTextField {
 		isValid = isValid && (date.charAt(7) == '-');
 		isValid = isValid && (isNumeric(date.charAt(8)) || date.charAt(8) == '-');
 		isValid = isValid && (isNumeric(date.charAt(9)) || date.charAt(9) == '-');
-		isValid = isValid && (date.charAt(0) != '-' || date.charAt(1) != '-' || date.charAt(2) != '-' || date.charAt(3) != '-' || date.charAt(5) != '-' || date.charAt(6) != '-' || date.charAt(7) != '-' || date.charAt(8) != '-');
 		return isValid;
 	}
-	
-	public String getDate() { return date; }
-	
-	public void setDate(String date) {
-		if (isValidEditingDate(date)) {
-			super.setForeground(foreground);
-			if (isValidDate(date)) this.date = date;
-		} else {
-			super.setForeground(JdotxtGUI.COLOR_GRAY_PANEL);
-			date = DEFAULT_DATE_STRING;
-			this.date = date;
-		}
-		setText(date);
-	}
-	
-	public void setForeground(Color fg) {
-		foreground = fg;
-		super.setForeground(foreground);
-	}
-	
-	private void updateDate() {
-		if (isValidDate(date)) {
-			String rawText = task.inFileFormatHeaderNoDate() + date + " " + textContent.getText();
-			task.update(rawText);
-			if (tasklistener != null) tasklistener.onDateUpdate(task);
-		}
-		if (date == DEFAULT_DATE_STRING) {
-			String rawText = task.inFileFormatHeaderNoDate() + textContent.getText();
-			task.update(rawText);
-			if (tasklistener != null) tasklistener.onDateUpdate(task);
-		}
-	}
-	
-	private boolean isNumeric(char c) { return ((c >= '0') && (c <= '9')); }
 }

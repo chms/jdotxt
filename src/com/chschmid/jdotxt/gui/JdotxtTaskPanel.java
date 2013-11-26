@@ -20,6 +20,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import com.chschmid.jdotxt.Jdotxt;
+import com.chschmid.jdotxt.gui.controls.JdotxtImageButton;
 import com.todotxt.todotxttouch.task.Priority;
 import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.util.Util;
@@ -30,14 +31,14 @@ public class JdotxtTaskPanel extends JPanel {
 	
 	private JPanel panelTodoInfo;
 	private JPanel panelTodoCommands;
-	private ImageButton buttonNewTask;
+	private JdotxtImageButton buttonNewTask;
 	
 	private PriorityTextField textPriority;
 	private JTextField textContent;
 	private DateTextField textDate;
 
-	private ImageButton checkDone;
-	private ImageButton buttonDelete;
+	private JdotxtImageButton checkDone;
+	private JdotxtImageButton buttonDelete;
 	
 	private Task task;
 	
@@ -72,8 +73,8 @@ public class JdotxtTaskPanel extends JPanel {
 		textContent       = new JTextField(task.getText());
 		textDate          = new DateTextField(task.getPrependedDate());
 		textPriority      = new PriorityTextField(task.getPriority().getCode().charAt(0));
-		checkDone         = new ImageButton(JdotxtTaskPanel.imgIncomplete);
-		buttonDelete      = new ImageButton(JdotxtTaskPanel.imgDelete);
+		checkDone         = new JdotxtImageButton(JdotxtTaskPanel.imgIncomplete);
+		buttonDelete      = new JdotxtImageButton(JdotxtTaskPanel.imgDelete);
 		
 		textPriority.setAlignmentY(TOP_ALIGNMENT);
 		
@@ -92,11 +93,11 @@ public class JdotxtTaskPanel extends JPanel {
 		
 		checkDone.setBackground(Color.WHITE);
 		checkDone.setAlignmentX(CENTER_ALIGNMENT);
-		checkDone.setActionListener(new DoneListener());
+		checkDone.addActionListener(new DoneListener());
 		
 		buttonDelete.setBackground(Color.WHITE);
 		buttonDelete.setAlignmentX(CENTER_ALIGNMENT);
-		buttonDelete.setActionListener(new DeleteListener());
+		buttonDelete.addActionListener(new DeleteListener());
 		
 		panelTodoInfo.setLayout(new BoxLayout(panelTodoInfo, BoxLayout.Y_AXIS));
 		panelTodoInfo.add(textContent);
@@ -116,10 +117,10 @@ public class JdotxtTaskPanel extends JPanel {
 		panelTodoCommands.setAlignmentY(TOP_ALIGNMENT);
 		
 		if (isNewTask) {
-			if (!compactMode) buttonNewTask = new ImageButton(Util.createImageIcon("/res/drawable/add.png"));
-			else buttonNewTask = new ImageButton(Util.createImageIcon("/res/drawable/add_25.png"));
+			if (!compactMode) buttonNewTask = new JdotxtImageButton(Util.createImageIcon("/res/drawable/add.png"));
+			else buttonNewTask = new JdotxtImageButton(Util.createImageIcon("/res/drawable/add_25.png"));
 			buttonNewTask.setAlignmentY(TOP_ALIGNMENT);
-			buttonNewTask.setActionListener(new AddTaskListener());
+			buttonNewTask.addActionListener(new AddTaskListener());
 			this.setBorder(BorderFactory.createMatteBorder(2, 0, 2, 0, JdotxtGUI.COLOR_HOVER));
 		} else this.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, JdotxtGUI.COLOR_GRAY_PANEL));
 		this.setBackground(Color.WHITE);

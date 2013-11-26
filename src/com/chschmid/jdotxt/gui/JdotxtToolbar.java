@@ -6,8 +6,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -16,18 +18,20 @@ import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.event.DocumentListener;
 
+import com.chschmid.jdotxt.gui.controls.JdotxtImageButton;
 import com.todotxt.todotxttouch.util.Util;
 
 public class JdotxtToolbar extends Box{
 
-	private ImageButton buttonSave;
-	private ImageButton buttonReload;
-	private ImageButton buttonArchive;
-	private ImageButton buttonSettings;
+	private JdotxtImageButton buttonSave;
+	private JdotxtImageButton buttonReload;
+	private JdotxtImageButton buttonArchive;
+	private JdotxtImageButton buttonSettings;
 	private SearchField textfieldSearch;
 	
 	private boolean enabled;
@@ -46,14 +50,14 @@ public class JdotxtToolbar extends Box{
 		this.setBackground(JdotxtGUI.COLOR_GRAY_PANEL);
 		this.setBorder(BorderFactory.createMatteBorder(0, 0, 3, 0, border));
 		
-		buttonSave      = new ImageButton(iconSave);
+		buttonSave      = new JdotxtImageButton(iconSave);
 		buttonSave.setToolTipText(JdotxtGUI.lang.getWord("Save"));
-		buttonReload    = new ImageButton(iconReload);
+		buttonReload    = new JdotxtImageButton(iconReload);
 		buttonReload.setToolTipText(JdotxtGUI.lang.getWord("Reload"));
-		buttonArchive   = new ImageButton(iconArchive);
+		buttonArchive   = new JdotxtImageButton(iconArchive);
 		buttonArchive.setToolTipText(JdotxtGUI.lang.getWord("Archive"));
 		textfieldSearch = new SearchField(JdotxtGUI.lang.getWord("Search..."));
-		buttonSettings  = new ImageButton(iconSettings);
+		buttonSettings  = new JdotxtImageButton(iconSettings);
 				
 		this.add(buttonSave);
 		this.add(buttonReload);
@@ -63,11 +67,25 @@ public class JdotxtToolbar extends Box{
 		this.add(Box.createRigidArea(new Dimension(4,1)));
 		this.add(buttonSettings);
 		
+		JButton bat = new JButton();
+		bat.setText("Test");
+		bat.setFont(JdotxtGUI.fontR);
+		bat.setOpaque(true);
+		bat.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(JdotxtToolbar.this, "Eggs are not supposed to be green.");
+			}
+		});
+		
+		this.add(bat);
+		
 		this.setOpaque(true);
 	}
 	
-	public ImageButton getButtonSave()        { return buttonSave; }
-	public ImageButton getButtonSettings()    { return buttonSettings; }
+	public JdotxtImageButton getButtonSave()        { return buttonSave; }
+	public JdotxtImageButton getButtonSettings()    { return buttonSettings; }
 	public SearchField   getTextfieldSearch() { return textfieldSearch; }
 	
 	public void setEnabled (boolean enabled){
@@ -83,10 +101,10 @@ public class JdotxtToolbar extends Box{
 	
 	public boolean isEnabled() {return enabled;}
 	
-	public void setSaveListener(ActionListener actionListener) { buttonSave.setActionListener(actionListener); }
-	public void setReloadListener(ActionListener actionListener) { buttonReload.setActionListener(actionListener); }
-	public void setArchiveListener(ActionListener actionListener) { buttonArchive.setActionListener(actionListener); }
-	public void setSettingsListener(ActionListener actionListener) { buttonSettings.setActionListener(actionListener); }
+	public void setSaveListener(ActionListener actionListener) { buttonSave.addActionListener(actionListener); }
+	public void setReloadListener(ActionListener actionListener) { buttonReload.addActionListener(actionListener); }
+	public void setArchiveListener(ActionListener actionListener) { buttonArchive.addActionListener(actionListener); }
+	public void setSettingsListener(ActionListener actionListener) { buttonSettings.addActionListener(actionListener); }
 	
     public static class SearchField extends Box{
 
