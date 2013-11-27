@@ -40,9 +40,14 @@ public class JdotxtPriorityField extends JTextField {
 	private Color foreground;
 	private DocumentListener listener;
 	
+	private boolean focusNext     = false;
+	private boolean focusPrevious = false;
+	private boolean enabled       = true;
+	
 	public JdotxtPriorityField(char priority) {
 		super();
 		initPriorityField(priority);
+		
 	}
 	
 	public JdotxtPriorityField() {
@@ -76,8 +81,8 @@ public class JdotxtPriorityField extends JTextField {
 		public void keyPressed(KeyEvent event) {
 			
 			int kc = event.getKeyCode();
-			if (kc == KeyEvent.VK_RIGHT) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent();
-			//if (kc == KeyEvent.VK_UP || kc == KeyEvent.VK_DOWN) return;
+			if (kc == KeyEvent.VK_RIGHT && focusNext) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent();
+			if (kc == KeyEvent.VK_LEFT && focusPrevious) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent();
 			event.consume();
 		}
 
@@ -88,11 +93,12 @@ public class JdotxtPriorityField extends JTextField {
 
 		@Override
 		public void keyTyped(KeyEvent event) {
+			event.consume();
+			if (!enabled) return;
 			Character c = event.getKeyChar();
 			if (c == 127 || c == 8 || c == 32) c = '-';
 			c = Character.toUpperCase(c);
 			if ((c >= 'A' && c <= 'Z') || c == '-') selectPriority(c);
-			event.consume();
 		}
 	}
 	
@@ -116,6 +122,11 @@ public class JdotxtPriorityField extends JTextField {
 		setSelectionEnd(2);
 	}
 	
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+		if (!enabled) setPriority(DEFAULT_PRIORITY);
+	}
+	
 	public void setPriority(char priority) {
 		priority = Character.toUpperCase(priority);
 		
@@ -132,6 +143,9 @@ public class JdotxtPriorityField extends JTextField {
 	}
 	
 	public char getPriority() { return priority; }
+	
+	public void setFocusNext(boolean focusNext) { this.focusNext = focusNext; }
+	public void setFocusPrevious(boolean focusPrevious) { this.focusPrevious = focusPrevious; }
 	
 	public void setForeground(Color fg) {
 		foreground = fg;

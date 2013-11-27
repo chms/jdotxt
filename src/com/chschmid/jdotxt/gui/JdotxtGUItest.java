@@ -29,6 +29,7 @@ public class JdotxtGUItest extends JFrame {
 	public static final ImageIcon unselected = Util.createImageIcon("/res/drawable/uncheck.png");
 	
 	JdotxtImageCheckBox cb;
+	JdotxtTaskPanel2 tp;
 	
 	public JdotxtGUItest() {
 		super();
@@ -82,7 +83,7 @@ public class JdotxtGUItest extends JFrame {
 		cb.addActionListener(new JdotxtImageCheckBoxListener("cb"));
 		this.add(cb, BorderLayout.LINE_END);
 		
-		JdotxtTaskPanel2 tp = new JdotxtTaskPanel2(new Task(1,"2013-12-01 blub"));
+		tp = new JdotxtTaskPanel2(new Task(1,"2013-12-01 blub"));
 		this.add(tp, BorderLayout.CENTER);
 		//this.add(new JTextField("Test3"), BorderLayout.LINE_END);
 	}

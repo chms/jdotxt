@@ -24,7 +24,6 @@ import java.io.File;
 import java.util.prefs.Preferences;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
-import com.chschmid.jdotxt.gui.JdotxtGUItest;
 import com.chschmid.jdotxt.gui.JdotxtSettingsDialog;
 import com.sun.jna.Function;
 import com.sun.jna.NativeLibrary;

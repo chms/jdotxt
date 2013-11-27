@@ -24,6 +24,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 
 import javax.swing.ImageIcon;
@@ -36,7 +38,12 @@ import com.chschmid.jdotxt.gui.JdotxtGUI;
 public class JdotxtImageButton extends JLabel {
 	private boolean mouseIsOverButton;
 	private boolean mouseIsDown;
+	private boolean keyIsPressed;
 	private boolean focused;
+	
+	private Color cHover;
+	private Color cPressed;
+	private Color cBackground;
 	
 	public JdotxtImageButton() {
 		super();
@@ -50,29 +57,31 @@ public class JdotxtImageButton extends JLabel {
 	}
 	
 	private void initGUI() {
-		this.setFocusable(false);
+		setFocusable(true);
 		this.setBorder(null);
+		
+		setHoverColor(JdotxtGUI.COLOR_HOVER);
+		setPressedColor(JdotxtGUI.COLOR_PRESSED);
+		setBackground(null);
 		
 		MouseAdapter mouseListener = new MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
             	mouseIsOverButton = true;
-            	if (mouseIsDown) setButtonBackground(JdotxtGUI.COLOR_PRESSED);
-            	else setButtonBackground(JdotxtGUI.COLOR_HOVER);
+            	setBackground();
             }
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
             	mouseIsOverButton = false;
-            	if (!focused) setButtonBackground(null);
-            	else setButtonBackground(JdotxtGUI.COLOR_HOVER);
+            	setBackground();
             }
             
             @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
             	if (SwingUtilities.isLeftMouseButton(evt)) {
             		mouseIsDown = true;
-            		setButtonBackground(JdotxtGUI.COLOR_PRESSED);
+            		setBackground();
             	}
             }
             
@@ -81,8 +90,7 @@ public class JdotxtImageButton extends JLabel {
             	mouseIsDown = false;
             	if (!isEnabled() || !SwingUtilities.isLeftMouseButton(evt)) return;
             	if (mouseIsOverButton) fireActionPerformed(new ActionEvent(JdotxtImageButton.this, ActionEvent.ACTION_PERFORMED, "Click"));
-            	if (mouseIsOverButton || focused) setButtonBackground(JdotxtGUI.COLOR_HOVER);
-            	else setButtonBackground(null);
+            	setBackground();
             }
         };
         addMouseListener(mouseListener);
@@ -91,29 +99,55 @@ public class JdotxtImageButton extends JLabel {
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				focused = false;
-				if (!mouseIsOverButton) setButtonBackground(null);
+				setBackground();
 			}
 			
 			@Override
 			public void focusGained(FocusEvent arg0) {
 				focused = true;
-				setButtonBackground(JdotxtGUI.COLOR_HOVER);
+				setBackground();
 			}
 		};
 		addFocusListener(focusListener);
+		
+		KeyListener keyListener = new KeyListener() {
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) {
+					keyIsPressed = false;
+					setBackground();
+					fireActionPerformed(new ActionEvent(JdotxtImageButton.this, ActionEvent.ACTION_PERFORMED, "Click"));
+				}
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) {
+					keyIsPressed = true;
+					setBackground();
+				}
+			}
+		};
+		addKeyListener(keyListener);
 	}
 	
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		setButtonBackground(null);
-		if (mouseIsOverButton || focused) setButtonBackground(JdotxtGUI.COLOR_HOVER);
+		setBackground();
 	}
 	
-	private void setButtonBackground(Color color) {
-		setBackground(color);
-		if (color == null || !isEnabled()) setOpaque(false);
-		else setOpaque(true);
-	}
+	public void setHoverColor(Color color) { cHover = color; }
+	public void setPressedColor(Color color) { cPressed = color; }
+	public void setBackgroundColor(Color color) { cBackground = color; }
+	
+	public Color getHoverColor(Color color) { return cHover; }
+	public Color getPressedColor(Color color) { return cHover; }
+	public Color getBackgroundColor(Color color) { return cBackground; }
 	
     public void addActionListener(ActionListener l) {
         listenerList.add(ActionListener.class, l);
@@ -126,6 +160,13 @@ public class JdotxtImageButton extends JLabel {
     public ActionListener[] getActionListeners() {
         return listenerList.getListeners(ActionListener.class);
     }
+    
+    private void setBackground() {
+    	if (keyIsPressed || (mouseIsOverButton && mouseIsDown)) setBackground(cPressed);
+    	else if (mouseIsOverButton || focused) setBackground(cHover);
+    	else setBackground(cBackground);
+    	setOpaque(true);
+	}
     
     protected void fireActionPerformed(ActionEvent event) {
     	Object[] listeners = listenerList.getListeners(ActionListener.class);

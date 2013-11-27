@@ -39,6 +39,9 @@ public class JdotxtDateField extends JTextField {
 	private Color foreground;
 	private DocumentListener listener;
 	
+	private boolean focusNext     = false;
+	private boolean focusPrevious = false;
+	
 	public JdotxtDateField(String date) {
 		super();
 		initDateField(date);
@@ -74,9 +77,12 @@ public class JdotxtDateField extends JTextField {
 			JTextField text = (JTextField)event.getSource();
 			StringBuilder tempDate = new StringBuilder(text.getText());
 			int cc = event.getKeyCode();
-			
-			if (getCaretPosition() == 0 && cc == KeyEvent.VK_LEFT) {
+			if (focusPrevious && getCaretPosition() == 0 &&cc == KeyEvent.VK_LEFT) {
 				KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent();
+				return;
+			}
+			if (focusNext && getCaretPosition() == getText().length() &&cc == KeyEvent.VK_RIGHT) {
+				KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent();
 				return;
 			}
 			if (cc == KeyEvent.VK_RIGHT || cc == KeyEvent.VK_KP_RIGHT || cc == KeyEvent.VK_LEFT || cc == KeyEvent.VK_KP_RIGHT) return;
@@ -158,6 +164,9 @@ public class JdotxtDateField extends JTextField {
 	}
 	
 	public String getDate() { return date; }
+	
+	public void setFocusNext(boolean focusNext) { this.focusNext = focusNext; }
+	public void setFocusPrevious(boolean focusPrevious) { this.focusPrevious = focusPrevious; }
 	
 	public void setForeground(Color fg) {
 		foreground = fg;
