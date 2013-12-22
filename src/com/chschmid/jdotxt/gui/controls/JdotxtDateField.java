@@ -1,9 +1,9 @@
 /**
-* Copyright (C) 2013 Christian M. Schmid
+* Copyright (C) 2013-2014 Christian M. Schmid
 *
 * This file is part of the jdotxt.
 *
-* PILight is free software: you can redistribute it and/or modify
+* jdotxt is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
@@ -21,44 +21,69 @@ package com.chschmid.jdotxt.gui.controls;
 
 import java.awt.Color;
 import java.awt.KeyboardFocusManager;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.PlainDocument;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
 
 @SuppressWarnings("serial")
 public class JdotxtDateField extends JTextField {
-	private String DEFAULT_DATE_STRING = "----------";
-	private String date;
+	public final static String DEFAULT_DATE_STRING = "----------";
+	public final static String NAV_PREV_ACTION = "NAV_PREV_ACTION";
+	public final static String NAV_NEXT_ACTION = "NAV_NEXT_ACTION";
 	private Color foreground;
-	private DocumentListener listener;
-	
+
 	private boolean focusNext     = false;
 	private boolean focusPrevious = false;
 	
 	public JdotxtDateField(String date) {
-		super();
 		initDateField(date);
 	}
 	
 	public JdotxtDateField() {
-		super();
 		initDateField(DEFAULT_DATE_STRING);
 	}
 	
 	private void initDateField(String date) {
+		setDocument(new DateDocument());
 		setDate(date);
 		foreground = getForeground();
 		this.addFocusListener(new JdotxtDateFieldFocusListener());
-		this.addKeyListener(new JdotxtDateFieldKeyListener());
 		this.getDocument().addDocumentListener(new JdotxtDateDocumentListener());
 		setCaretPosition(0);
+		
+		InputMap im = this.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap am = this.getActionMap();
+        im.put(KeyStroke.getKeyStroke("LEFT"), NAV_PREV_ACTION);
+        im.put(KeyStroke.getKeyStroke("RIGHT"), NAV_NEXT_ACTION);
+        am.put(NAV_PREV_ACTION, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (focusPrevious && getCaretPosition() == 0) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent();
+				((AbstractAction) getActionMap().get(DefaultEditorKit.backwardAction)).actionPerformed(e);
+			}
+		});
+        am.put(NAV_NEXT_ACTION, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (focusNext && getCaretPosition() == getText().length()) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent();
+				((AbstractAction) getActionMap().get(DefaultEditorKit.forwardAction)).actionPerformed(e);
+			}
+		});
 	}
 	
 	private class JdotxtDateFieldFocusListener implements FocusListener {
@@ -71,99 +96,34 @@ public class JdotxtDateField extends JTextField {
 		}
 	}
 	
-	private class JdotxtDateFieldKeyListener implements KeyListener {
-		@Override
-		public void keyPressed(KeyEvent event) {
-			JTextField text = (JTextField)event.getSource();
-			StringBuilder tempDate = new StringBuilder(text.getText());
-			int cc = event.getKeyCode();
-			if (focusPrevious && getCaretPosition() == 0 &&cc == KeyEvent.VK_LEFT) {
-				KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent();
-				return;
-			}
-			if (focusNext && getCaretPosition() == getText().length() &&cc == KeyEvent.VK_RIGHT) {
-				KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent();
-				return;
-			}
-			if (cc == KeyEvent.VK_RIGHT || cc == KeyEvent.VK_KP_RIGHT || cc == KeyEvent.VK_LEFT || cc == KeyEvent.VK_KP_RIGHT) return;
-			if (cc == KeyEvent.VK_UP || cc == KeyEvent.VK_DOWN || cc == KeyEvent.VK_HOME || cc == KeyEvent.VK_END) return;
-			
-			int pos = text.getCaretPosition();
-			
-			if (cc == KeyEvent.VK_SPACE) {
-				if (pos >= 10) event.consume();
-				else {
-					if (pos == 4 || pos == 7) pos++;
-					tempDate.setCharAt(pos, '-');
-					setDate(tempDate.toString());
-					pos++;
-					if (pos == 4 || pos == 7) pos++;
-					text.setCaretPosition(pos);
-				}
-			}
-			
-			if (cc == KeyEvent.VK_BACK_SPACE) {
-				if (pos == 0) event.consume();
-				else {
-					if (pos == 5 || pos == 8) pos--;
-					pos--;
-					tempDate.setCharAt(pos, '-');
-					setDate(tempDate.toString());
-					if (pos == 5 || pos == 8) pos--;
-					text.setCaretPosition(pos);
-				}
-			}
-			
-			event.consume();
-		}
-
-		@Override
-		public void keyReleased(KeyEvent event) { }
-
-		@Override
-		public void keyTyped(KeyEvent event) {
-			JTextField text = (JTextField)event.getSource();
-			StringBuilder tempDate = new StringBuilder(text.getText());
-			int pos = text.getCaretPosition();
-			Character c = event.getKeyChar();
-			if (isNumeric(c)) {
-				if (pos >= 10) event.consume();
-				else {
-					if (pos == 4 || pos == 7) pos++;
-					tempDate.setCharAt(pos, c);
-					setDate(tempDate.toString());
-					pos++;
-					if (pos == 4 || pos == 7) pos++;
-					text.setCaretPosition(pos);
-				}
-			}
-			event.consume();
-		}
-	}
-	
 	private class JdotxtDateDocumentListener implements DocumentListener {
 		@Override
-		public void insertUpdate(DocumentEvent e) { if (isValidDate(date) && listener != null) listener.insertUpdate(e); }
+		public void insertUpdate(DocumentEvent e) {
+			setColors();
+		}
 		@Override
-		public void removeUpdate(DocumentEvent e) { if (isValidDate(date) && listener != null) listener.removeUpdate(e); }
+		public void removeUpdate(DocumentEvent e) {
+			setColors();
+		}
 		@Override
-		public void changedUpdate(DocumentEvent e) { if (isValidDate(date) && listener != null) listener.changedUpdate(e); }
+		public void changedUpdate(DocumentEvent e) {
+			setColors();
+		}
 	}
 	
 	public void setDate(String date) {
-		if (isValidDate(date)) this.date = date;
-		else this.date = DEFAULT_DATE_STRING;
-		
-		if (isValidEditingDate(date) && !date.equals(DEFAULT_DATE_STRING)) {
+		String newDate = DEFAULT_DATE_STRING;
+		if (isValidDate(date)) newDate = date;
+		setText(newDate);
+	}
+	
+	private void setColors() {
+		if (isValidEditingDate(getText()) && !getText().equals(DEFAULT_DATE_STRING)) {
 			super.setForeground(foreground);
-			setText(date);
 		} else {
-			setText(DEFAULT_DATE_STRING);
 			super.setForeground(JdotxtGUI.COLOR_GRAY_PANEL);
 		}
 	}
-	
-	public String getDate() { return date; }
 	
 	public void setFocusNext(boolean focusNext) { this.focusNext = focusNext; }
 	public void setFocusPrevious(boolean focusPrevious) { this.focusPrevious = focusPrevious; }
@@ -173,40 +133,70 @@ public class JdotxtDateField extends JTextField {
 		super.setForeground(foreground);
 	}
 	
-	public void setDateListener(DocumentListener listener) { this.listener = listener; }
+	//public void setDateListener(DocumentListener listener) { this.listener = listener; }
 	
-	private boolean isNumeric(char c) { return ((c >= '0') && (c <= '9')); }
-	
-	public boolean isValidDate(String date){
+	public static boolean isValidDate(String date){
 		boolean isValid;
 		if (date.length() != 10) return false;
-		isValid = isNumeric(date.charAt(0));
-		isValid = isValid && isNumeric(date.charAt(1));
-		isValid = isValid && isNumeric(date.charAt(2));
-		isValid = isValid && isNumeric(date.charAt(3));
+		isValid = Character.isDigit(date.charAt(0));
+		isValid = isValid && Character.isDigit(date.charAt(1));
+		isValid = isValid && Character.isDigit(date.charAt(2));
+		isValid = isValid && Character.isDigit(date.charAt(3));
 		isValid = isValid && (date.charAt(4) == '-');
-		isValid = isValid && isNumeric(date.charAt(5));
-		isValid = isValid && isNumeric(date.charAt(6));
+		isValid = isValid && Character.isDigit(date.charAt(5));
+		isValid = isValid && Character.isDigit(date.charAt(6));
 		isValid = isValid && (date.charAt(7) == '-');
-		isValid = isValid && isNumeric(date.charAt(8));
-		isValid = isValid && isNumeric(date.charAt(9));
+		isValid = isValid && Character.isDigit(date.charAt(8));
+		isValid = isValid && Character.isDigit(date.charAt(9));
 		isValid = isValid || date.equals(DEFAULT_DATE_STRING);
 		return isValid;
 	}
 	
-	private boolean isValidEditingDate(String date){
+	private static boolean isValidEditingDate(String date){
 		boolean isValid;
 		if (date.length() != 10) return false;
-		isValid = isNumeric(date.charAt(0)) || date.charAt(0) == '-';
-		isValid = isValid && (isNumeric(date.charAt(1)) || date.charAt(1) == '-');
-		isValid = isValid && (isNumeric(date.charAt(2)) || date.charAt(2) == '-');
-		isValid = isValid && (isNumeric(date.charAt(3)) || date.charAt(3) == '-');
+		isValid = Character.isDigit(date.charAt(0)) || date.charAt(0) == '-';
+		isValid = isValid && (Character.isDigit(date.charAt(1)) || date.charAt(1) == '-');
+		isValid = isValid && (Character.isDigit(date.charAt(2)) || date.charAt(2) == '-');
+		isValid = isValid && (Character.isDigit(date.charAt(3)) || date.charAt(3) == '-');
 		isValid = isValid && (date.charAt(4) == '-');
-		isValid = isValid && (isNumeric(date.charAt(5)) || date.charAt(5) == '-');
-		isValid = isValid && (isNumeric(date.charAt(6)) || date.charAt(6) == '-');
+		isValid = isValid && (Character.isDigit(date.charAt(5)) || date.charAt(5) == '-');
+		isValid = isValid && (Character.isDigit(date.charAt(6)) || date.charAt(6) == '-');
 		isValid = isValid && (date.charAt(7) == '-');
-		isValid = isValid && (isNumeric(date.charAt(8)) || date.charAt(8) == '-');
-		isValid = isValid && (isNumeric(date.charAt(9)) || date.charAt(9) == '-');
+		isValid = isValid && (Character.isDigit(date.charAt(8)) || date.charAt(8) == '-');
+		isValid = isValid && (Character.isDigit(date.charAt(9)) || date.charAt(9) == '-');
 		return isValid;
+	}
+	
+	private class DateDocument extends PlainDocument {
+	    @Override
+	    public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+	    	if (str.equals(" ")) {
+	    		insertString(offs, "-", a);
+	    		return;
+	    	}
+	    	String newDate = replaceSubstring(this.getText(0, this.getLength()), str, offs);
+	    	
+	    	if (isValidEditingDate(newDate)) {
+	    		super.remove(offs, Math.min(str.length(), getLength() - offs));
+				super.insertString(offs, str, a);
+				int endPos = offs + str.length();
+				if (endPos == 4 || endPos == 7) setCaretPosition(endPos + 1);
+			}
+	    }
+	    
+	    public void remove(int offs, int len) throws BadLocationException {
+	    	super.remove(offs, len);
+	    	super.insertString(offs, DEFAULT_DATE_STRING.substring(0, len), null);
+	    	if (offs == 5 || offs == 8) setCaretPosition(offs - 1);
+	    	else setCaretPosition(offs);
+	    }
+	    
+	    private String replaceSubstring(String original, String replace, int offs) {
+	    	if (original.length() < offs) return "";
+	    	String a = original.substring(0, offs);
+	    	String b = original.substring(Math.min(original.length(), offs+replace.length()), original.length());
+	    	return a + replace + b;
+	    }
 	}
 }

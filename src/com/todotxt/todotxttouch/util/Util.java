@@ -37,7 +37,7 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
-import com.chschmid.jdotxt.gui.JdotxtToolbar;
+import com.chschmid.jdotxt.gui.controls.JdotxtToolbar;
 import com.todotxt.todotxttouch.TodoException;
 
 public class Util {

@@ -1,3 +1,22 @@
+/**
+* Copyright (C) 2013-2014 Christian M. Schmid
+*
+* This file is part of the jdotxt.
+*
+* jdotxt is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package com.chschmid.jdotxt.gui;
 
 import java.awt.BorderLayout;
@@ -15,7 +34,7 @@ import com.chschmid.jdotxt.gui.controls.JdotxtDateField;
 import com.chschmid.jdotxt.gui.controls.JdotxtImageButton;
 import com.chschmid.jdotxt.gui.controls.JdotxtImageCheckBox;
 import com.chschmid.jdotxt.gui.controls.JdotxtPriorityField;
-import com.chschmid.jdotxt.gui.controls.JdotxtTaskPanel2;
+import com.chschmid.jdotxt.gui.controls.JdotxtTaskPanel;
 import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.util.Util;
 
@@ -29,7 +48,7 @@ public class JdotxtGUItest extends JFrame {
 	public static final ImageIcon unselected = Util.createImageIcon("/res/drawable/uncheck.png");
 	
 	JdotxtImageCheckBox cb;
-	JdotxtTaskPanel2 tp;
+	JdotxtTaskPanel tp;
 	
 	public JdotxtGUItest() {
 		super();
@@ -37,16 +56,17 @@ public class JdotxtGUItest extends JFrame {
 	}
 	
 	private void initGUI() {
-		testJdotxtImageButton();
+		testJdotxtDateField();
 		this.setMinimumSize(new Dimension(MIN_WIDTH, MIN_HEIGHT));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	
-	private void testJdotxtDateField() {
+	public void testJdotxtDateField() {
 		JdotxtDateField df = new JdotxtDateField("2013-11-26");
-		df.setDateListener(new JdotxtDateFieldListener("DateField"));
+		//df.setDateListener(new JdotxtDateFieldListener("DateField"));
 		JdotxtPriorityField pf = new JdotxtPriorityField('F');
 		pf.setPriorityListener(new JdotxtDateFieldListener("PriorityField"));
+		df.setFocusNext(true);
 		
 		this.add(pf, BorderLayout.LINE_START);
 		this.add(df, BorderLayout.CENTER);
@@ -74,7 +94,7 @@ public class JdotxtGUItest extends JFrame {
 		}
 	}
 	
-	private void testJdotxtImageButton() {
+	public void testJdotxtImageButton() {
 		JdotxtImageButton ib = new JdotxtImageButton(iconSave);
 		ib.setFocusable(true);
 		ib.addActionListener(new JdotxtImageButtonListener("save"));
@@ -83,7 +103,7 @@ public class JdotxtGUItest extends JFrame {
 		cb.addActionListener(new JdotxtImageCheckBoxListener("cb"));
 		this.add(cb, BorderLayout.LINE_END);
 		
-		tp = new JdotxtTaskPanel2(new Task(1,"2013-12-01 blub"));
+		tp = new JdotxtTaskPanel(new Task(1,"2013-12-01 blub"));
 		this.add(tp, BorderLayout.CENTER);
 		//this.add(new JTextField("Test3"), BorderLayout.LINE_END);
 	}

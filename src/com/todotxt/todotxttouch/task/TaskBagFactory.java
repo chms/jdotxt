@@ -33,6 +33,6 @@ public class TaskBagFactory {
 
 		LocalFileTaskRepository localFileTaskRepository = new LocalFileTaskRepository();
 
-		return new TaskBagImpl(localFileTaskRepository);
+		return new JdotxtTaskBagImpl(localFileTaskRepository);
 	}
 }

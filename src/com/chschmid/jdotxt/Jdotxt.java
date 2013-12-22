@@ -1,7 +1,7 @@
 /**
 * jdotxt
 *
-* Copyright (C) 2013 Christian M. Schmid
+* Copyright (C) 2013-2014 Christian M. Schmid
 *
 * jdotxt is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import java.io.File;
 import java.util.prefs.Preferences;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
-import com.chschmid.jdotxt.gui.JdotxtSettingsDialog;
+import com.chschmid.jdotxt.gui.JdotxtWelcomeDialog;
 import com.sun.jna.Function;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.NativeLong;
@@ -34,7 +34,7 @@ import com.todotxt.todotxttouch.task.TaskBag;
 import com.todotxt.todotxttouch.task.TaskBagFactory;
 
 public class Jdotxt {
-	public static final String VERSION = "0.2.2";
+	public static final String VERSION = "0.3.8";
 	public static final String APPID = "chschmid.jdotxt";
 	
 	public static TaskBag taskBag;
@@ -47,6 +47,7 @@ public class Jdotxt {
 	public static void main( String[] args )
 	{
 		loadPreferences();
+
 		JdotxtGUI.loadLookAndFeel(userPrefs.get("lang", "English"));
 		
 		// Windows taskbar fix
@@ -58,8 +59,8 @@ public class Jdotxt {
 			public void run() {
 				// Show settings on first run
 				if (userPrefs.getBoolean("firstRun", true)) {
-					JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
-					settingsDialog.setVisible(true);
+					JdotxtWelcomeDialog welcomeDialog = new JdotxtWelcomeDialog();
+					welcomeDialog.setVisible(true);
 				}
 				
 				// Main window
@@ -101,4 +102,11 @@ public class Jdotxt {
 		}
 	}
 	
+	public static String insertReplaceString(String original, String replace, int offset) {
+		String a =  original.substring(0, Math.min(offset, original.length()));
+		String b;
+		if (original.length() > (offset + replace.length())) b = original.substring(offset + replace.length(), original.length());
+		else b = "";
+		return a + replace + b;
+	  }
 }

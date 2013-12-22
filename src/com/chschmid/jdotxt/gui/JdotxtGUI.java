@@ -1,9 +1,9 @@
 /**
-* Copyright (C) 2013 Christian M. Schmid
+* Copyright (C) 2013-2014 Christian M. Schmid
 *
 * This file is part of the jdotxt.
 *
-* PILight is free software: you can redistribute it and/or modify
+* jdotxt is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
@@ -21,12 +21,10 @@ package com.chschmid.jdotxt.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontFormatException;
-import java.awt.GridLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -38,75 +36,77 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 
 import res.lang.LanguagesController;
 
 import com.chschmid.jdotxt.Jdotxt;
+import com.chschmid.jdotxt.gui.controls.JdotxtFilterPanel;
 import com.chschmid.jdotxt.gui.controls.JdotxtStatusBar;
+import com.chschmid.jdotxt.gui.controls.JdotxtTaskList;
+import com.chschmid.jdotxt.gui.controls.JdotxtTaskPanel;
+import com.chschmid.jdotxt.gui.controls.JdotxtToolbar;
+import com.chschmid.jdotxt.gui.controls.TaskListener;
 import com.todotxt.todotxttouch.task.Priority;
+import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.task.TaskBag;
 import com.todotxt.todotxttouch.util.Util;
 
+@SuppressWarnings("serial")
+// The application main window
 public class JdotxtGUI extends JFrame {
-	private static final long serialVersionUID = 3932863098451412046L;
 	
+	// Minimal and maximal window dimension settings
 	public static int MIN_WIDTH = 640;
 	public static int MIN_HEIGHT = 480;
 	
+	// Languages
+	public static final String[] languages = { "English" };
+	
+	// Colors
 	public static Color COLOR_GRAY_PANEL = new Color(221, 221, 221);
 	public static Color COLOR_HOVER      = new Color(136, 201, 225);
 	public static Color COLOR_PRESSED    = new Color(51, 181, 229);
 	
+	// Fonts
 	public static Font fontR;
 	public static Font fontRI;
 	public static Font fontB;
 	
+	// Language support
 	public static LanguagesController lang;
+	
+	// Application icon
 	public static ImageIcon icon;
 	
+	// The tasks - from the todo.txt Android client
 	private TaskBag taskBag;
 	
-	private JdotxtToolbar jdotxtToolbar;
-	
-	private JPanel filterPanel;
-	private JScrollPane projectsPane;
-	private JScrollPane contextsPane;
+	// GUI elements
+	private JdotxtToolbar toolbar;
+	private JdotxtFilterPanel filterPanel;
 	private JScrollPane tasksPane;
-	
-	private JList<String> projects;
-	private JList<String> contexts;
-	private JList<String> loadingp;
-	private JList<String> loadingc;
-	private JdotxtTasksPanel tasksPanel;
+	private JdotxtTaskList taskList;
 	private JdotxtStatusBar statusBar;
 	
-	FilterSelectionListener projectsListener, contextsListener;
-	
+	// Task filters
 	private ArrayList<Priority> filterPrios  = new ArrayList<Priority>();
-	private ArrayList<String> filterContexts = new ArrayList<String>();
-	private ArrayList<String> filterProjects = new ArrayList<String>();
+	private ArrayList<String> filterContexts;
+	private ArrayList<String> filterProjects;
 	private String search = "";
 	
+	// Lock object for loading files
 	private Object loadLock = new Object();
 	
 	public JdotxtGUI() {
@@ -121,80 +121,43 @@ public class JdotxtGUI extends JFrame {
 		this.setBackground(Color.WHITE);
 		
 		// Create GUI elements
-		jdotxtToolbar = new JdotxtToolbar();
-		filterPanel = new JPanel(new GridLayout(1, 2));
-		projects = new JList<String>();
-		contexts = new JList<String>();
-		loadingp = new JList<String>();
-		loadingc = new JList<String>();
-		projectsPane = new JScrollPane();
-		contextsPane = new JScrollPane();
-		tasksPanel = new JdotxtTasksPanel(this);
-		tasksPane = new JScrollPane();
-		statusBar = new JdotxtStatusBar(lang.getWord("Loading..."));
+		toolbar     = new JdotxtToolbar();
+		filterPanel = new JdotxtFilterPanel();
+		taskList    = new JdotxtTaskList();
+		tasksPane   = new JScrollPane();
+		statusBar   = new JdotxtStatusBar();
 		
-		jdotxtToolbar.getTextfieldSearch().setDocumentListener(new SearchListener());
-		jdotxtToolbar.setSaveListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { saveTasks(); } });
-		jdotxtToolbar.setReloadListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { reloadTasks(); } });
-		jdotxtToolbar.setArchiveListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { archiveTasks(); } });
-		jdotxtToolbar.setSettingsListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { showSettingsDialog(); } });
+		// Toolbar listeners
+		toolbar.getTextfieldSearch().setDocumentListener(new SearchListener());
+		toolbar.getButtonSave().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { saveTasks(); } });
+		toolbar.getButtonReload().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { reloadTasks(); } });
+		toolbar.getButtonArchive().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { archiveTasks(); } });
+		toolbar.getButtonSettings().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { showSettingsDialog(); } });
 		
-		filterPanel.setPreferredSize(new Dimension(300,100));
+		// Other GUI element listeners
+		// What to do when the filters change
+		filterPanel.addFilterChangeListener(new MyFilterChangeListener()); 
+		// What to do when some task changes
+		taskList.addTaskListener(new StatusUpdater());
+		taskList.addTaskListener(new FilterUpdater());
 		
-		projects.setFont(fontR);
-		projects.setSelectionBackground(COLOR_PRESSED);
-		projects.setCellRenderer(new FilterCellRenderer());
-		projectsListener = new FilterSelectionListener(projects, filterProjects);
-		projects.addListSelectionListener(projectsListener);
-		
-		contexts.setFont(fontR);
-		contexts.setSelectionBackground(COLOR_PRESSED);
-		contexts.setCellRenderer(new FilterCellRenderer());
-		contextsListener = new FilterSelectionListener(contexts, filterContexts);
-		contexts.addListSelectionListener(contextsListener);
-		
-		String[] loadingString = new String[1];
-	    loadingString[0] = lang.getWord("Loading...");
-		loadingp.setListData(loadingString);
-		loadingp.setFont(fontRI);
-		loadingp.setEnabled(false);
-		loadingc.setListData(loadingString);
-		loadingc.setFont(fontRI);
-		loadingc.setEnabled(false);
-		
-		projectsPane.setBorder(BorderFactory.createEmptyBorder());
-		projectsPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		projectsPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		projectsPane.setViewportBorder(null);
-		projectsPane.getVerticalScrollBar().setBackground(Color.WHITE);
-		projectsPane.getVerticalScrollBar().setOpaque(true);
-		
-		contextsPane.setBorder(BorderFactory.createEmptyBorder());
-		contextsPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		contextsPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		contextsPane.setViewportBorder(null);
-		contextsPane.getVerticalScrollBar().setBackground(Color.WHITE);
-		contextsPane.getVerticalScrollBar().setOpaque(true);
-		
-		filterPanel.add(projectsPane);
-		filterPanel.add(contextsPane);
-		
+		// Style taskPane
 		tasksPane.setBorder(BorderFactory.createEmptyBorder());
 		tasksPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		tasksPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		tasksPane.setViewportBorder(null);
 		tasksPane.getVerticalScrollBar().setBackground(Color.WHITE);
 		tasksPane.getVerticalScrollBar().setOpaque(true);
-		tasksPane.setViewportView(tasksPanel);
+		tasksPane.setViewportView(taskList);
 		
-		this.add(jdotxtToolbar, BorderLayout.PAGE_START);
+		// Add GUI elements to main window
+		this.add(toolbar, BorderLayout.PAGE_START);
 		this.add(filterPanel, BorderLayout.LINE_START);
 		this.add(tasksPane, BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.PAGE_END);
 		
+		// Set window position and dimensions
 		this.setMinimumSize(new Dimension(MIN_WIDTH, MIN_HEIGHT));
-		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		
 		if (Jdotxt.userPrefs.getBoolean("isMaximized", false)) this.setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		else {
 			Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
@@ -203,16 +166,16 @@ public class JdotxtGUI extends JFrame {
 			this.setLocation(new Point(Jdotxt.userPrefs.getInt("x", x), Jdotxt.userPrefs.getInt("y", y)));
 			this.setSize(Jdotxt.userPrefs.getInt("width", MIN_WIDTH), Jdotxt.userPrefs.getInt("height", MIN_HEIGHT));
 		}
-		
-		reset();
-		
+
+		// Set window opening behavior
 		this.addWindowListener( new WindowAdapter() {
 		    public void windowOpened( WindowEvent e ){
-		    	projectsPane.requestFocus();
+		    	filterPanel.requestFocus();
 		    	reloadTasks();
 		    }
 		});
 		
+		// Set window/app closing behavior
 		this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
             	int result = 1;
@@ -234,31 +197,46 @@ public class JdotxtGUI extends JFrame {
             }
         });
 		
+		// Reset window to defaults
+		reset();
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		
 		// KeyDispatcher for global shortcuts
 		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 		manager.addKeyEventDispatcher(new KeyDispatcher());
 	}
 	
-	public void setStatusText(String text) {
-		statusBar.setText(text);
+	
+	// Sets the status bar to the default text "open and total tasks"
+	public void setDefaultStatusText() {
+		String status;
+		status = JdotxtGUI.lang.getWord("Open") + ": " + taskList.getNumOfOpenTasks();
+		status = status + "   " + JdotxtGUI.lang.getWord("Total") + ": " + taskList.getNumOfTasks();
+		JdotxtGUI.this.statusBar.setText(status);
+	}
+    
+	// Forward the filter settings to the Task List
+	public void forwardFilter2TaskList() {
+		taskList.setFilter(JdotxtGUI.this.filterPrios, JdotxtGUI.this.filterContexts, JdotxtGUI.this.filterProjects, JdotxtGUI.this.search);
+		taskList.updateTaskList();
 	}
 	
+	// Reset all GUI elements to default (= "Loading")
 	public void reset() {
-		jdotxtToolbar.setEnabled(false);
-		projectsPane.setViewportView(loadingp);
-		contextsPane.setViewportView(loadingc);
-		projects.clearSelection();
-		contexts.clearSelection();
-		projects.removeAll();
-		contexts.removeAll();
-		tasksPanel.reset();
+		toolbar.setEnabled(false);
+		taskList.reset();
+		taskList.setCompactMode(Jdotxt.userPrefs.getBoolean("compactMode", false));
+		taskList.setPrependMetadata(Jdotxt.userPrefs.getBoolean("prependMetadata", false));
+		taskList.setCopyProjectsContexts2NewTask(Jdotxt.userPrefs.getBoolean("copyMetadata", false));
+		filterPanel.reset();
+		filterPanel.setVisible(calculateVisibility());
+		filterPanel.setSwitchPanels(Jdotxt.userPrefs.getBoolean("switchPanels", false));
 		statusBar.setText(lang.getWord("Loading..."));
 	}
 	
 	// Toolbar functions
-	public void saveTasks() {
-		setEnableSave(false);
-		updateFilterPanes();
+	private void saveTasks() {
+		toolbar.getButtonSave().setEnabled(false);
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -268,58 +246,65 @@ public class JdotxtGUI extends JFrame {
 		t.start();
 	}
 	
-	public void reloadTasks() {
+	private void reloadTasks() {
 		reset();
 		Thread starter = new Thread(new TaskLoader(TaskLoader.RELOAD));
     	starter.start();
 	}
 	
-	public void refreshGUI() {
-		reset();
-		Thread starter = new Thread(new TaskLoader(TaskLoader.REFRESH_GUI));
-    	starter.start();
+	private void refreshGUI() {
+		taskList.setCompactMode(Jdotxt.userPrefs.getBoolean("compactMode", false));
+		taskList.setPrependMetadata(Jdotxt.userPrefs.getBoolean("prependMetadata", false));
+		setTaskBag(taskBag);
 	}
 	
-	public void showSettingsDialog() {
-		JdotxtSettingsDialog settingsDialog = new JdotxtSettingsDialog();
-		String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
-		boolean currentCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
-		
-		settingsDialog.setVisible(true);
-		String newPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
-		boolean newCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
-		
-		if (!currentPath.equals(newPath)) reloadTasks();
-		else if (currentCompactMode != newCompactMode) refreshGUI();
-	}
-	
-	public void archiveTasks() {
+	private void archiveTasks() {
 		reset();
 		Thread starter = new Thread(new TaskLoader(TaskLoader.ARCHIVE));
     	starter.start();
 	}
 	
-	public void setTaskBag(TaskBag taskBag) {
-		reset();
-		this.taskBag = taskBag;
-		tasksPanel.setTaskbag(taskBag);
+	public void showSettingsDialog() {
+		JdotxtPreferencesDialog settingsDialog = new JdotxtPreferencesDialog();
 		
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				forceUpdateFilterPanes();
-				jdotxtToolbar.setEnabled(true);
-				setEnableSave(JdotxtGUI.this.taskBag.hasChanged());
-			}
-		});
+		// Backup settings before the dialog is shown
+		String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
+		boolean currentCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
+		
+		settingsDialog.setVisible(true);
+		
+		// Settings after the dialog was closed
+		String newPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
+		boolean newCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
+		boolean prependMetadata = Jdotxt.userPrefs.getBoolean("prependMetadata", false);
+		boolean copyMetadata = Jdotxt.userPrefs.getBoolean("copyMetadata", false);
+		// Update stuff, according to the new settings
+		taskList.setPrependMetadata(prependMetadata);
+		taskList.setCopyProjectsContexts2NewTask(copyMetadata);
+		filterPanel.setVisible(calculateVisibility());
+		filterPanel.setSwitchPanels(Jdotxt.userPrefs.getBoolean("switchPanels", false));
+		if (!currentPath.equals(newPath)) reloadTasks();
+		else if (currentCompactMode != newCompactMode) refreshGUI();
 	}
 	
-	public void setEnableSave(boolean enable) { jdotxtToolbar.setEnableSave(enable); }
+    // Let the GUI elements know of newly loaded tasks
+	public void setTaskBag(TaskBag taskBag) {
+		this.taskBag = taskBag;
+		filterPanel.setTaskBag(JdotxtGUI.this.taskBag);
+		taskList.setTaskBag(JdotxtGUI.this.taskBag);
+		filterPanel.updateFilterPanes();
+		taskList.updateTaskList();
+		toolbar.setEnabled(true);
+		toolbar.getButtonSave().setEnabled(JdotxtGUI.this.taskBag.hasChanged());
+		setDefaultStatusText();
+	}
 	
+	// Fonts and stuff
 	public static void loadLookAndFeel(String language) {
 		fontR  = new Font("Ubuntu Light", Font.PLAIN, 14);
     	fontRI = new Font("Ubuntu Light", Font.ITALIC, 14);
     	fontB  = new Font("Ubuntu", Font.PLAIN, 14);
+    	
     	
     	// Fonts are not available
     	if (!fontR.getFamily().equals("Ubuntu Light") || !fontB.getFamily().equals("Ubuntu")) {
@@ -352,110 +337,54 @@ public class JdotxtGUI extends JFrame {
         icon = Util.createImageIcon("/res/drawable/jdo256.png");
 	}
 	
-	public void updateFilterPanes() { if (!isFilterPaneUpToDate()) forceUpdateFilterPanes(); }
+	private short calculateVisibility() { 
+		short visibility = 0;
+		if (Jdotxt.userPrefs.getBoolean("showProjectsPanel", true)) visibility = JdotxtFilterPanel.VISIBILITY_PROJECTS;
+		if (Jdotxt.userPrefs.getBoolean("showContextsPanel", true)) visibility = (short) (visibility + JdotxtFilterPanel.VISIBILITY_CONTEXTS);
+		return visibility;
+	}
 	
-	public void forceUpdateFilterPanes() {
-		projects.removeListSelectionListener(projectsListener);
-		contexts.removeListSelectionListener(contextsListener);
+	// File operations can be done in a separate thread, so that the GUI thread is not blocked by file IO
+	private class TaskLoader implements Runnable {
+		private short mode = REFRESH_GUI;
 		
-		List<String> selectedProjects = (List<String>) projects.getSelectedValuesList();
-		List<String> selectedContexts = (List<String>) contexts.getSelectedValuesList();
+		public static final short REFRESH_GUI = 0;
+		public static final short RELOAD = 1;
+		public static final short ARCHIVE = 2;
 		
-		ArrayList<String> myProjects = taskBag.getProjects(false);
-		ArrayList<String> myContexts = taskBag.getContexts(false);
-		
-		Util.prependString(myProjects, "+");
-		Util.prependString(myContexts, "@");
-		
-		myProjects.add(0, lang.getWord("Uncategorized"));
-		myProjects.add(0, lang.getWord("All"));
-		
-		myContexts.add(0, lang.getWord("Uncategorized"));
-		myContexts.add(0, lang.getWord("All"));
-		
-		String[] projectsString = new String[myProjects.size()];
-		myProjects.toArray(projectsString);
-		
-		String[] contextsString = new String[myContexts.size()];
-		myContexts.toArray(contextsString);
-		
-		projects.setListData(projectsString);
-		contexts.setListData(contextsString);
-		
-		ArrayList<Integer> selectedProjectsIndices = new ArrayList<Integer>();
-		ArrayList<Integer> selectedContextsIndices = new ArrayList<Integer>();
-		
-		for (int k1 = 0; k1 < projectsString.length; k1++) if (selectedProjects.contains(projectsString[k1])) selectedProjectsIndices.add(k1);
-		for (int k1 = 0; k1 < contextsString.length; k1++) if (selectedContexts.contains(contextsString[k1])) selectedContextsIndices.add(k1);
-		
-		if (selectedProjectsIndices.size() == 0) projects.setSelectedIndex(0);
-		else projects.setSelectedIndices(Util.integerList2IntArray(selectedProjectsIndices));
-		if (selectedContextsIndices.size() == 0) contexts.setSelectedIndex(0);
-		else contexts.setSelectedIndices(Util.integerList2IntArray(selectedContextsIndices));
-		
-		if (projectsPane.getViewport().getView() != projects) {
-			projectsPane.setViewportView(projects);
-			contextsPane.setViewportView(contexts);
+		public TaskLoader(short mode){
+			super();
+			this.mode = mode;
 		}
 		
-		if (selectedProjectsIndices.size() == 0) projectsListener.forceValueChanged();
-		else if (selectedContextsIndices.size() == 0) contextsListener.forceValueChanged();
-		
-		projects.addListSelectionListener(projectsListener);
-		contexts.addListSelectionListener(contextsListener);
-	}
-	
-	public boolean isFilterPaneUpToDate() {
-		ArrayList<String> myProjects = taskBag.getProjects(false);
-		ArrayList<String> myContexts = taskBag.getContexts(false);
-		
-		if ((projects.getModel().getSize() != myProjects.size() + 2) || (contexts.getModel().getSize() != myContexts.size() + 2)) return false;
-
-		for (int k1 = 0; k1 < myProjects.size(); k1++) if (!projects.getModel().getElementAt(k1+2).substring(1).equals(myProjects.get(k1))) return false;
-		for (int k1 = 0; k1 < myContexts.size(); k1++) if (!contexts.getModel().getElementAt(k1+2).substring(1).equals(myContexts.get(k1))) return false;
-		
-		return true;
-	}
-	
-	public void updateTasksPane(boolean changeFocus) {
-		tasksPanel.setFilter(filterPrios, filterContexts, filterProjects, search);
-		if (changeFocus) tasksPanel.requestFocus();
-		tasksPanel.updateTaskPanel();
-	}
-
-	public class FilterSelectionListener implements ListSelectionListener {
-		private List<String> filter;
-		private JList<String> list;
-		
-		public FilterSelectionListener(JList<String> list, List<String> filter) {
-			this.filter = filter;
-			this.list   = list;
-		}
-		
-		@Override
-		public void valueChanged(ListSelectionEvent event) {
-			if (!event.getValueIsAdjusting()) {
-				forceValueChanged();
+		public void run() {
+			synchronized (loadLock) {
+				if (mode == ARCHIVE) Jdotxt.archiveTodos();
+				if (mode != REFRESH_GUI) Jdotxt.loadTodos();
+				EventQueue.invokeLater(new Runnable() { public void run() { setTaskBag(Jdotxt.taskBag); } });
 			}
 		}
-		
-		public void forceValueChanged() {
-			filter.clear();
-			List<String> selection = list.getSelectedValuesList();
-			
-			if (selection.contains(lang.getWord("All"))) list.setSelectedIndex(0);
-			else {
-				if (selection.contains(lang.getWord("Uncategorized"))) {
-					filter.add("-");
-					selection.remove(lang.getWord("Uncategorized"));
-				}
-				for (String s: selection) filter.add(s.substring(1));
-			}
-			updateTasksPane(false);
-		}
 	}
 	
-	public class SearchListener implements DocumentListener {
+	// Custom KeyDispatcher for global shortcuts
+	private class KeyDispatcher implements KeyEventDispatcher {
+		public boolean dispatchKeyEvent(KeyEvent e) {
+	        if(e.getID() == KeyEvent.KEY_PRESSED) {
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S) saveTasks();
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_R) reloadTasks(); // Reload tasks
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) toolbar.getTextfieldSearch().requestFocus(); // Jump to search bar
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N) {
+	        		toolbar.getTextfieldSearch().clearSearch();
+	        		taskList.requestFocusNewTask(); // New task
+	        	}
+	        }
+	        //Allow the event to be redispatched
+	        return false;
+	    }
+	}
+	
+	// What to do when someone enters some search String
+	private class SearchListener implements DocumentListener {
 		@Override
 		public void changedUpdate(DocumentEvent e) { /* No action */}
 		@Override
@@ -469,79 +398,55 @@ public class JdotxtGUI extends JFrame {
 			} catch (BadLocationException e1) {
 				search = "";
 			}
-			updateTasksPane(false);
+			JdotxtGUI.this.forwardFilter2TaskList();
+			setDefaultStatusText();
 		}
 	}
 	
-	public class FilterCellRenderer extends DefaultListCellRenderer {
-		private static final long serialVersionUID = -7795431329110866824L;
-		
+    // After a task has been updated: update the status bar
+	private class StatusUpdater implements TaskListener {
 		@Override
-		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-	        JLabel c = new JLabel(value.toString());
-	        c.setBorder(new EmptyBorder(4, 4, 4, 4));
-	        c.setOpaque(true);
-	        
-	        if (JdotxtGUI.lang.getWord("All").equals(value) || JdotxtGUI.lang.getWord("Uncategorized").equals(value)) {
-	            c.setFont(JdotxtGUI.fontRI);
-	        } else {
-	        	c.setFont(JdotxtGUI.fontR);
-	        }
-	        
-	        if (isSelected) {
-	        	c.setBackground(list.getSelectionBackground());
-	        	c.setForeground(list.getSelectionForeground());
-	        } else {
-	        	c.setBackground(list.getBackground());
-	        	c.setForeground(list.getForeground());
-	        }
-	        return c;
-	    }
+		public void taskCreated(Task t) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(JdotxtGUI.this.taskBag.hasChanged());}
+		@Override
+		public void taskUpdated(Task t, short field) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(JdotxtGUI.this.taskBag.hasChanged());}
+		@Override
+		public void taskDeleted(Task t) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(JdotxtGUI.this.taskBag.hasChanged());}
+		@Override
+		public void enterPressed(Task t, short field) { }
+		@Override
+		public void focusLost(Task t, short field) { }
+		@Override
+		public void focusGained(Task t, short field) { }
 	}
 	
-	public class TaskLoader implements Runnable {
-		private short mode = REFRESH_GUI;
-		
-		public static final short REFRESH_GUI = 0;
-		public static final short RELOAD = 1;
-		public static final short ARCHIVE = 2;
-		
-		public TaskLoader(){
-			super();
-			mode = RELOAD;
-		}
-		
-		public TaskLoader(short mode){
-			super();
-			this.mode = mode;
-		}
-		
-		public void run() {
-			synchronized (loadLock) {
-				if (mode == ARCHIVE) Jdotxt.archiveTodos();
-				if (mode != REFRESH_GUI) Jdotxt.loadTodos();
-				setTaskBag(Jdotxt.taskBag);
-			}
+	// After a task has been updated: update the filter panes (maybe some projects/contexts have changed, or have been added/removed)
+	private class FilterUpdater implements TaskListener {
+		@Override
+		public void taskCreated(Task t) { filterPanel.updateFilterPanes(); }
+		@Override
+		public void taskUpdated(Task t, short field) { if (field != JdotxtTaskPanel.CONTENT) filterPanel.updateFilterPanes(); }
+		@Override
+		public void taskDeleted(Task t) { filterPanel.updateFilterPanes(); }
+		@Override
+		public void enterPressed(Task t, short field) { filterPanel.updateFilterPanes(); }
+		@Override
+		public void focusLost(Task t, short field) { filterPanel.updateFilterPanes(); }
+		@Override
+		public void focusGained(Task t, short field) { }
+	}
+	
+	// After someone has selected some filters
+	public class MyFilterChangeListener implements com.chschmid.jdotxt.gui.controls.JdotxtFilterPanel.FilterChangeListener {
+		@Override
+		public void filterChanged(ArrayList<String> filterContexts, ArrayList<String> filterProjects) {
+			JdotxtGUI.this.filterContexts = filterContexts;
+			JdotxtGUI.this.filterProjects = filterProjects;
+			JdotxtGUI.this.forwardFilter2TaskList();
+			setDefaultStatusText();
 		}
 	}
 	
-	// Custom KeyDispatcher
-	class KeyDispatcher implements KeyEventDispatcher {
-		public boolean dispatchKeyEvent(KeyEvent e) {
-	        if(e.getID() == KeyEvent.KEY_PRESSED) {
-	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S) saveTasks();
-	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_R) reloadTasks(); // Reload tasks
-	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) jdotxtToolbar.getTextfieldSearch().requestFocus(); // Jump to search bar
-	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N) {
-	        		jdotxtToolbar.getTextfieldSearch().clearSearch();
-	        		tasksPanel.focusNewTask(); // New task
-	        	}
-	        }
-	        //Allow the event to be redispatched
-	        return false;
-	    }
-	}
-	
+	// Autosave thread
 	public class AutoSaver implements Runnable {
 		public static final int DEFAULT_AUTOSAVE_INTERVAL = 2000;
 		
@@ -569,7 +474,6 @@ public class JdotxtGUI extends JFrame {
 		}
 		
 		private void autoSave() {
-			
 		}
 	}
 }

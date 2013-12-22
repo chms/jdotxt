@@ -1,9 +1,9 @@
 /**
-* Copyright (C) 2013 Christian M. Schmid
+* Copyright (C) 2013-2014 Christian M. Schmid
 *
 * This file is part of the jdotxt.
 *
-* PILight is free software: you can redistribute it and/or modify
+* jdotxt is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
@@ -40,13 +40,18 @@ public class JdotxtImageCheckBox extends JdotxtImageButton {
 		
 	public boolean isSelected() { return isSelected; }
 	public void setSelected(boolean isSelected) {
-		this.isSelected = isSelected;
 		if (isSelected) setIcon(selected);
 		else setIcon(unselected);
+		
+		if (this.isSelected == isSelected) return;
+		else {
+			this.isSelected = isSelected;
+			ActionEvent event = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Toggle");
+			super.fireActionPerformed(event);
+		}
 	}
 	
 	protected void fireActionPerformed(ActionEvent event) {
 		setSelected(!isSelected);
-    	super.fireActionPerformed(event);
     }
 }

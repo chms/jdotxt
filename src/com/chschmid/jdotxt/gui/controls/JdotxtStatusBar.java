@@ -1,9 +1,9 @@
 /**
-* Copyright (C) 2013 Christian M. Schmid
+* Copyright (C) 2013-2014 Christian M. Schmid
 *
 * This file is part of the jdotxt.
 *
-* PILight is free software: you can redistribute it and/or modify
+* jdotxt is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
@@ -22,11 +22,9 @@ package com.chschmid.jdotxt.gui.controls;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
-import com.todotxt.todotxttouch.util.Util;
 
 @SuppressWarnings("serial")
 public class JdotxtStatusBar extends Box {
@@ -45,15 +43,15 @@ public class JdotxtStatusBar extends Box {
 	}
 	
 	private void initGUI() {
-		ImageIcon border  = Util.createImageIcon("/res/drawable/statusbar-border.png");
-		this.setBorder(BorderFactory.createMatteBorder(3, 0, 0, 0, border));
+		//ImageIcon border  = Util.createImageIcon("/res/drawable/statusbar-border.png");
+		//this.setBorder(BorderFactory.createMatteBorder(3, 0, 0, 0, border));
 		this.setBackground(JdotxtGUI.COLOR_GRAY_PANEL);
 		this.setOpaque(true);
 		
 		label = new JLabel();
 		label.setFont(JdotxtGUI.fontR);
 		label.setBackground(JdotxtGUI.COLOR_GRAY_PANEL);
-		label.setBorder(BorderFactory.createEmptyBorder(2, 4, 4, 4));
+		label.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		
 		this.add(label);
 	}

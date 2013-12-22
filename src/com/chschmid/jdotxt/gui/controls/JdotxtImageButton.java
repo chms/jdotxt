@@ -1,9 +1,9 @@
 /**
-* Copyright (C) 2013 Christian M. Schmid
+* Copyright (C) 2013-2014 Christian M. Schmid
 *
 * This file is part of the jdotxt.
 *
-* PILight is free software: you can redistribute it and/or modify
+* jdotxt is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
@@ -32,8 +32,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
-import com.chschmid.jdotxt.gui.JdotxtGUI;
-
 @SuppressWarnings("serial")
 public class JdotxtImageButton extends JLabel {
 	private boolean mouseIsOverButton;
@@ -46,12 +44,10 @@ public class JdotxtImageButton extends JLabel {
 	private Color cBackground;
 	
 	public JdotxtImageButton() {
-		super();
 		initGUI();
 	}
 	
 	public JdotxtImageButton(ImageIcon icon) {
-		super();
 		initGUI();
 		this.setIcon(icon);
 	}
@@ -59,10 +55,6 @@ public class JdotxtImageButton extends JLabel {
 	private void initGUI() {
 		setFocusable(true);
 		this.setBorder(null);
-		
-		setHoverColor(JdotxtGUI.COLOR_HOVER);
-		setPressedColor(JdotxtGUI.COLOR_PRESSED);
-		setBackground(null);
 		
 		MouseAdapter mouseListener = new MouseAdapter() {
             @Override
@@ -141,13 +133,13 @@ public class JdotxtImageButton extends JLabel {
 		setBackground();
 	}
 	
-	public void setHoverColor(Color color) { cHover = color; }
-	public void setPressedColor(Color color) { cPressed = color; }
-	public void setBackgroundColor(Color color) { cBackground = color; }
+	public void setHoverColor(Color color) { cHover = color; setBackground(); }
+	public void setPressedColor(Color color) { cPressed = color; setBackground(); }
+	public void setBackgroundColor(Color color) { cBackground = color; setBackground(); }
 	
-	public Color getHoverColor(Color color) { return cHover; }
-	public Color getPressedColor(Color color) { return cHover; }
-	public Color getBackgroundColor(Color color) { return cBackground; }
+	public Color getHoverColor() { return cHover; }
+	public Color getPressedColor() { return cHover; }
+	public Color getBackgroundColor() { return cBackground; }
 	
     public void addActionListener(ActionListener l) {
         listenerList.add(ActionListener.class, l);
@@ -165,7 +157,8 @@ public class JdotxtImageButton extends JLabel {
     	if (keyIsPressed || (mouseIsOverButton && mouseIsDown)) setBackground(cPressed);
     	else if (mouseIsOverButton || focused) setBackground(cHover);
     	else setBackground(cBackground);
-    	setOpaque(true);
+    	if (isEnabled()) setOpaque(true);
+    	else setOpaque(false);
 	}
     
     protected void fireActionPerformed(ActionEvent event) {

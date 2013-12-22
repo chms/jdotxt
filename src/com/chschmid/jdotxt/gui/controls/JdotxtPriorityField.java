@@ -1,9 +1,9 @@
 /**
-* Copyright (C) 2013 Christian M. Schmid
+* Copyright (C) 2013-2014 Christian M. Schmid
 *
 * This file is part of the jdotxt.
 *
-* PILight is free software: you can redistribute it and/or modify
+* jdotxt is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * (at your option) any later version.
@@ -21,105 +21,106 @@ package com.chschmid.jdotxt.gui.controls;
 
 import java.awt.Color;
 import java.awt.KeyboardFocusManager;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
 
 @SuppressWarnings("serial")
 public class JdotxtPriorityField extends JTextField {
-	private char DEFAULT_PRIORITY = '-';
-	private char priority;
+	public final static char DEFAULT_PRIORITY  = '-';
+	public final static String NAV_PREV_ACTION = "NAV_PREV_ACTION";
+	public final static String NAV_NEXT_ACTION = "NAV_NEXT_ACTION";
 	
 	private Color foreground;
 	private DocumentListener listener;
 	
 	private boolean focusNext     = false;
 	private boolean focusPrevious = false;
+	private boolean focused       = false;
 	private boolean enabled       = true;
 	
 	public JdotxtPriorityField(char priority) {
-		super();
 		initPriorityField(priority);
-		
 	}
 	
 	public JdotxtPriorityField() {
-		super();
 		initPriorityField(DEFAULT_PRIORITY);
 	}
 	
 	private void initPriorityField(char priority) {
 		foreground = getForeground();
+		setDocument(new PriorityDocument());
 		setPriority(priority);
 		this.addFocusListener(new JdotxtPriorityFieldFocusListener());
-		this.addKeyListener(new JdotxtPriorityFieldKeyListener());
-		this.getDocument().addDocumentListener(new JdotxtDateDocumentListener());
+		this.getDocument().addDocumentListener(new JdotxtPriorityDocumentListener());
+		
+		InputMap im = this.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap am = this.getActionMap();
+        im.put(KeyStroke.getKeyStroke("LEFT"), NAV_PREV_ACTION);
+        im.put(KeyStroke.getKeyStroke("RIGHT"), NAV_NEXT_ACTION);
+        am.put(NAV_PREV_ACTION, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) { if (focusPrevious) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent(); }
+		});
+        am.put(NAV_NEXT_ACTION, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) { if (focusNext) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent(); }
+		});
 	}
 	
 	private class JdotxtPriorityFieldFocusListener implements FocusListener {
 		@Override
 		public void focusGained(FocusEvent arg0) {
+			focused = true;
 			selectPriority();
 		}
 
 		@Override
 		public void focusLost(FocusEvent arg0) {
-			setSelectionStart(0);
-			setSelectionEnd(0);
+			focused = false;
+			selectPriority();
 		}
 	}
 	
-	private class JdotxtPriorityFieldKeyListener implements KeyListener {
+	private class JdotxtPriorityDocumentListener implements DocumentListener {
 		@Override
-		public void keyPressed(KeyEvent event) {
-			
-			int kc = event.getKeyCode();
-			if (kc == KeyEvent.VK_RIGHT && focusNext) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent();
-			if (kc == KeyEvent.VK_LEFT && focusPrevious) KeyboardFocusManager.getCurrentKeyboardFocusManager().focusPreviousComponent();
-			event.consume();
+		public void insertUpdate(DocumentEvent e) {
+			if (isValidPriority(getText()) && listener != null) listener.insertUpdate(e);
 		}
-
 		@Override
-		public void keyReleased(KeyEvent event) {
-			event.consume();
+		public void removeUpdate(DocumentEvent e) {
+			if (isValidPriority(getText()) && listener != null) listener.removeUpdate(e);
+			selectPriority();
 		}
-
 		@Override
-		public void keyTyped(KeyEvent event) {
-			event.consume();
-			if (!enabled) return;
-			Character c = event.getKeyChar();
-			if (c == 127 || c == 8 || c == 32) c = '-';
-			c = Character.toUpperCase(c);
-			if ((c >= 'A' && c <= 'Z') || c == '-') selectPriority(c);
+		public void changedUpdate(DocumentEvent e) {
+			if (isValidPriority(getText()) && listener != null) listener.changedUpdate(e);
+			selectPriority();
 		}
-	}
-	
-	private class JdotxtDateDocumentListener implements DocumentListener {
-		@Override
-		public void insertUpdate(DocumentEvent e) { if (isValidPriority(priority) && listener != null) listener.insertUpdate(e); }
-		@Override
-		public void removeUpdate(DocumentEvent e) { if (isValidPriority(priority) && listener != null) listener.removeUpdate(e); }
-		@Override
-		public void changedUpdate(DocumentEvent e) { if (isValidPriority(priority) && listener != null) listener.changedUpdate(e); }
-	}
-	
-	private void selectPriority(char priority) {
-		setPriority(priority);
-		selectPriority();
 	}
 	
 	private void selectPriority() {
-		this.requestFocus();
-		setSelectionStart(1);
-		setSelectionEnd(2);
+		if (focused) {
+			setSelectionStart(1);
+			setSelectionEnd(2);
+		} else {
+			setSelectionStart(0);
+			setSelectionEnd(0);
+		}
 	}
 	
 	public void setEnabled(boolean enabled) {
@@ -129,20 +130,16 @@ public class JdotxtPriorityField extends JTextField {
 	
 	public void setPriority(char priority) {
 		priority = Character.toUpperCase(priority);
-		
-		if (isValidPriority(priority)) this.priority = priority;
-		else this.priority = DEFAULT_PRIORITY;
-		
-		if (isValidPriority(priority) && priority != DEFAULT_PRIORITY) {
-			super.setForeground(foreground);
-			setText("(" + priority + ')');
-		} else {
-			setText("(" + DEFAULT_PRIORITY + ')');
-			super.setForeground(JdotxtGUI.COLOR_GRAY_PANEL);
-		}
+		if (!isValidPriority(priority)) priority = DEFAULT_PRIORITY;
+		setText("(" + priority + ')');
+		setColor();
 	}
 	
-	public char getPriority() { return priority; }
+	private void setColor() {
+		if (getText().length() < 2) return;
+		if (getText().charAt(1) == '-') super.setForeground(JdotxtGUI.COLOR_GRAY_PANEL);
+		else super.setForeground(foreground);
+	}
 	
 	public void setFocusNext(boolean focusNext) { this.focusNext = focusNext; }
 	public void setFocusPrevious(boolean focusPrevious) { this.focusPrevious = focusPrevious; }
@@ -154,7 +151,7 @@ public class JdotxtPriorityField extends JTextField {
 	
 	public void setPriorityListener(DocumentListener listener) { this.listener = listener; }
 	
-	public boolean isValidPriority(char priority){
+	public static boolean isValidPriority(char priority){
 		boolean isValid = true;
 		isValid = (priority == '-');
 		priority = Character.toUpperCase(priority);
@@ -162,4 +159,50 @@ public class JdotxtPriorityField extends JTextField {
 		return isValid;
 	}
 	
+	public static boolean isValidPriority(String priority){
+		boolean isValid = true;
+		isValid = (priority.length() == 3);
+		isValid = isValid && priority.charAt(0) == '(';
+		isValid = isValid && priority.charAt(2) == '(';
+		isValid = isValid && priority.charAt(0) >= 'A' && priority.charAt(0) <= 'Z';
+		return isValid;
+	}
+	
+	private class PriorityDocument extends PlainDocument {
+		boolean replace = false;
+		
+	    @Override
+	    public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+	    	if (str.length() > 1) str = str.substring(1);
+	    	if (!enabled) str = "(-)";
+	    	else {
+	    		char priority = Character.toUpperCase(str.charAt(0));
+	    		if (!isValidPriority(priority)) priority = '-';
+	    		str = "(" + priority + ")";
+	    	}
+	    	super.remove(0, getDocument().getLength());
+	    	super.insertString(0, str, a);
+	    	
+	    	setColor();
+	    	selectPriority();
+	    }
+	    
+	    @Override
+	    public void remove(int offs, int len) throws BadLocationException {
+	    	if (!replace) {
+	    		String str = "(-)";
+		    	super.remove(0, getDocument().getLength());
+		    	super.insertString(0, str, null);
+		    	setColor();
+		    	selectPriority();
+	    	}
+	    }
+	    
+	    @Override
+	    public void replace(int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+	    	replace = true;
+	    	super.replace(offset, length, text, attrs);
+	    	replace = false;
+	    }
+	}
 }

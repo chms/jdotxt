@@ -75,7 +75,7 @@ public class LocalFileTaskRepository implements LocalTaskRepository {
 	public ArrayList<Task> load() {
 		init();
 		if (!TODO_TXT_FILE.exists()) {
-			System.out.print(TODO_TXT_FILE.getAbsolutePath() + " does not exist!");
+			//System.out.print(TODO_TXT_FILE.getAbsolutePath() + " does not exist!");
 			throw new TodoException(TODO_TXT_FILE.getAbsolutePath()
 					+ " does not exist!");
 		} else {
@@ -118,7 +118,7 @@ public class LocalFileTaskRepository implements LocalTaskRepository {
 	public ArrayList<Task> loadDoneTasks() {
 		init();
 		if (!DONE_TXT_FILE.exists()) {
-			System.out.print(DONE_TXT_FILE.getAbsolutePath() + " does not exist");
+			//System.out.print(DONE_TXT_FILE.getAbsolutePath() + " does not exist");
 			return new ArrayList<Task>();
 		} else {
 			try {
