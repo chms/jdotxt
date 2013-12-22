@@ -143,8 +143,6 @@ public class JdotxtFilterPanel extends JPanel {
 		if (visibility == VISIBILITY_NONE) this.setVisible(false);
 		else this.setVisible(true);
 		
-		System.out.println(visibility);
-		
 		if (switchPanels) {
 			if ((visibility & VISIBILITY_CONTEXTS) != 0) {
 				this.add(pane2); nWidth = nWidth + DEFAULT_WIDTH;
