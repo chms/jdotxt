@@ -44,7 +44,12 @@ class ByTextFilter implements Filter<Task> {
 
 	@Override
 	public boolean apply(Task input) {
-		String taskText = caseSensitive ? input.getText() : input.getText()
+		// Search text content only
+		// String taskText = caseSensitive ? input.getText() : input.getText()
+		// 		.toUpperCase();
+		
+		// Search complete task line
+		String taskText = caseSensitive ? input.inFileFormat() : input.inFileFormat()
 				.toUpperCase();
 
 		for (int i = 0; i < parts.length; ++i) {
