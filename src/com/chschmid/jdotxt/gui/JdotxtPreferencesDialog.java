@@ -287,26 +287,32 @@ public class JdotxtPreferencesDialog extends JDialog{
 		compactMode = new JCheckBox();
 		compactMode.setText(JdotxtGUI.lang.getWord("Text_compact_mode"));
 		compactMode.setFont(JdotxtGUI.fontR);
+		compactMode.setOpaque(false);
 		
 		copyMetadata = new JCheckBox();
 		copyMetadata.setText(JdotxtGUI.lang.getWord("Copy_projects_contexts"));
 		copyMetadata.setFont(JdotxtGUI.fontR);
+		copyMetadata.setOpaque(false);
 		
 		prependMetadata = new JCheckBox();
 		prependMetadata.setText(JdotxtGUI.lang.getWord("Prepend_projects_contexts"));
 		prependMetadata.setFont(JdotxtGUI.fontR);
+		prependMetadata.setOpaque(false);
 		
 		projectsPanel = new JCheckBox();
 		projectsPanel.setText(JdotxtGUI.lang.getWord("Show_projects_panel"));
 		projectsPanel.setFont(JdotxtGUI.fontR);
+		projectsPanel.setOpaque(false);
 		
 		contextsPanel = new JCheckBox();
 		contextsPanel.setText(JdotxtGUI.lang.getWord("Show_contexts_panel"));
 		contextsPanel.setFont(JdotxtGUI.fontR);
+		contextsPanel.setOpaque(false);
 		
 		switchPanels = new JCheckBox();
 		switchPanels.setText(JdotxtGUI.lang.getWord("Switch_filter_panels"));
 		switchPanels.setFont(JdotxtGUI.fontR);
+		switchPanels.setOpaque(false);
 		
 		JLabel labelLanguage = new JLabel(JdotxtGUI.lang.getWord("Language"));
 		labelLanguage.setFont(JdotxtGUI.fontR);

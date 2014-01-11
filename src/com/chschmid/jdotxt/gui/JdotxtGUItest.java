@@ -25,10 +25,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
 
 import com.chschmid.jdotxt.gui.controls.JdotxtDateField;
 import com.chschmid.jdotxt.gui.controls.JdotxtImageButton;
@@ -50,13 +52,47 @@ public class JdotxtGUItest extends JFrame {
 	JdotxtImageCheckBox cb;
 	JdotxtTaskPanel tp;
 	
+	JEditorPane editor;
+	
 	public JdotxtGUItest() {
 		super();
 		initGUI();
 	}
 	
 	private void initGUI() {
-		testJdotxtDateField();
+		this.add(new JdotxtTaskPanel(new Task()), BorderLayout.NORTH);
+		editor = new JEditorPane();
+		editor.setContentType("text/html");
+		editor.getDocument().addDocumentListener(new DocumentListener() {
+			
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
+				printDoc(arg0);
+			}
+			
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
+				printDoc(arg0);
+			}
+			
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
+				//printDoc(arg0);
+			}
+			
+			private void printDoc(DocumentEvent event) {
+				try {
+					System.out.println(event.getDocument().getText(0, event.getDocument().getLength()));
+					//System.out.println(editor.getText());
+				} catch (BadLocationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		//editor.setText("<a href=\"http://www.chschmid.com\">http://www.chschmid.com</a>");
+		editor.setText("abc");
+		this.add(editor, BorderLayout.CENTER);
 		this.setMinimumSize(new Dimension(MIN_WIDTH, MIN_HEIGHT));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
