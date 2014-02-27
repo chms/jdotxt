@@ -51,7 +51,10 @@ public class Jdotxt {
 		JdotxtGUI.loadLookAndFeel(userPrefs.get("lang", "English"));
 		
 		// Windows taskbar fix
-		if (isWindows()) provideAppUserModelID();
+		if (isWindows()) onWindows();
+		
+		// Mac OS X fixes
+		if (isMacOSX()) onMacOSX();
 		
 		// Start GUI
 		Runnable viewGUI = new Runnable() {
@@ -87,9 +90,12 @@ public class Jdotxt {
 	}
 	public static void archiveTodos() { taskBag.archive(); }
 	
-	// Windows taskbar fix
+	// Detect OS
 	public static boolean isWindows() {	return System.getProperty("os.name").startsWith("Windows"); }
-	public static void provideAppUserModelID() {
+	public static boolean isMacOSX() { return System.getProperty("os.name").startsWith("Mac OS X"); }
+	
+	public static void onWindows() {
+		// Windows taskbar fix: provideAppUserModelID
 		try {
 			NativeLibrary lib = NativeLibrary.getInstance("shell32");
 		    Function function = lib.getFunction("SetCurrentProcessExplicitAppUserModelID");
@@ -100,6 +106,10 @@ public class Jdotxt {
 		} catch (Exception x) {
 			return;
 		}
+	}
+	
+	public static void onMacOSX() {
+		// Nothing so far
 	}
 	
 	public static String insertReplaceString(String original, String replace, int offset) {

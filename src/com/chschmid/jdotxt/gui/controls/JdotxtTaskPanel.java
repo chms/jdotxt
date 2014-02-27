@@ -242,7 +242,7 @@ public class JdotxtTaskPanel extends JPanel {
 			buttonNewTask.setBackgroundColor(null);
 			buttonNewTask.addActionListener(new AddTaskListener());
 			this.setBorder(BorderFactory.createMatteBorder(2, 0, 2, 0, JdotxtGUI.COLOR_HOVER));
-		} else this.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, JdotxtGUI.COLOR_GRAY_PANEL));
+		} else this.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, JdotxtGUI.COLOR_GRAY_PANEL));
 		this.setBackground(Color.WHITE);
 		
 		if (isNewTask) this.add(buttonNewTask);

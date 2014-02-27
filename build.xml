@@ -6,6 +6,10 @@
   <property name="src" location="src"/>
   <property name="build" location="build"/>
   <property name="jar"  location="jar"/>
+  <property name="osxdir"  location="osxdir"/>
+  <property environment="env" />
+
+  <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -36,6 +40,20 @@
         <zipgroupfileset dir="libs" includes="**/*.jar"/>
     </jar>
   </target>
+
+  <target name="osx" depends="jar">
+    <mkdir dir="${osxdir}"/>
+    <bundleapp outputdirectory="${osxdir}"
+               name="jdotxt"
+               displayname="jdotxt"
+               identifier="com.chschmid.jdotxt.Jdotxt"
+               shortversion="0.3.9"
+               applicationCategory="public.app-category.developer-tools"
+               mainclassname="com.chschmid.jdotxt.Jdotxt"
+               icon="src/res/drawable/jdotxt.icns" copyright="2014 Christian M. Schmid">
+        <classpath file="${jar}/jdotxt.jar" />
+    </bundleapp>
+</target>
 
   <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${jar} directory trees -->

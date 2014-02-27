@@ -10,6 +10,7 @@
 dist/
 build/
 jar/
+osxdir/
 
 # Eclipse stuff #
 build/
