@@ -1,5 +1,11 @@
-*.class
+# Mac OS X "
+.DS_Store
+
+# Linux temporal files #
 *~
+
+# Binaries #
+*.class
 
 # Package Files #
 *.war
