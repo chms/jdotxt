@@ -9,8 +9,6 @@
   <property name="osxdir"  location="osxdir"/>
   <property environment="env" />
 
-  <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/>
-
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
@@ -42,6 +40,7 @@
   </target>
 
   <target name="osx" depends="jar">
+    <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/>
     <mkdir dir="${osxdir}"/>
     <bundleapp outputdirectory="${osxdir}"
                name="jdotxt"
