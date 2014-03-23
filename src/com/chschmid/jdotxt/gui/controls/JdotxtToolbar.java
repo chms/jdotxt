@@ -171,7 +171,10 @@ public class JdotxtToolbar extends Box{
 			this.setBackground(Color.WHITE);
 			this.setOpaque(true);
 			this.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY,1));
+			
+			// Fix size once and for all, so that font change doesn't change the width
 			this.setMaximumSize(this.getPreferredSize());
+			this.setPreferredSize(this.getPreferredSize());
 			
 			clearSearch();
 		}
@@ -181,15 +184,17 @@ public class JdotxtToolbar extends Box{
 			imgX       = Util.createImageIcon("/res/drawable/x.png");
 		}
 		
-		public void clearSearch() {
+		public void clearSearch() { clearSearch(true); }
+		public void clearSearch(boolean focusButton) {
 			search.setText("");
 			searchActive = false;
 			if (listener != null) search.getDocument().removeDocumentListener(listener);
 			search.setForeground(Color.GRAY);
 			search.setFont(JdotxtGUI.fontRI);
+			//search.setFont(JdotxtGUI.fontR);
 			search.setText(emptyText);
 			button.setIcon(imgSearch);
-			button.requestFocus();
+			if (focusButton) button.requestFocus();
 		}
 		
 		public void setDocumentListener(DocumentListener listener) { this.listener = listener; }
@@ -222,7 +227,7 @@ public class JdotxtToolbar extends Box{
 
 			@Override
 			public void focusLost(FocusEvent arg0) {
-				if (search.getText().isEmpty()) clearSearch();
+				if (search.getText().isEmpty()) clearSearch(false);
 			}
 		}
 		

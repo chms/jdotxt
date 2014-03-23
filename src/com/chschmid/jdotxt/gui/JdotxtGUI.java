@@ -301,7 +301,7 @@ public class JdotxtGUI extends JFrame {
 	
 	// Fonts and stuff
 	public static void loadLookAndFeel(String language) {
-		fontR  = new Font("Ubuntu Light", Font.PLAIN, 14);
+		fontR  = new Font("Ubuntu", Font.PLAIN, 14);
     	fontRI = new Font("Ubuntu Light", Font.ITALIC, 14);
     	fontB  = new Font("Ubuntu", Font.PLAIN, 14);
     	
