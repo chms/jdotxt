@@ -281,11 +281,11 @@ public class JdotxtPreferencesDialog extends JDialog {
 		//filePanel.add(labelAutoSave);
 		//filePanel.add(Box.createVerticalStrut(10));
 		filePanel.add(cbAutosave);
-		filePanel.add(Box.createVerticalStrut(10));
-		filePanel.add(labelConflictResolution);
-		filePanel.add(Box.createVerticalStrut(10));
-		filePanel.add(conflictResolution);
-		filePanel.add(Box.createVerticalGlue());
+		//filePanel.add(Box.createVerticalStrut(10));
+		//filePanel.add(labelConflictResolution);
+		//filePanel.add(Box.createVerticalStrut(10));
+		//filePanel.add(conflictResolution);
+		//filePanel.add(Box.createVerticalGlue());
 
 		JLabel labelOpenFiles = new JLabel(JdotxtGUI.lang.getWord("Open_files_in_text_editor"));
 		labelOpenFiles.setAlignmentX(Component.LEFT_ALIGNMENT);

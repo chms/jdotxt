@@ -133,6 +133,7 @@ public class JdotxtGUI extends JFrame {
 		toolbar.getButtonReload().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { reloadTasks(); } });
 		toolbar.getButtonArchive().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { archiveTasks(); } });
 		toolbar.getButtonSettings().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { showSettingsDialog(); } });
+		toolbar.setAutosave(!Jdotxt.userPrefs.getBoolean("autosave", false));
 		
 		// Other GUI element listeners
 		// What to do when the filters change
@@ -285,6 +286,7 @@ public class JdotxtGUI extends JFrame {
 		filterPanel.setSwitchPanels(Jdotxt.userPrefs.getBoolean("switchPanels", false));
 		if (!currentPath.equals(newPath)) reloadTasks();
 		else if (currentCompactMode != newCompactMode) refreshGUI();
+		toolbar.setAutosave(!Jdotxt.userPrefs.getBoolean("autosave", false));
 	}
 	
     // Let the GUI elements know of newly loaded tasks

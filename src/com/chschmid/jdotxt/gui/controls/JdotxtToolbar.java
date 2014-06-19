@@ -118,6 +118,11 @@ public class JdotxtToolbar extends Box{
 	}
 	public boolean isEnabled() {return enabled;}
 	
+	public void setAutosave(boolean visible) {
+		buttonSave.setVisible(visible);
+		buttonReload.setVisible(visible);
+	}
+	
 	// The search box
     @SuppressWarnings("serial")
 	public static class SearchField extends Box{
