@@ -34,11 +34,15 @@ import com.todotxt.todotxttouch.task.TaskBag;
 import com.todotxt.todotxttouch.task.TaskBagFactory;
 
 public class Jdotxt {
-	public static final String VERSION = "0.4.0";
+	public static final String VERSION = "0.4.2";
 	public static final String APPID = "chschmid.jdotxt";
 	
 	public static TaskBag taskBag;
 	public static Preferences userPrefs;
+	
+	public static final short CONFLICTRESOLUTION_ASK    = 1;
+	public static final short CONFLICTRESOLUTION_LOCAL  = 2;
+	public static final short CONFLICTRESOLUTION_REMOTE = 3;
 	
 	public static final String DEFAULT_DIR = System.getProperty("user.home") + File.separator + "jdotxt";
 	

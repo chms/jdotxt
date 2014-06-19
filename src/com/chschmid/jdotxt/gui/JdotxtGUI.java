@@ -448,7 +448,7 @@ public class JdotxtGUI extends JFrame {
 	
 	// Autosave thread
 	public class AutoSaver implements Runnable {
-		public static final int DEFAULT_AUTOSAVE_INTERVAL = 2000;
+		public static final int DEFAULT_AUTOSAVE_INTERVAL = 5000;
 		
 		private int autoSaveInterval;
 		

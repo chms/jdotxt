@@ -30,6 +30,8 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -73,8 +75,9 @@ public class JdotxtPreferencesDialog extends JDialog {
 
 	// Settings controls
 	private JTextField directory;
-	private JCheckBox compactMode, projectsPanel, contextsPanel, switchPanels,
-			prependMetadata, copyMetadata;
+	private JCheckBox cbCompactMode, cbProjectsPanel, cbContextsPanel, cbSwitchPanels, cbPrependMetadata, cbCopyMetadata, cbAutosave;
+	private JLabel labelConflictResolution;
+	private JRadioButton crAsk, crLocal, crRemote;
 
 	public JdotxtPreferencesDialog() {
 		super();
@@ -91,15 +94,11 @@ public class JdotxtPreferencesDialog extends JDialog {
 		topPanel = new Box(BoxLayout.X_AXIS);
 		topPanel.setBackground(JdotxtGUI.COLOR_GRAY_PANEL);
 		topPanel.setOpaque(true);
-		buttonSettings = new JdotxtImageButton(
-				Util.createImageIcon("/res/drawable/settings.png"));
-		buttonHelp = new JdotxtImageButton(
-				Util.createImageIcon("/res/drawable/help.png"));
-		buttonAbout = new JdotxtImageButton(
-				Util.createImageIcon("/res/drawable/about.png"));
+		buttonSettings = new JdotxtImageButton(Util.createImageIcon("/res/drawable/settings.png"));
+		buttonHelp = new JdotxtImageButton(Util.createImageIcon("/res/drawable/help.png"));
+		buttonAbout = new JdotxtImageButton(Util.createImageIcon("/res/drawable/about.png"));
 
-		styleJdotxtImageButton(buttonSettings,
-				JdotxtGUI.lang.getWord("Settings"));
+		styleJdotxtImageButton(buttonSettings, JdotxtGUI.lang.getWord("Settings"));
 		styleJdotxtImageButton(buttonHelp, JdotxtGUI.lang.getWord("Help"));
 		styleJdotxtImageButton(buttonAbout, JdotxtGUI.lang.getWord("About"));
 
@@ -111,8 +110,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 				buttonSettings.requestFocus();
 				buttonHelp.setBackgroundColor(JdotxtGUI.COLOR_GRAY_PANEL);
 				buttonAbout.setBackgroundColor(JdotxtGUI.COLOR_GRAY_PANEL);
-				((CardLayout) (mainPanel.getLayout())).show(mainPanel,
-						SETTINGS_PANEL);
+				((CardLayout) (mainPanel.getLayout())).show(mainPanel, SETTINGS_PANEL);
 			}
 		});
 		buttonHelp.addActionListener(new ActionListener() {
@@ -122,8 +120,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 				buttonHelp.setBackgroundColor(JdotxtGUI.COLOR_HOVER);
 				buttonHelp.requestFocus();
 				buttonAbout.setBackgroundColor(JdotxtGUI.COLOR_GRAY_PANEL);
-				((CardLayout) (mainPanel.getLayout())).show(mainPanel,
-						HELP_PANEL);
+				((CardLayout) (mainPanel.getLayout())).show(mainPanel, HELP_PANEL);
 			}
 		});
 		buttonAbout.addActionListener(new ActionListener() {
@@ -133,8 +130,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 				buttonHelp.setBackgroundColor(JdotxtGUI.COLOR_GRAY_PANEL);
 				buttonAbout.setBackgroundColor(JdotxtGUI.COLOR_HOVER);
 				buttonAbout.requestFocus();
-				((CardLayout) (mainPanel.getLayout())).show(mainPanel,
-						ABOUT_PANEL);
+				((CardLayout) (mainPanel.getLayout())).show(mainPanel, ABOUT_PANEL);
 			}
 		});
 
@@ -209,8 +205,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 		filePanel.setBackground(Color.WHITE);
 		filePanel.setOpaque(true);
 
-		JLabel labelDirectory = new JLabel(
-				JdotxtGUI.lang.getWord("Todo_file_location"));
+		JLabel labelDirectory = new JLabel(JdotxtGUI.lang.getWord("Todo_file_location"));
 		labelDirectory.setAlignmentX(Component.LEFT_ALIGNMENT);
 		labelDirectory.setFont(JdotxtGUI.fontR);
 
@@ -222,8 +217,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 		directory.setEnabled(false);
 		directory.setAlignmentX(LEFT_ALIGNMENT);
 
-		JButton btnChooseDir = new JButton(
-				JdotxtGUI.lang.getWord("Choose_directory"));
+		JButton btnChooseDir = new JButton(JdotxtGUI.lang.getWord("Choose_directory"));
 		btnChooseDir.setFont(JdotxtGUI.fontR);
 		btnChooseDir.addActionListener(new ActionListener() {
 			@Override
@@ -231,34 +225,33 @@ public class JdotxtPreferencesDialog extends JDialog {
 				JFileChooser chooser = new JFileChooser();
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				chooser.setCurrentDirectory(new File(directory.getText()));
-				int returnVal = chooser.showDialog(
-						JdotxtPreferencesDialog.this, null);
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					directory.setText(chooser.getSelectedFile()
-							.getAbsolutePath());
-				}
+				int returnVal = chooser.showDialog(JdotxtPreferencesDialog.this, null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) directory.setText(chooser.getSelectedFile().getAbsolutePath());
 			}
 		});
 
-		JLabel labelAutoSave = new JLabel(
-				JdotxtGUI.lang.getWord("Autosave_options"));
+		JLabel labelAutoSave = new JLabel(JdotxtGUI.lang.getWord("Autosave_options"));
 		labelAutoSave.setAlignmentX(Component.LEFT_ALIGNMENT);
 		labelAutoSave.setFont(JdotxtGUI.fontR);
 
-		JCheckBox enableAutosave = new JCheckBox("Enable autosave/autoreload");
-		enableAutosave.setFont(JdotxtGUI.fontR);
-
-		JLabel labelConflictResolution = new JLabel(
-				JdotxtGUI.lang.getWord("Conflict_resolution"));
+		cbAutosave = new JCheckBox("Enable autosave/autoreload");
+		cbAutosave.setFont(JdotxtGUI.fontR);
+		cbAutosave.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent event) {
+				if (event.getStateChange() == ItemEvent.SELECTED) setEnableAutoSaveOptions(true);
+				else setEnableAutoSaveOptions(false);
+			}
+		});
+		
+		labelConflictResolution = new JLabel(JdotxtGUI.lang.getWord("Conflict_resolution"));
 		labelConflictResolution.setAlignmentX(Component.LEFT_ALIGNMENT);
 		labelConflictResolution.setFont(JdotxtGUI.fontR);
 
 		ButtonGroup group = new ButtonGroup();
-		JRadioButton crAsk = new JRadioButton(JdotxtGUI.lang.getWord("CR_Ask"));
-		JRadioButton crLocal = new JRadioButton(
-				JdotxtGUI.lang.getWord("CR_Local"));
-		JRadioButton crRemote = new JRadioButton(
-				JdotxtGUI.lang.getWord("CR_Remote"));
+		crAsk = new JRadioButton(JdotxtGUI.lang.getWord("CR_Ask"));
+		crLocal = new JRadioButton(JdotxtGUI.lang.getWord("CR_Local"));
+		crRemote = new JRadioButton(JdotxtGUI.lang.getWord("CR_Remote"));
 		crAsk.setFont(JdotxtGUI.fontR);
 		crLocal.setFont(JdotxtGUI.fontR);
 		crRemote.setFont(JdotxtGUI.fontR);
@@ -273,14 +266,10 @@ public class JdotxtPreferencesDialog extends JDialog {
 		conflictResolution.setAlignmentX(Component.LEFT_ALIGNMENT);
 		conflictResolution.setBackground(Color.WHITE);
 
-		int crWidt = Math.max(crAsk.getPreferredSize().width,
-				crLocal.getPreferredSize().width);
-		crWidt = Math.max(crWidt, crRemote.getPreferredSize().width);
-
-		conflictResolution.setMaximumSize(new Dimension(crWidt, crLocal
-				.getPreferredSize().height));
-		conflictResolution.revalidate();
-		conflictResolution.repaint();
+		// Make it look less ugly on Linux
+		int crWidth = Math.max(crAsk.getPreferredSize().width, crLocal.getPreferredSize().width);
+		crWidth = Math.max(crWidth, crRemote.getPreferredSize().width);
+		conflictResolution.setMaximumSize(new Dimension(crWidth, crLocal.getPreferredSize().height));
 
 		filePanel.add(labelDirectory);
 		filePanel.add(Box.createVerticalStrut(10));
@@ -288,16 +277,15 @@ public class JdotxtPreferencesDialog extends JDialog {
 		filePanel.add(Box.createVerticalStrut(5));
 		filePanel.add(btnChooseDir);
 		
-		/*filePanel.add(Box.createVerticalStrut(20));
-		filePanel.add(labelAutoSave);
-		filePanel.add(Box.createVerticalStrut(10));
-		filePanel.add(enableAutosave);
+		filePanel.add(Box.createVerticalStrut(20));
+		//filePanel.add(labelAutoSave);
+		//filePanel.add(Box.createVerticalStrut(10));
+		filePanel.add(cbAutosave);
 		filePanel.add(Box.createVerticalStrut(10));
 		filePanel.add(labelConflictResolution);
 		filePanel.add(Box.createVerticalStrut(10));
 		filePanel.add(conflictResolution);
-		filePanel.add(Box.createVerticalGlue());*/
-		 
+		filePanel.add(Box.createVerticalGlue());
 
 		JLabel labelOpenFiles = new JLabel(JdotxtGUI.lang.getWord("Open_files_in_text_editor"));
 		labelOpenFiles.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -347,36 +335,35 @@ public class JdotxtPreferencesDialog extends JDialog {
 		displayPanel.setBackground(Color.WHITE);
 		displayPanel.setOpaque(true);
 
-		compactMode = new JCheckBox();
-		compactMode.setText(JdotxtGUI.lang.getWord("Text_compact_mode"));
-		compactMode.setFont(JdotxtGUI.fontR);
-		compactMode.setOpaque(false);
+		cbCompactMode = new JCheckBox();
+		cbCompactMode.setText(JdotxtGUI.lang.getWord("Text_compact_mode"));
+		cbCompactMode.setFont(JdotxtGUI.fontR);
+		cbCompactMode.setOpaque(false);
 
-		copyMetadata = new JCheckBox();
-		copyMetadata.setText(JdotxtGUI.lang.getWord("Copy_projects_contexts"));
-		copyMetadata.setFont(JdotxtGUI.fontR);
-		copyMetadata.setOpaque(false);
+		cbCopyMetadata = new JCheckBox();
+		cbCopyMetadata.setText(JdotxtGUI.lang.getWord("Copy_projects_contexts"));
+		cbCopyMetadata.setFont(JdotxtGUI.fontR);
+		cbCopyMetadata.setOpaque(false);
 
-		prependMetadata = new JCheckBox();
-		prependMetadata.setText(JdotxtGUI.lang
-				.getWord("Prepend_projects_contexts"));
-		prependMetadata.setFont(JdotxtGUI.fontR);
-		prependMetadata.setOpaque(false);
+		cbPrependMetadata = new JCheckBox();
+		cbPrependMetadata.setText(JdotxtGUI.lang.getWord("Prepend_projects_contexts"));
+		cbPrependMetadata.setFont(JdotxtGUI.fontR);
+		cbPrependMetadata.setOpaque(false);
 
-		projectsPanel = new JCheckBox();
-		projectsPanel.setText(JdotxtGUI.lang.getWord("Show_projects_panel"));
-		projectsPanel.setFont(JdotxtGUI.fontR);
-		projectsPanel.setOpaque(false);
+		cbProjectsPanel = new JCheckBox();
+		cbProjectsPanel.setText(JdotxtGUI.lang.getWord("Show_projects_panel"));
+		cbProjectsPanel.setFont(JdotxtGUI.fontR);
+		cbProjectsPanel.setOpaque(false);
 
-		contextsPanel = new JCheckBox();
-		contextsPanel.setText(JdotxtGUI.lang.getWord("Show_contexts_panel"));
-		contextsPanel.setFont(JdotxtGUI.fontR);
-		contextsPanel.setOpaque(false);
+		cbContextsPanel = new JCheckBox();
+		cbContextsPanel.setText(JdotxtGUI.lang.getWord("Show_contexts_panel"));
+		cbContextsPanel.setFont(JdotxtGUI.fontR);
+		cbContextsPanel.setOpaque(false);
 
-		switchPanels = new JCheckBox();
-		switchPanels.setText(JdotxtGUI.lang.getWord("Switch_filter_panels"));
-		switchPanels.setFont(JdotxtGUI.fontR);
-		switchPanels.setOpaque(false);
+		cbSwitchPanels = new JCheckBox();
+		cbSwitchPanels.setText(JdotxtGUI.lang.getWord("Switch_filter_panels"));
+		cbSwitchPanels.setFont(JdotxtGUI.fontR);
+		cbSwitchPanels.setOpaque(false);
 
 		JLabel labelLanguage = new JLabel(JdotxtGUI.lang.getWord("Language"));
 		labelLanguage.setFont(JdotxtGUI.fontR);
@@ -386,12 +373,12 @@ public class JdotxtPreferencesDialog extends JDialog {
 		language.setAlignmentX(Component.LEFT_ALIGNMENT);
 		language.setFont(JdotxtGUI.fontR);
 
-		displayPanel.add(compactMode);
-		displayPanel.add(copyMetadata);
-		displayPanel.add(prependMetadata);
-		displayPanel.add(projectsPanel);
-		displayPanel.add(contextsPanel);
-		displayPanel.add(switchPanels);
+		displayPanel.add(cbCompactMode);
+		displayPanel.add(cbCopyMetadata);
+		displayPanel.add(cbPrependMetadata);
+		displayPanel.add(cbProjectsPanel);
+		displayPanel.add(cbContextsPanel);
+		displayPanel.add(cbSwitchPanels);
 		// displayPanel.add(Box.createVerticalStrut(20));
 		// displayPanel.add(labelLanguage);
 		// displayPanel.add(Box.createVerticalStrut(10));
@@ -408,8 +395,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 		panel.setBackground(Color.WHITE);
 		panel.setOpaque(true);
 
-		JLabel labelIcon = new JLabel(new ImageIcon(JdotxtGUI.icon.getImage()
-				.getScaledInstance(64, 64, java.awt.Image.SCALE_SMOOTH)));
+		JLabel labelIcon = new JLabel(new ImageIcon(JdotxtGUI.icon.getImage().getScaledInstance(64, 64, java.awt.Image.SCALE_SMOOTH)));
 		labelIcon.setVerticalAlignment(SwingConstants.TOP);
 		panel.add(labelIcon, BorderLayout.WEST);
 		labelIcon.setPreferredSize(new Dimension(100, 100));
@@ -421,8 +407,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 		panelInfo.setBackground(Color.WHITE);
 		panelInfo.setOpaque(true);
 
-		JLabel labelTitle = new JLabel(JdotxtGUI.lang.getWord("jdotxt")
-				+ " (Version " + Jdotxt.VERSION + ")");
+		JLabel labelTitle = new JLabel(JdotxtGUI.lang.getWord("jdotxt") + " (Version " + Jdotxt.VERSION + ")");
 		labelTitle.setFont(JdotxtGUI.fontB.deriveFont(16f));
 		panelInfo.add(labelTitle);
 
@@ -430,8 +415,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 
 		JEditorPane textInfo = new JEditorPane();
 		textInfo.setContentType("text/html");
-		textInfo.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES,
-				Boolean.TRUE);
+		textInfo.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
 		textInfo.setFont(JdotxtGUI.fontR);
 		textInfo.setText(JdotxtGUI.lang.getWord("Text_help"));
 		textInfo.setEditable(false);
@@ -452,8 +436,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 
 		JEditorPane textShortcuts = new JEditorPane();
 		textShortcuts.setContentType("text/html");
-		textShortcuts.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES,
-				Boolean.TRUE);
+		textShortcuts.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
 		textShortcuts.setFont(JdotxtGUI.fontR);
 		textShortcuts.setText(JdotxtGUI.lang.getWord("Text_shortcuts"));
 		textShortcuts.setEditable(false);
@@ -475,8 +458,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 		panel.setBackground(Color.WHITE);
 		panel.setOpaque(true);
 
-		JLabel labelIcon = new JLabel(new ImageIcon(JdotxtGUI.icon.getImage()
-				.getScaledInstance(64, 64, java.awt.Image.SCALE_SMOOTH)));
+		JLabel labelIcon = new JLabel(new ImageIcon(JdotxtGUI.icon.getImage().getScaledInstance(64, 64, java.awt.Image.SCALE_SMOOTH)));
 		labelIcon.setVerticalAlignment(SwingConstants.TOP);
 		panel.add(labelIcon, BorderLayout.WEST);
 		labelIcon.setPreferredSize(new Dimension(100, 100));
@@ -488,8 +470,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 		panelInfo.setBackground(Color.WHITE);
 		panelInfo.setOpaque(true);
 
-		JLabel labelTitle = new JLabel(JdotxtGUI.lang.getWord("jdotxt")
-				+ " (Version " + Jdotxt.VERSION + ")");
+		JLabel labelTitle = new JLabel(JdotxtGUI.lang.getWord("jdotxt") + " (Version " + Jdotxt.VERSION + ")");
 		labelTitle.setFont(JdotxtGUI.fontB.deriveFont(16f));
 		panelInfo.add(labelTitle);
 
@@ -497,8 +478,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 
 		JEditorPane textInfo = new JEditorPane();
 		textInfo.setContentType("text/html");
-		textInfo.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES,
-				Boolean.TRUE);
+		textInfo.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
 		textInfo.setFont(JdotxtGUI.fontR);
 		textInfo.setText(JdotxtGUI.lang.getWord("Text_about"));
 		textInfo.setEditable(false);
@@ -532,8 +512,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 
 		JEditorPane textLicense = new JEditorPane();
 		textLicense.setContentType("text/html");
-		textLicense.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES,
-				Boolean.TRUE);
+		textLicense.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
 		textLicense.setFont(JdotxtGUI.fontR);
 		textLicense.setText(JdotxtGUI.lang.getWord("Text_license"));
 		textLicense.setEditable(false);
@@ -555,49 +534,55 @@ public class JdotxtPreferencesDialog extends JDialog {
 				}
 			}
 		});
+		
 		panelInfo.add(textLicense);
-
 		panelInfo.add(Box.createRigidArea(new Dimension(0, 20)));
-
 		panel.add(Box.createRigidArea(new Dimension(20, 0)), BorderLayout.EAST);
+		
 		return panel;
 	}
 
 	private void saveSettings() {
 		Jdotxt.userPrefs.put("dataDir", directory.getText());
-		Jdotxt.userPrefs.putBoolean("compactMode", compactMode.isSelected());
-		Jdotxt.userPrefs.putBoolean("copyMetadata", copyMetadata.isSelected());
-		Jdotxt.userPrefs.putBoolean("prependMetadata",
-				prependMetadata.isSelected());
-		Jdotxt.userPrefs.putBoolean("showProjectsPanel",
-				projectsPanel.isSelected());
-		Jdotxt.userPrefs.putBoolean("showContextsPanel",
-				contextsPanel.isSelected());
-		Jdotxt.userPrefs.putBoolean("switchPanels", switchPanels.isSelected());
+		Jdotxt.userPrefs.putBoolean("compactMode", cbCompactMode.isSelected());
+		Jdotxt.userPrefs.putBoolean("copyMetadata", cbCopyMetadata.isSelected());
+		Jdotxt.userPrefs.putBoolean("prependMetadata", cbPrependMetadata.isSelected());
+		Jdotxt.userPrefs.putBoolean("showProjectsPanel", cbProjectsPanel.isSelected());
+		Jdotxt.userPrefs.putBoolean("showContextsPanel", cbContextsPanel.isSelected());
+		Jdotxt.userPrefs.putBoolean("switchPanels", cbSwitchPanels.isSelected());
+		Jdotxt.userPrefs.putBoolean("autosave", cbAutosave.isSelected());
+		if (crLocal.isSelected())  Jdotxt.userPrefs.putInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_LOCAL);
+		else if (crRemote.isSelected()) Jdotxt.userPrefs.putInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_REMOTE);
+		else Jdotxt.userPrefs.putInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_ASK);
 	}
 
 	private void loadSettings() {
 		directory.setText(Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR));
-		compactMode.setSelected(Jdotxt.userPrefs.getBoolean("compactMode",
-				false));
-		copyMetadata.setSelected(Jdotxt.userPrefs.getBoolean("copyMetadata",
-				false));
-		prependMetadata.setSelected(Jdotxt.userPrefs.getBoolean(
-				"prependMetadata", false));
-		projectsPanel.setSelected(Jdotxt.userPrefs.getBoolean(
-				"showProjectsPanel", true));
-		contextsPanel.setSelected(Jdotxt.userPrefs.getBoolean(
-				"showContextsPanel", true));
-		switchPanels.setSelected(Jdotxt.userPrefs.getBoolean("switchPanels",
-				false));
+		cbCompactMode.setSelected(Jdotxt.userPrefs.getBoolean("compactMode", false));
+		cbCopyMetadata.setSelected(Jdotxt.userPrefs.getBoolean("copyMetadata", false));
+		cbPrependMetadata.setSelected(Jdotxt.userPrefs.getBoolean("prependMetadata", false));
+		cbProjectsPanel.setSelected(Jdotxt.userPrefs.getBoolean("showProjectsPanel", true));
+		cbContextsPanel.setSelected(Jdotxt.userPrefs.getBoolean("showContextsPanel", true));
+		cbSwitchPanels.setSelected(Jdotxt.userPrefs.getBoolean("switchPanels", false));
+		cbAutosave.setSelected(Jdotxt.userPrefs.getBoolean("autosave", false));
+		setEnableAutoSaveOptions(Jdotxt.userPrefs.getBoolean("autosave", false));
+		if (Jdotxt.userPrefs.getInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_ASK) == Jdotxt.CONFLICTRESOLUTION_LOCAL)  crLocal.setSelected(true);
+		else if (Jdotxt.userPrefs.getInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_ASK) == Jdotxt.CONFLICTRESOLUTION_REMOTE) crRemote.setSelected(true);
+		else crAsk.setSelected(true);
 	}
 
-	private void styleJdotxtImageButton(JdotxtImageButton button,
-			String toolTipText) {
+	private void styleJdotxtImageButton(JdotxtImageButton button, String toolTipText) {
 		button.setToolTipText(toolTipText);
 		button.setHoverColor(JdotxtGUI.COLOR_HOVER);
 		button.setPressedColor(JdotxtGUI.COLOR_PRESSED);
 		button.setBackgroundColor(JdotxtGUI.COLOR_GRAY_PANEL);
+	}
+	
+	private void setEnableAutoSaveOptions(boolean enable) {
+		labelConflictResolution.setEnabled(enable);
+		crAsk.setEnabled(enable);
+		crLocal.setEnabled(enable);
+		crRemote.setEnabled(enable);
 	}
 	
 	private boolean openTxtFile(File file) {
