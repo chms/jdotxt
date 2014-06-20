@@ -58,6 +58,7 @@ import com.chschmid.jdotxt.gui.controls.JdotxtTaskList;
 import com.chschmid.jdotxt.gui.controls.JdotxtTaskPanel;
 import com.chschmid.jdotxt.gui.controls.JdotxtToolbar;
 import com.chschmid.jdotxt.gui.controls.TaskListener;
+import com.chschmid.jdotxt.util.FileModifiedListener;
 import com.todotxt.todotxttouch.task.Priority;
 import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.task.TaskBag;
@@ -106,8 +107,7 @@ public class JdotxtGUI extends JFrame {
 	private ArrayList<String> filterProjects;
 	private String search = "";
 	
-	// Lock object for loading files
-	private Object loadLock = new Object();
+	private boolean reloadDialog;
 	
 	public JdotxtGUI() {
 		super();
@@ -139,8 +139,8 @@ public class JdotxtGUI extends JFrame {
 		// What to do when the filters change
 		filterPanel.addFilterChangeListener(new MyFilterChangeListener()); 
 		// What to do when some task changes
-		taskList.addTaskListener(new StatusUpdater());
-		taskList.addTaskListener(new FilterUpdater());
+		taskList.addTaskListener(new StatusUpdateListener());
+		taskList.addTaskListener(new FilterUpdateListener());
 		
 		// Style taskPane
 		tasksPane.setBorder(BorderFactory.createEmptyBorder());
@@ -182,7 +182,7 @@ public class JdotxtGUI extends JFrame {
             	int result = 1;
             	if (taskBag.hasChanged()) {
             		result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_save_changes"), lang.getWord("jdotxt"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-            		if (result == 0) taskBag.store();
+            		if (result == 0) Jdotxt.storeTodos();
             	}
             	
             	if (result < 2){
@@ -197,6 +197,24 @@ public class JdotxtGUI extends JFrame {
             	}
             }
         });
+		
+		// Add a listener to file modifications
+		Jdotxt.addFileModifiedListener(new FileModifiedListener() {
+			@Override
+			public void fileModified() {
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						if (reloadDialog == false) {
+							reloadDialog = true;
+							int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+							reloadDialog = false;
+							if (result == 0) reloadTasks();
+						}
+					}
+				});
+			}
+		});
 		
 		// Reset window to defaults
 		reset();
@@ -241,7 +259,7 @@ public class JdotxtGUI extends JFrame {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				taskBag.store();
+				Jdotxt.storeTodos();
 			}
 		});
 		t.start();
@@ -292,12 +310,12 @@ public class JdotxtGUI extends JFrame {
     // Let the GUI elements know of newly loaded tasks
 	public void setTaskBag(TaskBag taskBag) {
 		this.taskBag = taskBag;
-		filterPanel.setTaskBag(JdotxtGUI.this.taskBag);
-		taskList.setTaskBag(JdotxtGUI.this.taskBag);
+		filterPanel.setTaskBag(taskBag);
+		taskList.setTaskBag(taskBag);
 		filterPanel.updateFilterPanes();
 		taskList.updateTaskList();
 		toolbar.setEnabled(true);
-		toolbar.getButtonSave().setEnabled(JdotxtGUI.this.taskBag.hasChanged());
+		toolbar.getButtonSave().setEnabled(taskBag.hasChanged());
 		setDefaultStatusText();
 	}
 	
@@ -360,11 +378,9 @@ public class JdotxtGUI extends JFrame {
 		}
 		
 		public void run() {
-			synchronized (loadLock) {
-				if (mode == ARCHIVE) Jdotxt.archiveTodos();
-				if (mode != REFRESH_GUI) Jdotxt.loadTodos();
-				EventQueue.invokeLater(new Runnable() { public void run() { setTaskBag(Jdotxt.taskBag); } });
-			}
+			if (mode == ARCHIVE) Jdotxt.archiveTodos();
+			if (mode != REFRESH_GUI) Jdotxt.loadTodos();
+			EventQueue.invokeLater(new Runnable() { public void run() { setTaskBag(Jdotxt.taskBag); } });
 		}
 	}
 	
@@ -406,13 +422,13 @@ public class JdotxtGUI extends JFrame {
 	}
 	
     // After a task has been updated: update the status bar
-	private class StatusUpdater implements TaskListener {
+	private class StatusUpdateListener implements TaskListener {
 		@Override
-		public void taskCreated(Task t) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(JdotxtGUI.this.taskBag.hasChanged());}
+		public void taskCreated(Task t) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(taskBag.hasChanged());}
 		@Override
-		public void taskUpdated(Task t, short field) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(JdotxtGUI.this.taskBag.hasChanged());}
+		public void taskUpdated(Task t, short field) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(taskBag.hasChanged());}
 		@Override
-		public void taskDeleted(Task t) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(JdotxtGUI.this.taskBag.hasChanged());}
+		public void taskDeleted(Task t) { setDefaultStatusText(); toolbar.getButtonSave().setEnabled(taskBag.hasChanged());}
 		@Override
 		public void enterPressed(Task t, short field) { }
 		@Override
@@ -422,7 +438,7 @@ public class JdotxtGUI extends JFrame {
 	}
 	
 	// After a task has been updated: update the filter panes (maybe some projects/contexts have changed, or have been added/removed)
-	private class FilterUpdater implements TaskListener {
+	private class FilterUpdateListener implements TaskListener {
 		@Override
 		public void taskCreated(Task t) { filterPanel.updateFilterPanes(); }
 		@Override
@@ -433,6 +449,22 @@ public class JdotxtGUI extends JFrame {
 		public void enterPressed(Task t, short field) { filterPanel.updateFilterPanes(); }
 		@Override
 		public void focusLost(Task t, short field) { filterPanel.updateFilterPanes(); }
+		@Override
+		public void focusGained(Task t, short field) { }
+	}
+	
+	// After a task has been updated: Trigger saving to file if autosave is activated.
+	private class AutoSaveListener implements TaskListener {
+		@Override
+		public void taskCreated(Task t) { }
+		@Override
+		public void taskUpdated(Task t, short field) { }
+		@Override
+		public void taskDeleted(Task t) { }
+		@Override
+		public void enterPressed(Task t, short field) { }
+		@Override
+		public void focusLost(Task t, short field) { }
 		@Override
 		public void focusGained(Task t, short field) { }
 	}

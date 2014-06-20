@@ -233,7 +233,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 		JLabel labelAutoSave = new JLabel(JdotxtGUI.lang.getWord("Autosave_options"));
 		labelAutoSave.setAlignmentX(Component.LEFT_ALIGNMENT);
 		labelAutoSave.setFont(JdotxtGUI.fontR);
-
+		
 		cbAutosave = new JCheckBox("Enable autosave/autoreload");
 		cbAutosave.setFont(JdotxtGUI.fontR);
 		cbAutosave.addItemListener(new ItemListener() {
@@ -243,6 +243,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 				else setEnableAutoSaveOptions(false);
 			}
 		});
+		cbAutosave.setOpaque(false);
 		
 		labelConflictResolution = new JLabel(JdotxtGUI.lang.getWord("Conflict_resolution"));
 		labelConflictResolution.setAlignmentX(Component.LEFT_ALIGNMENT);

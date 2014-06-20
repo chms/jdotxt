@@ -21,10 +21,13 @@ package com.chschmid.jdotxt;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.IOException;
 import java.util.prefs.Preferences;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
 import com.chschmid.jdotxt.gui.JdotxtWelcomeDialog;
+import com.chschmid.jdotxt.util.FileModifiedListener;
+import com.chschmid.jdotxt.util.FileModifiedWatcher;
 import com.sun.jna.Function;
 import com.sun.jna.NativeLibrary;
 import com.sun.jna.NativeLong;
@@ -46,11 +49,23 @@ public class Jdotxt {
 	
 	public static final String DEFAULT_DIR = System.getProperty("user.home") + File.separator + "jdotxt";
 	
+	private static FileModifiedWatcher fileModifiedWatcher;
+	
 	private static native NativeLong SetCurrentProcessExplicitAppUserModelID(WString appID);
+	
+	// Lock object for file operations
+	private static Object fileLock = new Object();
 	
 	public static void main( String[] args )
 	{
 		loadPreferences();
+		
+		// For detecting file changes to todo.txt
+		try {
+			fileModifiedWatcher = new FileModifiedWatcher();
+			fileModifiedWatcher.startProcessingEvents();
+		} catch (IOException e) {
+		}
 
 		JdotxtGUI.loadLookAndFeel(userPrefs.get("lang", "English"));
 		
@@ -77,6 +92,7 @@ public class Jdotxt {
 			}
 		};
 		EventQueue.invokeLater(viewGUI);
+		System.out.println("Exit");
 	}
 	
 	public static void loadPreferences() { userPrefs = Preferences.userNodeForPackage(Jdotxt.class); }
@@ -89,10 +105,57 @@ public class Jdotxt {
 		LocalFileTaskRepository.TODO_TXT_FILE = new File(todoFile);
 		LocalFileTaskRepository.DONE_TXT_FILE = new File(doneFile);
 		LocalFileTaskRepository.initFiles();
+		
+		
 		taskBag = TaskBagFactory.getTaskBag();
-		taskBag.reload();
+		synchronized(fileLock){
+			
+			if (fileModifiedWatcher != null) {
+				fileModifiedWatcher.unRegisterFile();
+				try {
+					fileModifiedWatcher.registerFile(LocalFileTaskRepository.TODO_TXT_FILE);
+				} catch (IOException e) {
+				}
+			}
+			taskBag.reload();
+			
+			// Unregister first, in case path has been changed
+			fileModifiedWatcher.unRegisterFile();
+			try {
+				fileModifiedWatcher.registerFile(LocalFileTaskRepository.TODO_TXT_FILE);
+			} catch (IOException e) {
+			}
+		}
 	}
-	public static void archiveTodos() { taskBag.archive(); }
+	
+	public static void addFileModifiedListener(FileModifiedListener fileModifiedListener) {
+		fileModifiedWatcher.addFileModifiedListener(fileModifiedListener);
+	}
+	public static void removeFileModifiedListener(FileModifiedListener fileModifiedListener) {
+		fileModifiedWatcher.removeFileModifiedListener(fileModifiedListener);
+	}
+	
+	
+	public static void archiveTodos() { 
+		synchronized(fileLock){
+			fileModifiedWatcher.unRegisterFile();
+			taskBag.archive();
+			try {
+				fileModifiedWatcher.registerFile(LocalFileTaskRepository.TODO_TXT_FILE);
+			} catch (IOException e) {
+			}
+		}
+	}
+	public static void storeTodos() { 
+		synchronized(fileLock){
+			fileModifiedWatcher.unRegisterFile();
+			taskBag.store();
+			try {
+				fileModifiedWatcher.registerFile(LocalFileTaskRepository.TODO_TXT_FILE);
+			} catch (IOException e) {
+			}
+		}
+	}
 	
 	// Detect OS
 	public static boolean isWindows() {	return System.getProperty("os.name").startsWith("Windows"); }
