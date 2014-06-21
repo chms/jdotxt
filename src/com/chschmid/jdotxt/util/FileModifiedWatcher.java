@@ -51,7 +51,7 @@ public class FileModifiedWatcher {
 		if (key != null) key.cancel();
 		Path path = file.getParentFile().toPath();
 		
-		key = path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+		key = path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE);
 	    this.file = file;
 		return oldFile;
 	}
@@ -98,8 +98,8 @@ public class FileModifiedWatcher {
 	            try {
 	                key = watcher.take();
 		            for (WatchEvent<?> event: key.pollEvents()) {
-		                if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY && file != null) {
-		                	if (event.context().toString().equals(file.getName())) fireFileModified();
+		                if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY || event.kind() == StandardWatchEventKinds.ENTRY_CREATE) {
+		                	if (file != null && event.context().toString().equals(file.getName())) fireFileModified();
 		                }
 		            }
 		            key.reset();

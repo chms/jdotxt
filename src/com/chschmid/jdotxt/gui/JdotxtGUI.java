@@ -34,6 +34,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -108,7 +109,7 @@ public class JdotxtGUI extends JFrame {
 	private ArrayList<String> filterProjects;
 	private String search = "";
 	
-	private boolean reloadDialogVisible;
+	private boolean reloadDialogVisible, showReloadDialog;
 	private AutoSaveListener autoSaveListener;
 	private DelayedActionHandler autoSaver;
 	
@@ -212,6 +213,21 @@ public class JdotxtGUI extends JFrame {
             }
         });
 		
+		this.addWindowFocusListener(new WindowFocusListener() {
+			@Override
+			public void windowLostFocus(WindowEvent arg0) { }
+			@Override
+			public void windowGainedFocus(WindowEvent arg0) {
+				if (showReloadDialog) {
+					showReloadDialog = false;
+					int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+					reloadDialogVisible = false;
+					if (result == 0) reloadTasks();
+					else toolbar.getButtonSave().setEnabled(true);
+				}
+			}
+		});
+		
 		// Add a listener to file modifications
 		Jdotxt.addFileModifiedListener(new FileModifiedListener() {
 			@Override
@@ -221,10 +237,12 @@ public class JdotxtGUI extends JFrame {
 					public void run() {
 						if (reloadDialogVisible == false) {
 							reloadDialogVisible = true;
-							int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-							reloadDialogVisible = false;
-							if (result == 0) reloadTasks();
-							else toolbar.getButtonSave().setEnabled(true);
+							if (JdotxtGUI.this.isFocused()) {
+								int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+								reloadDialogVisible = false;
+								if (result == 0) reloadTasks();
+								else toolbar.getButtonSave().setEnabled(true);
+							} else showReloadDialog = true;
 						}
 					}
 				});
