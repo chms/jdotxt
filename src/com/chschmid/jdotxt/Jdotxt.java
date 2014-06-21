@@ -40,13 +40,15 @@ public class Jdotxt {
 	public static final String VERSION = "0.4.2";
 	public static final String APPID = "chschmid.jdotxt";
 	
-	public static TaskBag taskBag;
-	public static Preferences userPrefs;
+	public static final int AUTOSAVE_DELAY = 3000;
 	
 	public static final short CONFLICTRESOLUTION_ASK    = 1;
 	public static final short CONFLICTRESOLUTION_LOCAL  = 2;
 	public static final short CONFLICTRESOLUTION_REMOTE = 3;
 	
+	public static TaskBag taskBag;
+	public static Preferences userPrefs;
+
 	public static final String DEFAULT_DIR = System.getProperty("user.home") + File.separator + "jdotxt";
 	
 	private static FileModifiedWatcher fileModifiedWatcher;
@@ -60,7 +62,7 @@ public class Jdotxt {
 	{
 		loadPreferences();
 		
-		// For detecting file changes to todo.txt
+		// For detecting file changes to todo.txt, start thread, file will be specified later
 		try {
 			fileModifiedWatcher = new FileModifiedWatcher();
 			fileModifiedWatcher.startProcessingEvents();
@@ -92,7 +94,6 @@ public class Jdotxt {
 			}
 		};
 		EventQueue.invokeLater(viewGUI);
-		System.out.println("Exit");
 	}
 	
 	public static void loadPreferences() { userPrefs = Preferences.userNodeForPackage(Jdotxt.class); }

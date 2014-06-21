@@ -234,7 +234,7 @@ public class JdotxtPreferencesDialog extends JDialog {
 		labelAutoSave.setAlignmentX(Component.LEFT_ALIGNMENT);
 		labelAutoSave.setFont(JdotxtGUI.fontR);
 		
-		cbAutosave = new JCheckBox("Enable autosave/autoreload");
+		cbAutosave = new JCheckBox(JdotxtGUI.lang.getWord("Enable_autosave"));
 		cbAutosave.setFont(JdotxtGUI.fontR);
 		cbAutosave.addItemListener(new ItemListener() {
 			@Override

@@ -58,6 +58,7 @@ import com.chschmid.jdotxt.gui.controls.JdotxtTaskList;
 import com.chschmid.jdotxt.gui.controls.JdotxtTaskPanel;
 import com.chschmid.jdotxt.gui.controls.JdotxtToolbar;
 import com.chschmid.jdotxt.gui.controls.TaskListener;
+import com.chschmid.jdotxt.util.DelayedActionHandler;
 import com.chschmid.jdotxt.util.FileModifiedListener;
 import com.todotxt.todotxttouch.task.Priority;
 import com.todotxt.todotxttouch.task.Task;
@@ -107,7 +108,9 @@ public class JdotxtGUI extends JFrame {
 	private ArrayList<String> filterProjects;
 	private String search = "";
 	
-	private boolean reloadDialog;
+	private boolean reloadDialogVisible;
+	private AutoSaveListener autoSaveListener;
+	private DelayedActionHandler autoSaver;
 	
 	public JdotxtGUI() {
 		super();
@@ -133,7 +136,7 @@ public class JdotxtGUI extends JFrame {
 		toolbar.getButtonReload().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { reloadTasks(); } });
 		toolbar.getButtonArchive().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { archiveTasks(); } });
 		toolbar.getButtonSettings().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { showSettingsDialog(); } });
-		toolbar.setAutosave(!Jdotxt.userPrefs.getBoolean("autosave", false));
+		//toolbar.setVisibleSaveReload(!Jdotxt.userPrefs.getBoolean("autosave", false));
 		
 		// Other GUI element listeners
 		// What to do when the filters change
@@ -141,6 +144,14 @@ public class JdotxtGUI extends JFrame {
 		// What to do when some task changes
 		taskList.addTaskListener(new StatusUpdateListener());
 		taskList.addTaskListener(new FilterUpdateListener());
+		
+		// Autosave
+		autoSaver = new DelayedActionHandler(Jdotxt.AUTOSAVE_DELAY, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) { if (!reloadDialogVisible) saveTasks(); }
+		});
+		autoSaveListener = new AutoSaveListener();
+		if (Jdotxt.userPrefs.getBoolean("autosave", false)) taskList.addTaskListener(autoSaveListener);
 		
 		// Style taskPane
 		tasksPane.setBorder(BorderFactory.createEmptyBorder());
@@ -181,8 +192,11 @@ public class JdotxtGUI extends JFrame {
             public void windowClosing(WindowEvent e) {
             	int result = 1;
             	if (taskBag.hasChanged()) {
-            		result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_save_changes"), lang.getWord("jdotxt"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-            		if (result == 0) Jdotxt.storeTodos();
+            		if (Jdotxt.userPrefs.getBoolean("autosave", false)) Jdotxt.storeTodos();
+            		else {
+	            		result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_save_changes"), lang.getWord("jdotxt"), JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+	            		if (result == 0) Jdotxt.storeTodos();
+            		}
             	}
             	
             	if (result < 2){
@@ -205,11 +219,12 @@ public class JdotxtGUI extends JFrame {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						if (reloadDialog == false) {
-							reloadDialog = true;
+						if (reloadDialogVisible == false) {
+							reloadDialogVisible = true;
 							int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-							reloadDialog = false;
+							reloadDialogVisible = false;
 							if (result == 0) reloadTasks();
+							else toolbar.getButtonSave().setEnabled(true);
 						}
 					}
 				});
@@ -289,6 +304,7 @@ public class JdotxtGUI extends JFrame {
 		// Backup settings before the dialog is shown
 		String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
 		boolean currentCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
+		boolean currentAutoSave = Jdotxt.userPrefs.getBoolean("autosave", false);
 		
 		settingsDialog.setVisible(true);
 		
@@ -297,6 +313,7 @@ public class JdotxtGUI extends JFrame {
 		boolean newCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
 		boolean prependMetadata = Jdotxt.userPrefs.getBoolean("prependMetadata", false);
 		boolean copyMetadata = Jdotxt.userPrefs.getBoolean("copyMetadata", false);
+		boolean autoSave = Jdotxt.userPrefs.getBoolean("autosave", false);
 		// Update stuff, according to the new settings
 		taskList.setPrependMetadata(prependMetadata);
 		taskList.setCopyProjectsContexts2NewTask(copyMetadata);
@@ -304,7 +321,11 @@ public class JdotxtGUI extends JFrame {
 		filterPanel.setSwitchPanels(Jdotxt.userPrefs.getBoolean("switchPanels", false));
 		if (!currentPath.equals(newPath)) reloadTasks();
 		else if (currentCompactMode != newCompactMode) refreshGUI();
-		toolbar.setAutosave(!Jdotxt.userPrefs.getBoolean("autosave", false));
+		if (currentAutoSave != autoSave) {
+			if (!autoSave) taskList.removeTaskListener(autoSaveListener);
+			else taskList.addTaskListener(autoSaveListener);
+		}
+		//toolbar.setVisibleSaveReload(!Jdotxt.userPrefs.getBoolean("autosave", false));
 	}
 	
     // Let the GUI elements know of newly loaded tasks
@@ -456,11 +477,11 @@ public class JdotxtGUI extends JFrame {
 	// After a task has been updated: Trigger saving to file if autosave is activated.
 	private class AutoSaveListener implements TaskListener {
 		@Override
-		public void taskCreated(Task t) { }
+		public void taskCreated(Task t) { autoSaver.triggerAction(); }
 		@Override
-		public void taskUpdated(Task t, short field) { }
+		public void taskUpdated(Task t, short field) { autoSaver.triggerAction(); }
 		@Override
-		public void taskDeleted(Task t) { }
+		public void taskDeleted(Task t) { autoSaver.triggerAction(); }
 		@Override
 		public void enterPressed(Task t, short field) { }
 		@Override
@@ -477,37 +498,6 @@ public class JdotxtGUI extends JFrame {
 			JdotxtGUI.this.filterProjects = filterProjects;
 			JdotxtGUI.this.forwardFilter2TaskList();
 			setDefaultStatusText();
-		}
-	}
-	
-	// Autosave thread
-	public class AutoSaver implements Runnable {
-		public static final int DEFAULT_AUTOSAVE_INTERVAL = 5000;
-		
-		private int autoSaveInterval;
-		
-		public AutoSaver() {
-			super();
-			autoSaveInterval = DEFAULT_AUTOSAVE_INTERVAL;
-		}
-		
-		public AutoSaver(int autoSaveInterval) {
-			this.autoSaveInterval = autoSaveInterval;
-		}
-		
-		public void run() {
-			while (!Thread.currentThread().isInterrupted()) {
-				try {
-					Thread.sleep(autoSaveInterval);
-					autoSave();
-				} catch (InterruptedException e) {
-		              Thread.currentThread().interrupt();
-		              return;
-		        }
-		    }
-		}
-		
-		private void autoSave() {
 		}
 	}
 }

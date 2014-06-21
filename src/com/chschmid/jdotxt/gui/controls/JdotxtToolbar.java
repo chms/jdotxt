@@ -118,7 +118,7 @@ public class JdotxtToolbar extends Box{
 	}
 	public boolean isEnabled() {return enabled;}
 	
-	public void setAutosave(boolean visible) {
+	public void setVisibleSaveReload(boolean visible) {
 		buttonSave.setVisible(visible);
 		buttonReload.setVisible(visible);
 	}
