@@ -254,9 +254,9 @@ public class JdotxtGUI extends JFrame {
 		unresolvedFileModification = false;
 		if (result == 0) reloadTasks();
 		else {
+			taskBag.update(null); // Fake a change so that a save really leads to a save
 			toolbar.getButtonSave().setEnabled(true);
 			if (Jdotxt.userPrefs.getBoolean("autosave", false)) {
-				taskBag.update(null); // Fake a change so that a save really leads to a save
 				saveTasks();
 				System.out.println("Save update");
 			}
