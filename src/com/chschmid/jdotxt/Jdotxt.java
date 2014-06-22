@@ -42,10 +42,6 @@ public class Jdotxt {
 	
 	public static final int AUTOSAVE_DELAY = 3000;
 	
-	public static final short CONFLICTRESOLUTION_ASK    = 1;
-	public static final short CONFLICTRESOLUTION_LOCAL  = 2;
-	public static final short CONFLICTRESOLUTION_REMOTE = 3;
-	
 	public static TaskBag taskBag;
 	public static Preferences userPrefs;
 
