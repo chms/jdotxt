@@ -11,7 +11,7 @@
   <property name="build.test.dir" location="${build.dir}/test"/>
   <property name="build.test.reports.dir" location="${build.test.dir}/reports"/>
   <property name="jar.dir"  location="jar"/>
-  <property name="osx.dir"  location="osxdir"/>
+  <property name="osx.dir"  location="osx"/>
   <property environment="env"/>
 
   <fileset id="main.libs" dir="${lib.dir}">
@@ -79,7 +79,7 @@
   </target>
 
   <target name="osx" depends="jar">
-    <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/>
+    <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask" classpath="${lib.dir}/appbundler-1.0.jar"/>
     <mkdir dir="${osx.dir}"/>
     <bundleapp outputdirectory="${osx.dir}"
                name="jdotxt"

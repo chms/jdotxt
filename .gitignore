@@ -16,7 +16,7 @@
 dist/
 build/
 jar/
-osxdir/
+osx/
 
 # Eclipse stuff #
 build/
