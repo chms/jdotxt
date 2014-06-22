@@ -1,62 +1,102 @@
 <project name="jdotxt" default="jar" basedir=".">
-    <description>
-        another open source cross-platform GUI for todo.txt files
-    </description>
+  <description>
+    another open source cross-platform GUI for todo.txt files
+  </description>
   <!-- set global properties for this build -->
-  <property name="src" location="src"/>
-  <property name="build" location="build"/>
-  <property name="jar"  location="jar"/>
-  <property name="osxdir"  location="osxdir"/>
-  <property environment="env" />
+  <property name="src.dir" location="src"/>
+  <property name="test.dir" location="test"/>
+  <property name="lib.dir" location="libs"/>
+  <property name="build.dir" location="build"/>
+  <property name="build.main.dir" location="${build.dir}/main"/>
+  <property name="build.test.dir" location="${build.dir}/test"/>
+  <property name="build.test.reports.dir" location="${build.test.dir}/reports"/>
+  <property name="jar.dir"  location="jar"/>
+  <property name="osx.dir"  location="osxdir"/>
+  <property environment="env"/>
+
+  <fileset id="main.libs" dir="${lib.dir}">
+    <include name="jna-4.0.0.jar"/>
+    <include name="juniversalchardet-1.0.3.jar"/>
+  </fileset>
+
+  <fileset id="test.libs" dir="${lib.dir}">
+    <include name="hamcrest-core-1.3.jar"/>
+    <include name="junit-4.11.jar"/>
+  </fileset>
 
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${build}"/>
+    <mkdir dir="${build.main.dir}"/>
+    <mkdir dir="${build.test.dir}"/>
   </target>
 
-  <target name="compile" depends="init" description="compile the source " >
-    <!-- Compile the java code from ${src} into ${build} -->
-    <javac includeantruntime="false" srcdir="${src}" destdir="${build}">	
-		<classpath>
-			<fileset dir="libs">
-			<include name="*.jar" />
-			</fileset>
-		</classpath> 
-	</javac>
-    <copy todir="build">
-        <fileset dir="src" includes="**/*.png,**/*.properties,**/*.ttf" />
+  <target name="compile" depends="init" description="compile the source">
+    <javac encoding="UTF-8" includeantruntime="false" destdir="${build.main.dir}">
+      <src path="${src.dir}"/>
+      <classpath>
+        <fileset refid="main.libs"/>
+      </classpath>
+    </javac>
+    <copy todir="${build.main.dir}">
+      <fileset dir="${src.dir}" includes="**/*.png,**/*.properties,**/*.ttf"/>
     </copy>
+    <javac encoding="UTF-8" includeantruntime="false" destdir="${build.test.dir}">
+      <src path="${test.dir}"/>
+      <classpath>
+        <pathelement location="${build.main.dir}"/>
+        <fileset refid="main.libs"/>
+        <fileset refid="test.libs"/>
+      </classpath>
+    </javac>
   </target>
 
-  <target name="jar" depends="compile" description="generate the jar" >
-    <!-- Create the jar directory -->
-    <mkdir dir="${jar}"/>
-    <!-- Put everything in ${build} into the jar file -->
-    <jar jarfile="${jar}/jdotxt.jar" basedir="${build}" manifest="manifest">
-        <zipgroupfileset dir="libs" includes="**/*.jar"/>
+  <target name="test" depends="compile" description="run unit tests">
+    <delete dir="${build.test.reports.dir}"/>
+    <mkdir dir="${build.test.reports.dir}"/>
+    <junit printsummary="yes" haltonfailure="yes">
+      <classpath>
+        <pathelement location="${build.main.dir}"/>
+        <pathelement location="${build.test.dir}"/>
+        <fileset refid="main.libs"/>
+        <fileset refid="test.libs"/>
+      </classpath>
+      <formatter type="plain"/>
+      <formatter type="xml"/>
+      <batchtest fork="on" skipNonTests="true" todir="${build.test.reports.dir}">
+        <fileset dir="${build.test.dir}"/>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="jar" depends="compile,test" description="generate the jar">
+    <mkdir dir="${jar.dir}"/>
+    <jar jarfile="${jar.dir}/jdotxt.jar" manifest="manifest">
+      <fileset dir="${build.main.dir}"/>
+      <zipgroupfileset refid="main.libs"/>
     </jar>
   </target>
 
   <target name="osx" depends="jar">
     <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/>
-    <mkdir dir="${osxdir}"/>
-    <bundleapp outputdirectory="${osxdir}"
+    <mkdir dir="${osx.dir}"/>
+    <bundleapp outputdirectory="${osx.dir}"
                name="jdotxt"
                displayname="jdotxt"
                identifier="com.chschmid.jdotxt.Jdotxt"
                shortversion="0.3.9"
                applicationCategory="public.app-category.developer-tools"
                mainclassname="com.chschmid.jdotxt.Jdotxt"
-               icon="src/res/drawable/jdotxt.icns" copyright="2014 Christian M. Schmid">
-        <classpath file="${jar}/jdotxt.jar" />
+               icon="${src.dir}/res/drawable/jdotxt.icns"
+               copyright="2014 Christian M. Schmid">
+      <classpath file="${jar.dir}/jdotxt.jar" />
     </bundleapp>
-</target>
+  </target>
 
-  <target name="clean" description="clean up" >
-    <!-- Delete the ${build} and ${jar} directory trees -->
-    <delete dir="${build}"/>
-    <delete dir="${jar}"/>
+  <target name="clean" description="clean up">
+    <delete dir="${build.dir}"/>
+    <delete dir="${jar.dir}"/>
+    <delete dir="${osx.dir}"/>
   </target>
 </project>
