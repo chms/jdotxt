@@ -38,7 +38,7 @@ import com.todotxt.todotxttouch.task.TaskBagFactory;
 
 public class Jdotxt {
 	public static final String VERSION = "0.4.3";
-	public static final String APPID = "chschmid.jdotxt";
+	public static final String APPID   = "chschmid.jdotxt";
 	
 	public static final int AUTOSAVE_DELAY = 3000;
 	
@@ -103,11 +103,10 @@ public class Jdotxt {
 		LocalFileTaskRepository.DONE_TXT_FILE = new File(doneFile);
 		LocalFileTaskRepository.initFiles();
 		
-		
 		taskBag = TaskBagFactory.getTaskBag();
 		synchronized(fileLock){
-			
 			if (fileModifiedWatcher != null) {
+				// Unregister first, in case path has been changed
 				fileModifiedWatcher.unRegisterFile();
 				try {
 					fileModifiedWatcher.registerFile(LocalFileTaskRepository.TODO_TXT_FILE);
@@ -115,13 +114,6 @@ public class Jdotxt {
 				}
 			}
 			taskBag.reload();
-			
-			// Unregister first, in case path has been changed
-			fileModifiedWatcher.unRegisterFile();
-			try {
-				fileModifiedWatcher.registerFile(LocalFileTaskRepository.TODO_TXT_FILE);
-			} catch (IOException e) {
-			}
 		}
 	}
 	
