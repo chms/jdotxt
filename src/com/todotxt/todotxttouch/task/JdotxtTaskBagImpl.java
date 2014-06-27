@@ -168,12 +168,13 @@ class JdotxtTaskBagImpl implements TaskBag {
 
 	@Override
 	public void update(Task task) {
+		lastChange = new Date();
+		if (task == null) return;
 		try {
 			//reload();
 			Task found = JdotxtTaskBagImpl.find(tasks, task);
 			if (found != null) {
 				task.copyInto(found);
-				lastChange = new Date();
 				// Log.i(TAG, "copied into found {" + found + "}");
 				// store();
 			} else {

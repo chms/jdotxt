@@ -552,9 +552,6 @@ public class JdotxtPreferencesDialog extends JDialog {
 		Jdotxt.userPrefs.putBoolean("showContextsPanel", cbContextsPanel.isSelected());
 		Jdotxt.userPrefs.putBoolean("switchPanels", cbSwitchPanels.isSelected());
 		Jdotxt.userPrefs.putBoolean("autosave", cbAutosave.isSelected());
-		if (crLocal.isSelected())  Jdotxt.userPrefs.putInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_LOCAL);
-		else if (crRemote.isSelected()) Jdotxt.userPrefs.putInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_REMOTE);
-		else Jdotxt.userPrefs.putInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_ASK);
 	}
 
 	private void loadSettings() {
@@ -567,9 +564,6 @@ public class JdotxtPreferencesDialog extends JDialog {
 		cbSwitchPanels.setSelected(Jdotxt.userPrefs.getBoolean("switchPanels", false));
 		cbAutosave.setSelected(Jdotxt.userPrefs.getBoolean("autosave", false));
 		setEnableAutoSaveOptions(Jdotxt.userPrefs.getBoolean("autosave", false));
-		if (Jdotxt.userPrefs.getInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_ASK) == Jdotxt.CONFLICTRESOLUTION_LOCAL)  crLocal.setSelected(true);
-		else if (Jdotxt.userPrefs.getInt("conflictResolution", Jdotxt.CONFLICTRESOLUTION_ASK) == Jdotxt.CONFLICTRESOLUTION_REMOTE) crRemote.setSelected(true);
-		else crAsk.setSelected(true);
 	}
 
 	private void styleJdotxtImageButton(JdotxtImageButton button, String toolTipText) {

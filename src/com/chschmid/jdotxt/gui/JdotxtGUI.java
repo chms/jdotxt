@@ -109,7 +109,7 @@ public class JdotxtGUI extends JFrame {
 	private ArrayList<String> filterProjects;
 	private String search = "";
 	
-	private boolean reloadDialogVisible, showReloadDialog;
+	private boolean reloadDialogVisible, unresolvedFileModification;
 	private AutoSaveListener autoSaveListener;
 	private DelayedActionHandler autoSaver;
 	
@@ -149,7 +149,9 @@ public class JdotxtGUI extends JFrame {
 		// Autosave
 		autoSaver = new DelayedActionHandler(Jdotxt.AUTOSAVE_DELAY, new ActionListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) { if (!reloadDialogVisible) saveTasks(); }
+			public void actionPerformed(ActionEvent e) { 
+				if (!unresolvedFileModification) saveTasks();
+			}
 		});
 		autoSaveListener = new AutoSaveListener();
 		if (Jdotxt.userPrefs.getBoolean("autosave", false)) taskList.addTaskListener(autoSaveListener);
@@ -218,13 +220,7 @@ public class JdotxtGUI extends JFrame {
 			public void windowLostFocus(WindowEvent arg0) { }
 			@Override
 			public void windowGainedFocus(WindowEvent arg0) {
-				if (showReloadDialog) {
-					showReloadDialog = false;
-					int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-					reloadDialogVisible = false;
-					if (result == 0) reloadTasks();
-					else toolbar.getButtonSave().setEnabled(true);
-				}
+				if (unresolvedFileModification && !reloadDialogVisible) showReloadDialog();
 			}
 		});
 		
@@ -232,18 +228,11 @@ public class JdotxtGUI extends JFrame {
 		Jdotxt.addFileModifiedListener(new FileModifiedListener() {
 			@Override
 			public void fileModified() {
+				unresolvedFileModification = true;
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						if (reloadDialogVisible == false) {
-							reloadDialogVisible = true;
-							if (JdotxtGUI.this.isFocused()) {
-								int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-								reloadDialogVisible = false;
-								if (result == 0) reloadTasks();
-								else toolbar.getButtonSave().setEnabled(true);
-							} else showReloadDialog = true;
-						}
+						if (reloadDialogVisible == false && JdotxtGUI.this.isFocused()) showReloadDialog();
 					}
 				});
 			}
@@ -258,6 +247,21 @@ public class JdotxtGUI extends JFrame {
 		manager.addKeyEventDispatcher(new KeyDispatcher());
 	}
 	
+	private void showReloadDialog() {
+		reloadDialogVisible = true;
+		int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+		reloadDialogVisible = false;
+		unresolvedFileModification = false;
+		if (result == 0) reloadTasks();
+		else {
+			taskBag.update(null); // Fake a change so that a save really leads to a save
+			toolbar.getButtonSave().setEnabled(true);
+			if (Jdotxt.userPrefs.getBoolean("autosave", false)) {
+				saveTasks();
+				System.out.println("Save update");
+			}
+		}
+	}
 	
 	// Sets the status bar to the default text "open and total tasks"
 	public void setDefaultStatusText() {
