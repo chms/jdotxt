@@ -31,7 +31,7 @@ To build jdotxt
 
 You can run the resulting jar file by executing
 
-java -jar jar/jdotxt.jar
+javaw -jar jar/jdotxt.jar
 
 #### Third Party Code
 
