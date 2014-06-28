@@ -502,6 +502,25 @@ public class JdotxtPreferencesDialog extends JDialog {
 			}
 		});
 		panelInfo.add(textInfo);
+		
+		panelInfo.add(Box.createRigidArea(new Dimension(0, 20)));
+		
+		JLabel labelContributors = new JLabel(JdotxtGUI.lang.getWord("Contributors"));
+		labelContributors.setFont(JdotxtGUI.fontB.deriveFont(14f));
+		panelInfo.add(labelContributors);
+		
+		panelInfo.add(Box.createRigidArea(new Dimension(0, 10)));
+		
+		JEditorPane textContributors = new JEditorPane();
+		textContributors.setContentType("text/html");
+		textContributors.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+		textContributors.setFont(JdotxtGUI.fontR);
+		textContributors.setText(JdotxtGUI.lang.getWord("Text_contributors"));
+		textContributors.setEditable(false);
+		textContributors.setFocusable(false);
+		textContributors.setAlignmentX(Component.LEFT_ALIGNMENT);
+		textContributors.setBorder(BorderFactory.createEmptyBorder());
+		panelInfo.add(textContributors);
 
 		panelInfo.add(Box.createRigidArea(new Dimension(0, 20)));
 
@@ -535,7 +554,6 @@ public class JdotxtPreferencesDialog extends JDialog {
 				}
 			}
 		});
-		
 		panelInfo.add(textLicense);
 		panelInfo.add(Box.createRigidArea(new Dimension(0, 20)));
 		panel.add(Box.createRigidArea(new Dimension(20, 0)), BorderLayout.EAST);
