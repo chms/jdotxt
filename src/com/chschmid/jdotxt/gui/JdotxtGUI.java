@@ -133,7 +133,7 @@ public class JdotxtGUI extends JFrame {
 		
 		// Toolbar listeners
 		toolbar.getTextfieldSearch().setDocumentListener(new SearchListener());
-		toolbar.getButtonSave().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { saveTasks(); } });
+		toolbar.getButtonSave().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { saveTasks(false); } });
 		toolbar.getButtonReload().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { reloadTasks(); } });
 		toolbar.getButtonArchive().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { archiveTasks(); } });
 		toolbar.getButtonSettings().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { showSettingsDialog(); } });
@@ -150,7 +150,7 @@ public class JdotxtGUI extends JFrame {
 		autoSaver = new DelayedActionHandler(Jdotxt.AUTOSAVE_DELAY, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) { 
-				if (!unresolvedFileModification) saveTasks();
+				if (!unresolvedFileModification) saveTasks(false);
 			}
 		});
 		autoSaveListener = new AutoSaveListener();
@@ -257,7 +257,7 @@ public class JdotxtGUI extends JFrame {
 			taskBag.update(null); // Fake a change so that a save really leads to a save
 			toolbar.getButtonSave().setEnabled(true);
 			if (Jdotxt.userPrefs.getBoolean("autosave", false)) {
-				saveTasks();
+				saveTasks(true);
 				System.out.println("Save update");
 			}
 		}
@@ -291,7 +291,8 @@ public class JdotxtGUI extends JFrame {
 	}
 	
 	// Toolbar functions
-	private void saveTasks() {
+	private void saveTasks(boolean forceSave) {
+		if (forceSave) taskBag.update(null);
 		toolbar.getButtonSave().setEnabled(false);
 		Thread t = new Thread(new Runnable() {
 			@Override
@@ -345,7 +346,10 @@ public class JdotxtGUI extends JFrame {
 		else if (currentCompactMode != newCompactMode) refreshGUI();
 		if (currentAutoSave != autoSave) {
 			if (!autoSave) taskList.removeTaskListener(autoSaveListener);
-			else taskList.addTaskListener(autoSaveListener);
+			else {
+				saveTasks(true);
+				taskList.addTaskListener(autoSaveListener);
+			}
 		}
 		//toolbar.setVisibleSaveReload(!Jdotxt.userPrefs.getBoolean("autosave", false));
 	}
@@ -431,7 +435,7 @@ public class JdotxtGUI extends JFrame {
 	private class KeyDispatcher implements KeyEventDispatcher {
 		public boolean dispatchKeyEvent(KeyEvent e) {
 	        if(e.getID() == KeyEvent.KEY_PRESSED) {
-	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S) saveTasks();
+	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_S) saveTasks(false);
 	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_R) reloadTasks(); // Reload tasks
 	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) toolbar.getTextfieldSearch().requestFocus(); // Jump to search bar
 	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N) {
