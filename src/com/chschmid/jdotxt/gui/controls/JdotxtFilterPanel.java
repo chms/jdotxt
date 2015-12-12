@@ -201,10 +201,10 @@ public class JdotxtFilterPanel extends JPanel {
 		Util.prependString(myContexts, "@");
 		
 		myProjects.add(0, JdotxtGUI.lang.getWord("Uncategorized"));
-		myProjects.add(0, JdotxtGUI.lang.getWord("All"));
+		myProjects.add(0, JdotxtGUI.lang.getWord("All_projects"));
 		
 		myContexts.add(0, JdotxtGUI.lang.getWord("Uncategorized"));
-		myContexts.add(0, JdotxtGUI.lang.getWord("All"));
+		myContexts.add(0, JdotxtGUI.lang.getWord("All_contexts"));
 		
 		String[] projectsString = new String[myProjects.size()];
 		myProjects.toArray(projectsString);
@@ -258,7 +258,9 @@ public class JdotxtFilterPanel extends JPanel {
 			filter.clear();
 			List<String> selection = list.getSelectedValuesList();
 			
-			if (selection.contains(JdotxtGUI.lang.getWord("All"))) list.setSelectedIndex(0);
+			if (selection.contains(JdotxtGUI.lang.getWord("All"))
+				|| selection.contains(JdotxtGUI.lang.getWord("All_contexts"))
+				|| selection.contains(JdotxtGUI.lang.getWord("All_projects"))) list.setSelectedIndex(0);
 			else {
 				if (selection.contains(JdotxtGUI.lang.getWord("Uncategorized"))) {
 					filter.add("-");
@@ -279,7 +281,10 @@ public class JdotxtFilterPanel extends JPanel {
 	        c.setBorder(new EmptyBorder(4, 4, 4, 4));
 	        c.setOpaque(true);
 	        
-	        if (JdotxtGUI.lang.getWord("All").equals(value) || JdotxtGUI.lang.getWord("Uncategorized").equals(value)) {
+	        if (JdotxtGUI.lang.getWord("All").equals(value)
+	        	|| JdotxtGUI.lang.getWord("All_contexts").equals(value)
+	        	|| JdotxtGUI.lang.getWord("All_projects").equals(value)
+	        	|| JdotxtGUI.lang.getWord("Uncategorized").equals(value)) {
 	            c.setFont(JdotxtGUI.fontRI);
 	        } else {
 	        	c.setFont(JdotxtGUI.fontR);
