@@ -48,17 +48,27 @@ import com.chschmid.jdotxt.Jdotxt;
 
 @SuppressWarnings("serial")
 public class JdotxtWelcomeDialog extends JDialog{
-	private JTextField directory;
+	public static final short P_WELCOME        = 0;
+	public static final short P_PATH_NOT_FOUND = 1;
 	
-	public JdotxtWelcomeDialog() {
-		super(new DummyFrame());
+	private JTextField directory;
+	private short purpose;
+	
+	public JdotxtWelcomeDialog(short purpose) {
+		super(new WelcomeFrame());
+		this.purpose = purpose;
 		initGUI();
 	}
 	
 	void initGUI() {
 		this.setModal(true);
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		this.setTitle(JdotxtGUI.lang.getWord("Welcome"));
+        switch(purpose) {
+	        case P_WELCOME:
+	        	setTitle(JdotxtGUI.lang.getWord("Welcome")); break;
+	        case P_PATH_NOT_FOUND:
+	        	setTitle(JdotxtGUI.lang.getWord("Text_file_not_found")); break;
+        }
 		this.setIconImage(JdotxtGUI.icon.getImage());
 		this.getContentPane().setBackground(Color.WHITE);
 
@@ -75,8 +85,9 @@ public class JdotxtWelcomeDialog extends JDialog{
 		panelInfo.setOpaque(true);
 		
 		JLabel labelTitle = new JLabel(JdotxtGUI.lang.getWord("Text_thank_you"));
+		if (purpose == P_PATH_NOT_FOUND) labelTitle.setText(JdotxtGUI.lang.getWord("Text_path_not_found"));
 		labelTitle.setFont(JdotxtGUI.fontB.deriveFont(24f));
-		
+
 		JLabel labelFoss = new JLabel(JdotxtGUI.lang.getWord("Text_welcome_foss"));
 		labelFoss.setFont(JdotxtGUI.fontR);
 		
@@ -127,8 +138,10 @@ public class JdotxtWelcomeDialog extends JDialog{
 		labelRecommendation.setMaximumSize(labelRecommendation.getPreferredSize());
 		
 		panelInfo.add(labelTitle);
-		panelInfo.add(Box.createVerticalStrut(20));
-		panelInfo.add(labelFoss);
+		if (purpose == P_WELCOME) {
+			panelInfo.add(Box.createVerticalStrut(20));
+			panelInfo.add(labelFoss);
+		}
 		panelInfo.add(Box.createVerticalStrut(20));
 		panelInfo.add(labelWhere);
 		panelInfo.add(Box.createVerticalStrut(30));
@@ -175,7 +188,7 @@ public class JdotxtWelcomeDialog extends JDialog{
 		
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosed(WindowEvent e) {
-			    DummyFrame parent = ((DummyFrame)getParent());
+				WelcomeFrame parent = ((WelcomeFrame)getParent());
 				if (parent.isVisible()) parent.dispose();
 			}
 		});
@@ -183,13 +196,12 @@ public class JdotxtWelcomeDialog extends JDialog{
 		start.requestFocus();
 	}
 	
-	static final class DummyFrame extends JFrame {
-	    DummyFrame() {
+	static final class WelcomeFrame extends JFrame {
+		WelcomeFrame() {
 	    	super();
 	        setUndecorated(true);
 	        setLocationRelativeTo(null);
 	        setIconImage(JdotxtGUI.icon.getImage());
-	        setTitle(JdotxtGUI.lang.getWord("Welcome"));
 	        setVisible(true);
 	    }
 	}

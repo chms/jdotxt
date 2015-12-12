@@ -208,7 +208,6 @@ public class JdotxtGUI extends JFrame {
                 	Jdotxt.userPrefs.putInt("width", JdotxtGUI.this.getWidth());
                 	Jdotxt.userPrefs.putInt("height", JdotxtGUI.this.getHeight());
                 	Jdotxt.userPrefs.putBoolean("isMaximized", (JdotxtGUI.this.getExtendedState() & JFrame.MAXIMIZED_BOTH) != 0);
-                	Jdotxt.userPrefs.putBoolean("firstRun", false);
                 	Jdotxt.userPrefs.put("version", Jdotxt.VERSION);
                     System.exit(0);
             	}

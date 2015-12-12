@@ -37,7 +37,7 @@ import com.todotxt.todotxttouch.task.TaskBag;
 import com.todotxt.todotxttouch.task.TaskBagFactory;
 
 public class Jdotxt {
-	public static final String VERSION = "0.4.5";
+	public static final String VERSION = "0.4.6";
 	public static final String APPID   = "chschmid.jdotxt";
 	
 	public static final int AUTOSAVE_DELAY = 3000;
@@ -77,12 +77,30 @@ public class Jdotxt {
 		Runnable viewGUI = new Runnable() {
 			@Override
 			public void run() {
-				// Show settings on first run
-				if (userPrefs.getBoolean("firstRun", true)) {
-					JdotxtWelcomeDialog welcomeDialog = new JdotxtWelcomeDialog();
-					welcomeDialog.setVisible(true);
-				}
+				File todoFileDir;
+				boolean showDialog = true;
 				
+				while (showDialog) {
+					// Show settings on first run or show path selection if file path is not found
+					if (userPrefs.getBoolean("firstRun", true)) {
+						userPrefs.putBoolean("firstRun", false);
+						JdotxtWelcomeDialog welcomeDialog = new JdotxtWelcomeDialog(JdotxtWelcomeDialog.P_WELCOME);
+						welcomeDialog.setVisible(true);
+					} else {
+						todoFileDir = new File(userPrefs.get("dataDir", DEFAULT_DIR));
+						if (!todoFileDir.exists()) {
+							JdotxtWelcomeDialog welcomeDialog = new JdotxtWelcomeDialog(JdotxtWelcomeDialog.P_PATH_NOT_FOUND);
+							welcomeDialog.setVisible(true);
+						}
+					}
+					
+					// Try to create path
+					todoFileDir = new File(userPrefs.get("dataDir", DEFAULT_DIR));
+					todoFileDir.mkdirs();
+					
+					showDialog = !todoFileDir.exists();
+				}
+					
 				// Main window
 				JdotxtGUI mainGUI = new JdotxtGUI();
 				//JdotxtGUItest mainGUI = new JdotxtGUItest();
@@ -95,9 +113,12 @@ public class Jdotxt {
 	public static void loadPreferences() { userPrefs = Preferences.userNodeForPackage(Jdotxt.class); }
 	
 	public static void loadTodos() {
-		String dataDir  = userPrefs.get("dataDir", DEFAULT_DIR);
-		String todoFile = dataDir + File.separator + "todo.txt";
-		String doneFile = dataDir + File.separator + "done.txt";
+		String dataDir   = userPrefs.get("dataDir", DEFAULT_DIR);
+		File todoFileDir = new File(dataDir);
+		if (!todoFileDir.exists()) dataDir = DEFAULT_DIR;
+		
+		String todoFile  = dataDir + File.separator + "todo.txt";
+		String doneFile  = dataDir + File.separator + "done.txt";
 		
 		LocalFileTaskRepository.TODO_TXT_FILE = new File(todoFile);
 		LocalFileTaskRepository.DONE_TXT_FILE = new File(doneFile);
