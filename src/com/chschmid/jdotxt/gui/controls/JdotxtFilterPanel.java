@@ -32,6 +32,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
@@ -260,7 +261,18 @@ public class JdotxtFilterPanel extends JPanel {
 			
 			if (selection.contains(JdotxtGUI.lang.getWord("All"))
 				|| selection.contains(JdotxtGUI.lang.getWord("All_contexts"))
-				|| selection.contains(JdotxtGUI.lang.getWord("All_projects"))) list.setSelectedIndex(0);
+				|| selection.contains(JdotxtGUI.lang.getWord("All_projects"))) {
+				if (selection.size() > 1) {
+					ListModel<String> all = list.getModel();
+					for (int k1 = 2; k1 < all.getSize(); k1++) {
+						if (!selection.contains(all.getElementAt(k1))) filter.add(all.getElementAt(k1).substring(1));
+					}
+					if (filter.size() == 0) {
+						if (!selection.contains(JdotxtGUI.lang.getWord("Uncategorized"))) filter.add("-");
+						else filter.add("98jLpz+LfAH4JQ_lQJb0x"); // Make sure that no item is found when all items + "All" is selected
+					}
+				}
+			}
 			else {
 				if (selection.contains(JdotxtGUI.lang.getWord("Uncategorized"))) {
 					filter.add("-");
