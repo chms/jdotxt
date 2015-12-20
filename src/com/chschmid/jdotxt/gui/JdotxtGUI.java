@@ -164,6 +164,7 @@ public class JdotxtGUI extends JFrame {
 		tasksPane.getVerticalScrollBar().setBackground(Color.WHITE);
 		tasksPane.getVerticalScrollBar().setOpaque(true);
 		tasksPane.setViewportView(taskList);
+		tasksPane.getViewport().setBackground(Color.WHITE);
 		
 		// Add GUI elements to main window
 		this.add(toolbar, BorderLayout.PAGE_START);
@@ -439,6 +440,7 @@ public class JdotxtGUI extends JFrame {
 	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_F) toolbar.getTextfieldSearch().requestFocus(); // Jump to search bar
 	        	if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_N) {
 	        		toolbar.getTextfieldSearch().clearSearch();
+	        		tasksPane.getVerticalScrollBar().setValue(0);
 	        		taskList.requestFocusNewTask(); // New task
 	        	}
 	        }

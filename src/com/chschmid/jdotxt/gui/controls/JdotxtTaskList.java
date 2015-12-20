@@ -20,7 +20,9 @@
 package com.chschmid.jdotxt.gui.controls;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Rectangle;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +32,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Scrollable;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
 import com.todotxt.todotxttouch.task.Filter;
@@ -40,7 +43,7 @@ import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.task.TaskBag;
 
 @SuppressWarnings("serial")
-public class JdotxtTaskList extends JPanel {
+public class JdotxtTaskList extends JPanel implements Scrollable {
 	private Filter<Task> filter;
 	private List<Task> tasks;
 
@@ -405,4 +408,69 @@ public class JdotxtTaskList extends JPanel {
 		}
 	}
 
+	@Override
+	public Dimension getPreferredScrollableViewportSize() {
+		return getPreferredSize();
+	}
+	
+
+	@Override
+	public boolean getScrollableTracksViewportHeight() {
+		return false;
+	}
+
+	@Override
+	public boolean getScrollableTracksViewportWidth() {
+		return true;
+	}
+
+	@Override
+	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+		int hNew = 10, hTask = 10, increment = 0, currentPosition;
+		
+		hNew  = newTaskPanel.getHeight();
+		if (guiTaskPanelList != null) hTask = guiTaskPanelList.get(0).panel.getHeight();
+		
+		currentPosition = visibleRect.y;
+		
+		if (newTaskPanel.isVisible()) {
+			if (currentPosition <= hNew) {
+				if (direction < 0) increment = currentPosition;
+				else {
+					increment = hNew - currentPosition;
+				}
+			} else {
+				currentPosition = currentPosition - hNew;
+				increment = currentPosition - (currentPosition / hTask) * hTask;
+				if (direction > 0) increment = hTask - increment;
+			}
+		} else {
+			increment = currentPosition - (currentPosition / hTask) * hTask;
+			if (direction > 0) increment = hTask - increment;
+		}
+		if (increment == 0) increment = hTask;
+		
+		return increment;
+	}
+
+	@Override
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+		int pageIncrement = 0, hTask = 10;
+		
+		if (guiTaskPanelList != null) hTask = guiTaskPanelList.get(0).panel.getHeight();
+
+		if (direction < 0) {
+			visibleRect.y = visibleRect.y - visibleRect.height;
+			pageIncrement = - getScrollableUnitIncrement(visibleRect, orientation, 1);
+			if (pageIncrement <= - hTask) pageIncrement = 0;
+			pageIncrement = pageIncrement + visibleRect.height;
+		} else {
+			visibleRect.y = visibleRect.y + visibleRect.height;
+			pageIncrement = - getScrollableUnitIncrement(visibleRect, orientation, -1);
+			if (pageIncrement <= - hTask) pageIncrement = 0;
+			pageIncrement = pageIncrement + visibleRect.height;
+		}
+
+		return pageIncrement;
+	}
 }
