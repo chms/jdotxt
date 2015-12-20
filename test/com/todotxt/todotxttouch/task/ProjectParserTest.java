@@ -83,7 +83,7 @@ public class ProjectParserTest {
 	// This is explicitly forbidden by spec but we
 	// have a simplistic implementation
 	public void testProjectComesBeforeDate() {
-		task = "+groceries 2014-03-05 Buy flour, eggs and milk";
+		task = "+groceries 2016-03-05 Buy flour, eggs and milk";
 		expected.add("groceries");
 		actual.addAll(ProjectParser.getInstance().parse(task));
 		assertEquals(expected, actual);

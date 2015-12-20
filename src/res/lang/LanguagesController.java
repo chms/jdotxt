@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2013 Christian M. Schmid
+* Copyright (C) 2013-2015 Christian M. Schmid
 *
 * This file is part of the jdotxt.
 *

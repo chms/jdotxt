@@ -1,7 +1,7 @@
 jdotxt
 ======
 
-Copyright 2013-2014 Christian M. Schmid
+Copyright 2013-2015 Christian M. Schmid
 
 another open source cross-platform GUI for the todo.txt file format
 

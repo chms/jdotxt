@@ -89,7 +89,7 @@
                applicationCategory="public.app-category.developer-tools"
                mainclassname="com.chschmid.jdotxt.Jdotxt"
                icon="${src.dir}/res/drawable/jdotxt.icns"
-               copyright="2014 Christian M. Schmid">
+               copyright="2015 Christian M. Schmid">
       <classpath file="${jar.dir}/jdotxt.jar" />
     </bundleapp>
   </target>

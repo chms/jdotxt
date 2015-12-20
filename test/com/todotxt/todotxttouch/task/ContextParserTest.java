@@ -83,7 +83,7 @@ public class ContextParserTest {
 	// This is explicitly forbidden by spec but we
 	// have a simplistic implementation
 	public void testContextComesBeforeDate() {
-		task = "@supermarket 2014-03-05 Buy flour, eggs and milk";
+		task = "@supermarket 2016-03-05 Buy flour, eggs and milk";
 		expected.add("supermarket");
 		actual.addAll(ContextParser.getInstance().parse(task));
 		assertEquals(expected, actual);

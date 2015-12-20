@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2013-2014 Christian M. Schmid
+* Copyright (C) 2013-2015 Christian M. Schmid
 *
 * This file is part of the jdotxt.
 *
@@ -98,7 +98,7 @@ public class JdotxtGUItest extends JFrame {
 	}
 	
 	public void testJdotxtDateField() {
-		JdotxtDateField df = new JdotxtDateField("2013-11-26");
+		JdotxtDateField df = new JdotxtDateField("2015-11-26");
 		//df.setDateListener(new JdotxtDateFieldListener("DateField"));
 		JdotxtPriorityField pf = new JdotxtPriorityField('F');
 		pf.setPriorityListener(new JdotxtDateFieldListener("PriorityField"));
@@ -139,7 +139,7 @@ public class JdotxtGUItest extends JFrame {
 		cb.addActionListener(new JdotxtImageCheckBoxListener("cb"));
 		this.add(cb, BorderLayout.LINE_END);
 		
-		tp = new JdotxtTaskPanel(new Task(1,"2013-12-01 blub"));
+		tp = new JdotxtTaskPanel(new Task(1,"2015-12-01 blub"));
 		this.add(tp, BorderLayout.CENTER);
 		//this.add(new JTextField("Test3"), BorderLayout.LINE_END);
 	}
