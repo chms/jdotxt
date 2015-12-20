@@ -426,6 +426,30 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 
 	@Override
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+		return calculateUnitIncrement(visibleRect, orientation, direction);
+	}
+
+	@Override
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+		int pageIncrement = 0, hTask = 10;
+		
+		if (guiTaskPanelList != null) hTask = guiTaskPanelList.get(0).panel.getHeight();
+
+		if (direction < 0) {
+			visibleRect.y = visibleRect.y - visibleRect.height;
+			pageIncrement = - calculateUnitIncrement(visibleRect, orientation, 1);
+			if (pageIncrement <= - hTask) pageIncrement = 0;
+			pageIncrement = pageIncrement + visibleRect.height;
+		} else {
+			visibleRect.y = visibleRect.y + visibleRect.height;
+			pageIncrement = - calculateUnitIncrement(visibleRect, orientation, -1);
+			if (pageIncrement <= - hTask) pageIncrement = 0;
+			pageIncrement = pageIncrement + visibleRect.height;
+		}
+		return pageIncrement;
+	}
+	
+	private int calculateUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
 		int hNew = 10, hTask = 10, increment = 0, currentPosition;
 		
 		hNew  = newTaskPanel.getHeight();
@@ -451,26 +475,5 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 		if (increment == 0) increment = hTask;
 		
 		return increment;
-	}
-
-	@Override
-	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-		int pageIncrement = 0, hTask = 10;
-		
-		if (guiTaskPanelList != null) hTask = guiTaskPanelList.get(0).panel.getHeight();
-
-		if (direction < 0) {
-			visibleRect.y = visibleRect.y - visibleRect.height;
-			pageIncrement = - getScrollableUnitIncrement(visibleRect, orientation, 1);
-			if (pageIncrement <= - hTask) pageIncrement = 0;
-			pageIncrement = pageIncrement + visibleRect.height;
-		} else {
-			visibleRect.y = visibleRect.y + visibleRect.height;
-			pageIncrement = - getScrollableUnitIncrement(visibleRect, orientation, -1);
-			if (pageIncrement <= - hTask) pageIncrement = 0;
-			pageIncrement = pageIncrement + visibleRect.height;
-		}
-
-		return pageIncrement;
 	}
 }
