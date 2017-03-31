@@ -378,17 +378,17 @@ public class JdotxtGUI extends JFrame {
 	
 	// Fonts and stuff
 	public static void loadLookAndFeel(String language) {
-		fontR  = new Font("Ubuntu", Font.PLAIN, 14);
-    	fontRI = new Font("Ubuntu Light", Font.ITALIC, 14);
-    	fontB  = new Font("Ubuntu", Font.PLAIN, 14);
+		fontR  = new Font("Ubuntu", Font.PLAIN, 28);
+    	fontRI = new Font("Ubuntu Light", Font.ITALIC, 28);
+    	fontB  = new Font("Ubuntu", Font.PLAIN, 28);
     	
     	
     	// Fonts are not available
     	if (!fontR.getFamily().equals("Ubuntu Light") || !fontB.getFamily().equals("Ubuntu")) {
     		try {
-            	fontR  = Font.createFont(Font.TRUETYPE_FONT, Jdotxt.class.getResourceAsStream("/res/fonts/Ubuntu-R.ttf")).deriveFont(14f);
-            	fontRI = Font.createFont(Font.TRUETYPE_FONT, Jdotxt.class.getResourceAsStream("/res/fonts/Ubuntu-MI.ttf")).deriveFont(14f);
-            	fontB  = Font.createFont(Font.TRUETYPE_FONT, Jdotxt.class.getResourceAsStream("/res/fonts/Ubuntu-B.ttf")).deriveFont(14f);
+            	fontR  = Font.createFont(Font.TRUETYPE_FONT, Jdotxt.class.getResourceAsStream("/res/fonts/Ubuntu-R.ttf")).deriveFont(28f);
+            	fontRI = Font.createFont(Font.TRUETYPE_FONT, Jdotxt.class.getResourceAsStream("/res/fonts/Ubuntu-MI.ttf")).deriveFont(28f);
+            	fontB  = Font.createFont(Font.TRUETYPE_FONT, Jdotxt.class.getResourceAsStream("/res/fonts/Ubuntu-B.ttf")).deriveFont(28f);
     		} catch (FontFormatException e) {
     			// No problem, will also work with another L&F
     		} catch (IOException e) {
