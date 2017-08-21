@@ -49,7 +49,7 @@ public class JdotxtFilterPanel extends JPanel {
 	public static final short  VISIBILITY_CONTEXTS = 2;
 	public static final short  VISIBILITY_ALL      = VISIBILITY_PROJECTS + VISIBILITY_CONTEXTS;
 	
-	public static final int DEFAULT_WIDTH = 250;
+	public static final int DEFAULT_WIDTH = 350;
 	
 	private TaskBag taskBag;
 	
