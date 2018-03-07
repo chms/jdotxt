@@ -155,8 +155,8 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 		if (gt != null) gt.panel.requestFocus(control);
 	}
 	
-	public void setFilter(ArrayList<Priority> filterPrios, ArrayList<String> filterContexts, ArrayList<String> filterProjects, String search) {
-		filter = FilterFactory.generateAndFilter(filterPrios, filterContexts, filterProjects, search, false);
+	public void setFilter(ArrayList<Priority> filterPrios, ArrayList<String> filterContexts, ArrayList<String> filterProjects, String search, boolean showHidden, boolean showThreshold) {
+		filter = FilterFactory.generateAndFilter(filterPrios, filterContexts, filterProjects, search, false, showHidden, showThreshold);
 		
 		if (search.isEmpty()) {
 			newTask = JdotxtGUI.lang.getWord("New_task");

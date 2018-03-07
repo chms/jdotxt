@@ -111,6 +111,8 @@ public class JdotxtGUI extends JFrame {
 	// Task filters
 	private ArrayList<Priority> filterPrios  = new ArrayList<Priority>();
 	private ArrayList<String> filterContexts;
+	private boolean showHidden = Jdotxt.userPrefs.getBoolean("showHidden", true);
+	private boolean showThreshold = Jdotxt.userPrefs.getBoolean("showThreshold", true);
 	private ArrayList<String> filterProjects;
 	private String search = "";
 	
@@ -283,7 +285,14 @@ public class JdotxtGUI extends JFrame {
     
 	// Forward the filter settings to the Task List
 	public void forwardFilter2TaskList() {
-		taskList.setFilter(JdotxtGUI.this.filterPrios, JdotxtGUI.this.filterContexts, JdotxtGUI.this.filterProjects, JdotxtGUI.this.search);
+		taskList.setFilter(
+				JdotxtGUI.this.filterPrios,
+				JdotxtGUI.this.filterContexts,
+				JdotxtGUI.this.filterProjects,
+				JdotxtGUI.this.search,
+				JdotxtGUI.this.showHidden,
+				JdotxtGUI.this.showThreshold
+		);
 		taskList.updateTaskList();
 	}
 	
@@ -333,7 +342,9 @@ public class JdotxtGUI extends JFrame {
 	
 	public void showSettingsDialog() {
 		JdotxtPreferencesDialog settingsDialog = new JdotxtPreferencesDialog();
-		
+
+		settingsDialog.addPreferenceFilterChangeListener(new PreferenceFilterChangeListener());
+
 		// Backup settings before the dialog is shown
 		String currentPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);
 		boolean currentCompactMode = Jdotxt.userPrefs.getBoolean("compactMode", false);
@@ -535,6 +546,15 @@ public class JdotxtGUI extends JFrame {
 			JdotxtGUI.this.filterProjects = filterProjects;
 			JdotxtGUI.this.forwardFilter2TaskList();
 			setDefaultStatusText();
+		}
+	}
+
+	public class PreferenceFilterChangeListener implements JdotxtPreferencesDialog.PreferencesFilterChangeListener {
+		@Override
+		public void preferenceFilterChanged(boolean showHidden, boolean showThreshold) {
+			JdotxtGUI.this.showHidden = showHidden;
+			JdotxtGUI.this.showThreshold = showThreshold;
+			JdotxtGUI.this.forwardFilter2TaskList();
 		}
 	}
 	

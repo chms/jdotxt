@@ -35,6 +35,8 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -75,9 +77,10 @@ public class JdotxtPreferencesDialog extends JDialog {
 
 	// Settings controls
 	private JTextField directory;
-	private JCheckBox cbCompactMode, cbProjectsPanel, cbContextsPanel, cbSwitchPanels, cbPrependMetadata, cbCopyMetadata, cbAutosave;
+	private JCheckBox cbCompactMode, cbProjectsPanel, cbContextsPanel, cbSwitchPanels, cbPrependMetadata, cbCopyMetadata, cbAutosave, cbHidden, cbThreshold;
 	private JLabel labelConflictResolution;
 	private JRadioButton crAsk, crLocal, crRemote;
+	private List<PreferencesFilterChangeListener> preferencesFilterChangeListenerList = new ArrayList<>();
 
 	public JdotxtPreferencesDialog() {
 		super();
@@ -189,6 +192,10 @@ public class JdotxtPreferencesDialog extends JDialog {
 		this.setLocation(x, y);
 
 		loadSettings();
+	}
+
+	public void addPreferenceFilterChangeListener(PreferencesFilterChangeListener preferencesFilterChangeListener) {
+		preferencesFilterChangeListenerList.add(preferencesFilterChangeListener);
 	}
 
 	private JTabbedPane getSettingsPanel() {
@@ -366,6 +373,16 @@ public class JdotxtPreferencesDialog extends JDialog {
 		cbSwitchPanels.setFont(JdotxtGUI.fontR);
 		cbSwitchPanels.setOpaque(false);
 
+		cbHidden = new JCheckBox();
+		cbHidden.setText(JdotxtGUI.lang.getWord("Show_hidden_tasks"));
+		cbHidden.setFont(JdotxtGUI.fontR);
+		cbHidden.setOpaque(false);
+
+		cbThreshold = new JCheckBox();
+		cbThreshold.setText(JdotxtGUI.lang.getWord("Show_tasks_with_threshold"));
+		cbThreshold.setFont(JdotxtGUI.fontR);
+		cbThreshold.setOpaque(false);
+
 		JLabel labelLanguage = new JLabel(JdotxtGUI.lang.getWord("Language"));
 		labelLanguage.setFont(JdotxtGUI.fontR);
 
@@ -380,6 +397,8 @@ public class JdotxtPreferencesDialog extends JDialog {
 		displayPanel.add(cbProjectsPanel);
 		displayPanel.add(cbContextsPanel);
 		displayPanel.add(cbSwitchPanels);
+		displayPanel.add(cbHidden);
+		displayPanel.add(cbThreshold);
 		// displayPanel.add(Box.createVerticalStrut(20));
 		// displayPanel.add(labelLanguage);
 		// displayPanel.add(Box.createVerticalStrut(10));
@@ -570,6 +589,11 @@ public class JdotxtPreferencesDialog extends JDialog {
 		Jdotxt.userPrefs.putBoolean("showContextsPanel", cbContextsPanel.isSelected());
 		Jdotxt.userPrefs.putBoolean("switchPanels", cbSwitchPanels.isSelected());
 		Jdotxt.userPrefs.putBoolean("autosave", cbAutosave.isSelected());
+		Jdotxt.userPrefs.putBoolean("showHidden", cbHidden.isSelected());
+		Jdotxt.userPrefs.putBoolean("showThreshold", cbThreshold.isSelected());
+		for (PreferencesFilterChangeListener preferencesFilterChangeListener : preferencesFilterChangeListenerList) {
+			preferencesFilterChangeListener.preferenceFilterChanged(cbHidden.isSelected(), cbThreshold.isSelected());
+		}
 	}
 
 	private void loadSettings() {
@@ -580,7 +604,9 @@ public class JdotxtPreferencesDialog extends JDialog {
 		cbProjectsPanel.setSelected(Jdotxt.userPrefs.getBoolean("showProjectsPanel", true));
 		cbContextsPanel.setSelected(Jdotxt.userPrefs.getBoolean("showContextsPanel", true));
 		cbSwitchPanels.setSelected(Jdotxt.userPrefs.getBoolean("switchPanels", false));
-		cbAutosave.setSelected(Jdotxt.userPrefs.getBoolean("autosave", false));
+		cbHidden.setSelected(Jdotxt.userPrefs.getBoolean("showHidden", true));
+		cbThreshold.setSelected(Jdotxt.userPrefs.getBoolean("showThreshold", true));
+		cbAutosave.setSelected(Jdotxt.userPrefs.getBoolean("autosave", true));
 		setEnableAutoSaveOptions(Jdotxt.userPrefs.getBoolean("autosave", false));
 	}
 
@@ -626,4 +652,10 @@ public class JdotxtPreferencesDialog extends JDialog {
 		}
 		return true;
 	}
+
+	public interface PreferencesFilterChangeListener {
+		void preferenceFilterChanged(boolean showHidden, boolean showThreshold);
+	}
+
+
 }
