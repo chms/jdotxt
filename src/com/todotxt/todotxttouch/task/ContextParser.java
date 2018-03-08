@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 class ContextParser {
 	private final static Pattern CONTEXT_PATTERN = Pattern
-			.compile("(?:^|\\s)@([\\w_\\.-\\:\\/]+)", Pattern.UNICODE_CHARACTER_CLASS);
+			.compile("(?:^|\\s)@([\\w_\\.\\-\\:\\/]+)", Pattern.UNICODE_CHARACTER_CLASS);
 	private static final ContextParser INSTANCE = new ContextParser();
 
 	private ContextParser() {
