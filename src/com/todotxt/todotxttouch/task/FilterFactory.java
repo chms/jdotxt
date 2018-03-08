@@ -35,7 +35,7 @@ public class FilterFactory {
 
 	public static Filter<Task> generateAndFilter(List<Priority> priorities,
 			List<String> contexts, List<String> projects, String text,
-			boolean caseSensitive) {
+			boolean caseSensitive, boolean showHidden, boolean showThreshold) {
 		AndFilter filter = new AndFilter();
 
 		if (priorities.size() > 0) {
@@ -52,6 +52,14 @@ public class FilterFactory {
 
 		if (!Strings.isEmptyOrNull(text)) {
 			filter.addFilter(new ByTextFilter(text, caseSensitive));
+		}
+
+		if (!showHidden) {
+			filter.addFilter(new HiddenFilter());
+		}
+
+		if (!showThreshold) {
+			filter.addFilter(new ThresholdDateFilter());
 		}
 		return filter;
 	}
