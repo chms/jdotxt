@@ -2,6 +2,7 @@ package com.todotxt.todotxttouch.task.sorter;
 
 import com.todotxt.todotxttouch.task.Task;
 
+import java.util.Date;
 import java.util.List;
 
 public enum Sorters {
@@ -113,6 +114,20 @@ public enum Sorters {
                     List<String> p2 = t2.getContexts();
 
                     return compareLists(p1, p2) * (ascending ? 1 : -1);
+                }
+            };
+        }
+    },
+    THRESHOLD_DATE("Threshold date") {
+        @Override
+        Sorter<Task> get(final boolean ascending) {
+            return new GenericSorter<Task>() {
+                @Override
+                public int compare(Task t1, Task t2) {
+                    Date d1 = t1.getThresholdDate();
+                    Date d2 = t2.getThresholdDate();
+
+                    return (d1 == null ? (d2 == null ? 0 : -1) : (d2 == null ? 1 : d1.compareTo(d2))) * (ascending ? 1 : -1);
                 }
             };
         }
