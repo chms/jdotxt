@@ -19,27 +19,16 @@
 
 package com.chschmid.jdotxt.gui.controls;
 
-import java.awt.Color;
-import java.awt.Dimension;
+import com.chschmid.jdotxt.gui.JdotxtGUI;
+import com.todotxt.todotxttouch.util.Util;
+
+import javax.swing.*;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.event.DocumentListener;
-
-import com.chschmid.jdotxt.gui.JdotxtGUI;
-import com.todotxt.todotxttouch.util.Util;
 
 public class JdotxtToolbar extends Box{
 
@@ -47,6 +36,7 @@ public class JdotxtToolbar extends Box{
 	private JdotxtImageButton buttonReload;
 	private JdotxtImageButton buttonArchive;
 	private JdotxtImageButton buttonSettings;
+	private JdotxtImageButton buttonSort;
 	private SearchField textfieldSearch;
 	
 	private boolean enabled;
@@ -64,6 +54,7 @@ public class JdotxtToolbar extends Box{
 		ImageIcon iconReload   = Util.createImageIcon("/res/drawable/reload.png");
 		ImageIcon iconArchive  = Util.createImageIcon("/res/drawable/archive.png");
 		ImageIcon iconSettings = Util.createImageIcon("/res/drawable/settings.png");
+		ImageIcon iconSort = Util.createImageIcon("/res/drawable/sort.png");
 		//ImageIcon border       = Util.createImageIcon("/res/drawable/toolbar-border.png");
 		
 		// Style toolbar
@@ -78,6 +69,8 @@ public class JdotxtToolbar extends Box{
 		styleJdotxtImageButton(buttonReload, JdotxtGUI.lang.getWord("Reload"));
 		buttonArchive   = new JdotxtImageButton(iconArchive);
 		styleJdotxtImageButton(buttonArchive, JdotxtGUI.lang.getWord("Archive"));
+		buttonSort 		= new JdotxtImageButton(iconSort);
+		styleJdotxtImageButton(buttonSave, JdotxtGUI.lang.getWord("Save"));
 		textfieldSearch = new SearchField(JdotxtGUI.lang.getWord("Search..."));
 		buttonSettings  = new JdotxtImageButton(iconSettings);
 		styleJdotxtImageButton(buttonSettings, JdotxtGUI.lang.getWord("Preferences"));
@@ -87,6 +80,7 @@ public class JdotxtToolbar extends Box{
 		this.add(buttonReload);
 		this.add(buttonArchive);
 		this.add(Box.createHorizontalGlue());
+		this.add(buttonSort);
 		this.add(textfieldSearch);
 		this.add(Box.createRigidArea(new Dimension(4,1)));
 		this.add(buttonSettings);
@@ -105,7 +99,8 @@ public class JdotxtToolbar extends Box{
 	public JdotxtImageButton getButtonArchive()   { return buttonArchive; }
 	public JdotxtImageButton getButtonSettings()  { return buttonSettings; }
 	public SearchField       getTextfieldSearch() { return textfieldSearch; }
-	
+	public JdotxtImageButton getButtonSort() 	  { return buttonSort; }
+
 	// Enable/disable all controls
 	public void setEnabled (boolean enabled){
 		this.enabled = enabled;

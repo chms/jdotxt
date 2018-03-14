@@ -22,13 +22,9 @@
  */
 package com.todotxt.todotxttouch.task;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.todotxt.todotxttouch.task.sorter.PredefinedSorters;
+
+import java.util.*;
 
 /**
  * Implementation of the TaskBag interface
@@ -143,7 +139,7 @@ class JdotxtTaskBagImpl implements TaskBag {
 		}
 
 		if (comparator == null) {
-			comparator = Sort.PRIORITY_DESC.getComparator();
+			comparator = PredefinedSorters.DEFAULT;
 		}
 
 		Collections.sort(localTasks, comparator);

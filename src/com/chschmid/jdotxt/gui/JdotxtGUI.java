@@ -19,54 +19,24 @@
 
 package com.chschmid.jdotxt.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
-import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
-
-import res.lang.LanguagesController;
-
 import com.chschmid.jdotxt.Jdotxt;
-import com.chschmid.jdotxt.gui.controls.JdotxtFilterPanel;
-import com.chschmid.jdotxt.gui.controls.JdotxtStatusBar;
-import com.chschmid.jdotxt.gui.controls.JdotxtTaskList;
-import com.chschmid.jdotxt.gui.controls.JdotxtTaskPanel;
-import com.chschmid.jdotxt.gui.controls.JdotxtToolbar;
-import com.chschmid.jdotxt.gui.controls.TaskListener;
+import com.chschmid.jdotxt.gui.controls.*;
 import com.chschmid.jdotxt.util.DelayedActionHandler;
 import com.chschmid.jdotxt.util.FileModifiedListener;
 import com.todotxt.todotxttouch.task.Priority;
 import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.task.TaskBag;
 import com.todotxt.todotxttouch.util.Util;
+import res.lang.LanguagesController;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 @SuppressWarnings("serial")
 // The application main window
@@ -144,6 +114,16 @@ public class JdotxtGUI extends JFrame {
 		toolbar.getButtonReload().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { reloadTasks(); } });
 		toolbar.getButtonArchive().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { archiveTasks(); } });
 		toolbar.getButtonSettings().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { showSettingsDialog(); } });
+		toolbar.getButtonSort().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				JdotxtSortDialog d = new JdotxtSortDialog(taskList.getSortMap());
+				d.setVisible(true);
+
+				taskList.refreshSort();
+				taskList.updateTaskList();
+			}
+		});
 		//toolbar.setVisibleSaveReload(!Jdotxt.userPrefs.getBoolean("autosave", false));
 		
 		// Other GUI element listeners
