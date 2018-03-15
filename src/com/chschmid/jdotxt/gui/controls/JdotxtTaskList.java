@@ -215,6 +215,7 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 		String sortString = Jdotxt.userPrefs.get("sort", null);
 		if (sortString == null) {
 			sort = null;
+			return;
 		}
 		sort.clear();
 		String[] sorters = sortString.split("\\|");
