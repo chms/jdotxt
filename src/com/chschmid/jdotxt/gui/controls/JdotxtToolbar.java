@@ -37,6 +37,7 @@ public class JdotxtToolbar extends Box{
 	private JdotxtImageButton buttonArchive;
 	private JdotxtImageButton buttonSettings;
 	private JdotxtImageButton buttonSort;
+	private JdotxtSavedSortCombobox savedSortCombobox;
 	private SearchField textfieldSearch;
 	
 	private boolean enabled;
@@ -47,7 +48,7 @@ public class JdotxtToolbar extends Box{
 		super(BoxLayout.X_AXIS);
 		initGUI();
 	}
-	
+
 	private void initGUI() {
 		// Load images
 		ImageIcon iconSave     = Util.createImageIcon("/res/drawable/save.png");
@@ -68,6 +69,7 @@ public class JdotxtToolbar extends Box{
 		buttonReload    = new JdotxtImageButton(iconReload);
 		styleJdotxtImageButton(buttonReload, JdotxtGUI.lang.getWord("Reload"));
 		buttonArchive   = new JdotxtImageButton(iconArchive);
+		savedSortCombobox = new JdotxtSavedSortCombobox();
 		styleJdotxtImageButton(buttonArchive, JdotxtGUI.lang.getWord("Archive"));
 		buttonSort 		= new JdotxtImageButton(iconSort);
 		styleJdotxtImageButton(buttonSave, JdotxtGUI.lang.getWord("Save"));
@@ -79,6 +81,7 @@ public class JdotxtToolbar extends Box{
 		this.add(buttonSave);
 		this.add(buttonReload);
 		this.add(buttonArchive);
+		this.add(savedSortCombobox);
 		this.add(Box.createHorizontalGlue());
 		this.add(buttonSort);
 		this.add(textfieldSearch);
@@ -117,7 +120,11 @@ public class JdotxtToolbar extends Box{
 		buttonSave.setVisible(visible);
 		buttonReload.setVisible(visible);
 	}
-	
+
+	public JdotxtSavedSortCombobox getSavedSortCombobox() {
+		return savedSortCombobox;
+	}
+
 	// The search box
     @SuppressWarnings("serial")
 	public static class SearchField extends Box{

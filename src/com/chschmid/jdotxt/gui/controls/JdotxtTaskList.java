@@ -21,6 +21,7 @@ package com.chschmid.jdotxt.gui.controls;
 
 import com.chschmid.jdotxt.Jdotxt;
 import com.chschmid.jdotxt.gui.JdotxtGUI;
+import com.chschmid.jdotxt.gui.utils.SortUtils;
 import com.todotxt.todotxttouch.task.*;
 import com.todotxt.todotxttouch.task.sorter.PredefinedSorters;
 import com.todotxt.todotxttouch.task.sorter.Sorter;
@@ -218,18 +219,7 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 			return;
 		}
 		sort.clear();
-		String[] sorters = sortString.split("\\|");
-		for (String s : sorters) {
-			String[] parts = s.split(":");
-			Sorters sorter;
-			try {
-				sorter = Sorters.valueOf(parts[0]);
-			} catch (IllegalArgumentException e) {
-				continue;
-			}
-			boolean dir = Boolean.valueOf(parts[1]);
-			sort.put(sorter, dir);
-		}
+		sort.putAll(SortUtils.parseSort(sortString));
 	}
 
 	private Sorter<Task> getSort() {

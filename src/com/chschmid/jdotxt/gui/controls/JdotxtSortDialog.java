@@ -2,6 +2,7 @@ package com.chschmid.jdotxt.gui.controls;
 
 import com.chschmid.jdotxt.Jdotxt;
 import com.chschmid.jdotxt.gui.JdotxtGUI;
+import com.chschmid.jdotxt.gui.utils.SortUtils;
 import com.todotxt.todotxttouch.task.sorter.Sorters;
 
 import javax.swing.*;
@@ -18,6 +19,8 @@ public class JdotxtSortDialog extends JDialog {
     private Vector<Sorters> addList = new Vector<>();
 
     private JTable current, add;
+    private JButton saveButton;
+    private JTextField name;
 
     public JdotxtSortDialog(Map<Sorters, Boolean> sort) {
         super();
@@ -109,6 +112,13 @@ public class JdotxtSortDialog extends JDialog {
 
         tables.add(Box.createRigidArea(new Dimension(0,15)));
 
+        Box save = new Box(BoxLayout.X_AXIS);
+        name = new JTextField();
+        saveButton = new JButton();
+        saveButton.setText("Save");
+        save.add(name);
+        save.add(saveButton);
+
         cols = new Vector<>();
         cols.setSize(2);
         Collections.fill(cols, "");
@@ -135,6 +145,8 @@ public class JdotxtSortDialog extends JDialog {
         tables.add(new JLabel("Available fields"));
         tables.add(add);
         tables.add(Box.createRigidArea(new Dimension(0,15)));
+        tables.add(save);
+        tables.add(Box.createRigidArea(new Dimension(0,15)));
 
         Box buttons = new Box(BoxLayout.X_AXIS);
         buttons.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 3));
@@ -155,15 +167,7 @@ public class JdotxtSortDialog extends JDialog {
         ok.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                StringBuilder sb = new StringBuilder();
-                for (Map.Entry<Sorters, Boolean> s: sortList) {
-                    sb.append(s.getKey().name());
-                    sb.append(":");
-                    sb.append(s.getValue().toString());
-                    if (s != sortList.lastElement())
-                        sb.append("|");
-                }
-                Jdotxt.userPrefs.put("sort", sb.toString());
+                Jdotxt.userPrefs.put("sort", SortUtils.writeSort(sortList));
                 JdotxtSortDialog.this.dispose();
             }
         });
@@ -212,6 +216,23 @@ public class JdotxtSortDialog extends JDialog {
     }
 
 
+    public JButton getSaveButton() {
+        return saveButton;
+    }
+
+    public String getSortName() {
+        return name.getText();
+    }
+
+    public Map<Sorters, Boolean> getSort() {
+        Map<Sorters, Boolean> res = new HashMap<>();
+
+        for (Map.Entry<Sorters, Boolean> s: sortList) {
+            res.put(s.getKey(), s.getValue());
+        }
+
+        return res;
+    }
 
     interface ClickHandler {
         void click(int row, int col);

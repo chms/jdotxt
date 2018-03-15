@@ -21,11 +21,13 @@ package com.chschmid.jdotxt.gui;
 
 import com.chschmid.jdotxt.Jdotxt;
 import com.chschmid.jdotxt.gui.controls.*;
+import com.chschmid.jdotxt.gui.utils.SortUtils;
 import com.chschmid.jdotxt.util.DelayedActionHandler;
 import com.chschmid.jdotxt.util.FileModifiedListener;
 import com.todotxt.todotxttouch.task.Priority;
 import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.task.TaskBag;
+import com.todotxt.todotxttouch.task.sorter.Sorters;
 import com.todotxt.todotxttouch.util.Util;
 import res.lang.LanguagesController;
 
@@ -37,6 +39,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 // The application main window
@@ -77,6 +81,8 @@ public class JdotxtGUI extends JFrame {
 	private JScrollPane tasksPane;
 	private JdotxtTaskList taskList;
 	private JdotxtStatusBar statusBar;
+
+	private Map<String, Map<Sorters, Boolean>> savedSorts = new HashMap<>();
 	
 	// Task filters
 	private ArrayList<Priority> filterPrios  = new ArrayList<Priority>();
@@ -117,8 +123,31 @@ public class JdotxtGUI extends JFrame {
 		toolbar.getButtonSort().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				JdotxtSortDialog d = new JdotxtSortDialog(taskList.getSortMap());
+				final JdotxtSortDialog d = new JdotxtSortDialog(taskList.getSortMap());
+				d.getSaveButton().addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent actionEvent) {
+						saveSort(d.getSortName(), d.getSort());
+						toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+					}
+				});
 				d.setVisible(true);
+
+				taskList.refreshSort();
+				taskList.updateTaskList();
+			}
+		});
+		loadSorts();
+		toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+		toolbar.getSavedSortCombobox().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				Object item = toolbar.getSavedSortCombobox().getSelectedItem();
+				if ("Manage...".equals(item))
+					//TODO: manage saved sorts
+					return;
+				Map<Sorters, Boolean> sort = savedSorts.get(item);
+				Jdotxt.userPrefs.put("sort", SortUtils.writeSort(new ArrayList<>(sort.entrySet())));
 
 				taskList.refreshSort();
 				taskList.updateTaskList();
@@ -410,6 +439,36 @@ public class JdotxtGUI extends JFrame {
 		if (Jdotxt.userPrefs.getBoolean("showProjectsPanel", true)) visibility = JdotxtFilterPanel.VISIBILITY_PROJECTS;
 		if (Jdotxt.userPrefs.getBoolean("showContextsPanel", true)) visibility = (short) (visibility + JdotxtFilterPanel.VISIBILITY_CONTEXTS);
 		return visibility;
+	}
+
+	public String saveSort(String name, Map<Sorters, Boolean> sort) {
+		if (savedSorts.containsKey(name))
+			return "Saved sort with such name already exists";
+		savedSorts.put(name, sort);
+		toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, Map<Sorters, Boolean>> e : savedSorts.entrySet()) {
+			sb.append(e.getKey());
+			sb.append(';');
+			sb.append(SortUtils.writeSort(new ArrayList<>(e.getValue().entrySet())));
+			sb.append(System.lineSeparator());
+		}
+		Jdotxt.userPrefs.put("savedSorts", sb.toString());
+		return "OK";
+	}
+
+	public void loadSorts() {
+		String sorts = Jdotxt.userPrefs.get("savedSorts", "");
+		if (sorts == null || "".equals(sorts)) {
+			this.savedSorts = new HashMap<>();
+			return;
+		}
+		String[] savedArray = sorts.split(System.lineSeparator());
+		for (String saved : savedArray) {
+			String[] nameAndSort = saved.split(";");
+			Map<Sorters, Boolean> sort = SortUtils.parseSort(nameAndSort[1]);
+			this.savedSorts.put(nameAndSort[0], sort);
+		}
 	}
 	
 	// File operations can be done in a separate thread, so that the GUI thread is not blocked by file IO
