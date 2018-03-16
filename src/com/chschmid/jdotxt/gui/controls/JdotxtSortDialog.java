@@ -110,7 +110,7 @@ public class JdotxtSortDialog extends JDialog {
                 } else if (col == 4) {
                     sortDisplay.remove(row);
                     Map.Entry<Sorters, Boolean> e = sortList.remove(row);
-                    addDisplay.add(new Vector(Arrays.asList(e.getKey().getName(), "+")));
+                    addDisplay.add(new Vector<>(Arrays.asList(e.getKey().getName(), "+")));
                     addList.add(e.getKey());
                 }
                 current.updateUI();

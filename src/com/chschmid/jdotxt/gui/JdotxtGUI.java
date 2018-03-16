@@ -156,6 +156,7 @@ public class JdotxtGUI extends JFrame {
                         public void actionPerformed(ActionEvent actionEvent) {
                             savedSorts = d.getSorts();
                             writeSorts();
+							toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
                         }
                     });
                     d.setVisible(true);
