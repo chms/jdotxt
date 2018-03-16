@@ -117,7 +117,7 @@ public class JdotxtContentField extends JTextField{
 	private void tryToMoveBack(char start) {
 		char c = start;
 		int i = 0;
-		while (mode == AutocompletionModes.PLAIN && isValid(c) && getCaretPosition() - 1 - i >= 0) {
+		while (mode == AutocompletionModes.PLAIN && isValid(c) && getCaretPosition() - 3 - i >= 0) {
 			i++;
 			c = getText().charAt(getCaretPosition() - 1 - i);
 			tryToAutocomplete(c, i);
@@ -182,10 +182,10 @@ public class JdotxtContentField extends JTextField{
 	}
 
 	private void filterAutocomplete() {
-		String f = filter.toString();
+		String f = filter.toString().toLowerCase();
 		List<String> filtered = new ArrayList<>();
 		for (String s : getFullListOfCompletions()) {
-			if (s.contains(f) && ! f.equals(s)) {
+			if (s.toLowerCase().contains(f) && ! f.equals(s)) {
 				filtered.add(s);
 			}
 		}
@@ -224,7 +224,6 @@ public class JdotxtContentField extends JTextField{
 			list.setLayoutOrientation(JList.VERTICAL);
 			list.setVisibleRowCount(-1);
 			list.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-			list.setPrototypeCellValue("111111111");
 			add(list, BorderLayout.CENTER);
 		}
 
