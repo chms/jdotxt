@@ -19,28 +19,21 @@
 
 package com.chschmid.jdotxt.gui.controls;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListModel;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import com.chschmid.jdotxt.gui.JdotxtGUI;
 import com.todotxt.todotxttouch.task.TaskBag;
 import com.todotxt.todotxttouch.util.Util;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class JdotxtFilterPanel extends JPanel {
@@ -61,6 +54,8 @@ public class JdotxtFilterPanel extends JPanel {
 	
 	private JList<String> projects = new JList<String>();
 	private JList<String> contexts = new JList<String>();
+	private String matchProjects = "";
+	private String matchContexts = "";
 	
 	private ArrayList<String> filterContexts = new ArrayList<String>();
 	private ArrayList<String> filterProjects = new ArrayList<String>();
@@ -83,13 +78,94 @@ public class JdotxtFilterPanel extends JPanel {
 		projects.setCellRenderer(new FilterCellRenderer());
 		projectsListener = new FilterSelectionListener(projects, filterProjects);
 		projects.addListSelectionListener(projectsListener);
-		
+		projects.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent keyEvent) {
+				final FilterField f = new FilterField(keyEvent.getKeyChar()) {
+					@Override
+					public void onType(String typed) {
+						matchProjects = typed;
+						forceUpdateFilterPanes();
+						if (projects.getModel().getSize() >= 3)
+							projects.setSelectedIndex(2);
+					}
+
+					@Override
+					public void onFinish() {
+						String itemToSelect = projects.getSelectedValue();
+						matchProjects = "";
+						forceUpdateFilterPanes();
+						if (itemToSelect != null)
+							projects.setSelectedValue(itemToSelect, true);
+						dispose();
+					}
+
+					@Override
+					public void selectNext() {
+						int i = projects.getSelectedIndex();
+						if (i + 1 < projects.getModel().getSize())
+							projects.setSelectedIndex(i + 1);
+					}
+
+					@Override
+					public void selectPrev() {
+						int i = projects.getSelectedIndex();
+						if (i > 0)
+							projects.setSelectedIndex(i-1);
+					}
+				};
+				f.setLocation(projects.getLocationOnScreen());
+				f.setVisible(true);
+			}
+		});
+
 		contexts.setFont(JdotxtGUI.fontR);
 		contexts.setSelectionBackground(JdotxtGUI.COLOR_PRESSED);
 		contexts.setCellRenderer(new FilterCellRenderer());
 		contextsListener = new FilterSelectionListener(contexts, filterContexts);
 		contexts.addListSelectionListener(contextsListener);
-		
+		contexts.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent keyEvent) {
+				final FilterField f = new FilterField(keyEvent.getKeyChar()) {
+					@Override
+					public void onType(String typed) {
+						matchContexts = typed;
+						forceUpdateFilterPanes();
+						if (contexts.getModel().getSize() >= 3) {
+							contexts.setSelectedIndex(2);
+						}
+					}
+
+					@Override
+					public void onFinish() {
+						String itemToSelect = contexts.getSelectedValue();
+						matchContexts = "";
+						forceUpdateFilterPanes();
+						if (itemToSelect != null)
+							contexts.setSelectedValue(itemToSelect, true);
+						dispose();
+					}
+
+					@Override
+					public void selectNext() {
+						int i = contexts.getSelectedIndex();
+						if (i + 1 < contexts.getModel().getSize())
+							contexts.setSelectedIndex(i + 1);
+					}
+
+					@Override
+					public void selectPrev() {
+						int i = contexts.getSelectedIndex();
+						if (i > 0)
+							contexts.setSelectedIndex(i-1);
+					}
+				};
+				f.setLocation(contexts.getLocationOnScreen());
+				f.setVisible(true);
+			}
+		});
+
 		String[] loadingString = new String[1];
 	    loadingString[0] = JdotxtGUI.lang.getWord("Loading...");
 	    loading1.setListData(loadingString);
@@ -195,8 +271,21 @@ public class JdotxtFilterPanel extends JPanel {
 		List<String> selectedProjects = (List<String>) projects.getSelectedValuesList();
 		List<String> selectedContexts = (List<String>) contexts.getSelectedValuesList();
 		
-		ArrayList<String> myProjects = taskBag.getProjects(false);
-		ArrayList<String> myContexts = taskBag.getContexts(false);
+		ArrayList<String> myProjects = new ArrayList<>();
+
+		for (String e : taskBag.getProjects(false)) {
+			if (e.contains(matchProjects)) {
+				myProjects.add(e);
+			}
+		}
+
+		ArrayList<String> myContexts = new ArrayList<>();
+
+		for (String e : taskBag.getContexts(false)) {
+			if (e.contains(matchContexts)) {
+				myContexts.add(e);
+			}
+		}
 		
 		Util.prependString(myProjects, "+");
 		Util.prependString(myContexts, "@");
@@ -319,5 +408,55 @@ public class JdotxtFilterPanel extends JPanel {
 	
 	public interface FilterChangeListener {
 		public void filterChanged(ArrayList<String> filterContexts, ArrayList<String> filterProjects);
+	}
+
+	abstract class FilterField extends JDialog {
+		JTextField jtf;
+
+		public FilterField(char first) {
+			initGUI();
+			jtf.setText(String.valueOf(first));
+			refresh();
+			onType(jtf.getText());
+		}
+
+		protected void initGUI() {
+			setUndecorated(true);
+			jtf = new JTextField();
+			jtf.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyReleased(KeyEvent keyEvent) {
+					if (keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE || keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {
+						onFinish();
+					} else if (keyEvent.getKeyCode() == KeyEvent.VK_UP) {
+						selectPrev();
+					} else if (keyEvent.getKeyCode() == KeyEvent.VK_DOWN) {
+						selectNext();
+					} else {
+						onType(jtf.getText());
+						refresh();
+					}
+				}
+			});
+			jtf.setMinimumSize(new Dimension(100, 20));
+			add(jtf, BorderLayout.CENTER);
+			jtf.addFocusListener(new FocusAdapter() {
+				@Override
+				public void focusLost(FocusEvent focusEvent) {
+					onFinish();
+				}
+			});
+		}
+
+		private void refresh() {
+			jtf.updateUI();
+			pack();
+			jtf.setCaretPosition(jtf.getText().length());
+		}
+
+		public abstract void onType(String typed);
+		public abstract void onFinish();
+		public abstract void selectNext();
+		public abstract void selectPrev();
 	}
 }
