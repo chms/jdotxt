@@ -215,7 +215,7 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 	public void refreshSort() {
 		String sortString = Jdotxt.userPrefs.get("sort", null);
 		if (sortString == null) {
-			sort = null;
+			sort = new LinkedHashMap<>();
 			return;
 		}
 		sort.clear();
@@ -239,6 +239,8 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 	}
 
 	public Map<Sorters, Boolean> getSortMap() {
+		if (sort == null)
+			return new LinkedHashMap<>();
 		return new LinkedHashMap<>(sort);
 	}
 
