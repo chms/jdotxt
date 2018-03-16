@@ -123,7 +123,13 @@ public class JdotxtGUI extends JFrame {
 		toolbar.getButtonSort().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
-				final JdotxtSortDialog d = new JdotxtSortDialog(taskList.getSortMap());
+				final JdotxtSortDialog d = new JdotxtSortDialog(taskList.getSortMap(), false);
+				d.getOk().addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        Jdotxt.userPrefs.put("sort", SortUtils.writeSort(new ArrayList<>(d.getSort().entrySet())));
+                    }
+                });
 				d.getSaveButton().addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent actionEvent) {
@@ -143,9 +149,18 @@ public class JdotxtGUI extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				Object item = toolbar.getSavedSortCombobox().getSelectedItem();
-				if ("Manage...".equals(item))
-					//TODO: manage saved sorts
-					return;
+				if ("Manage...".equals(item)) {
+                    final JdotxtSavedSortDialog d = new JdotxtSavedSortDialog(savedSorts);
+                    d.getOk().addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            savedSorts = d.getSorts();
+                            writeSorts();
+                        }
+                    });
+                    d.setVisible(true);
+                    return;
+                }
 				Map<Sorters, Boolean> sort = savedSorts.get(item);
 				Jdotxt.userPrefs.put("sort", SortUtils.writeSort(new ArrayList<>(sort.entrySet())));
 
@@ -441,23 +456,27 @@ public class JdotxtGUI extends JFrame {
 		return visibility;
 	}
 
-	public String saveSort(String name, Map<Sorters, Boolean> sort) {
+	private String saveSort(String name, Map<Sorters, Boolean> sort) {
 		if (savedSorts.containsKey(name))
 			return "Saved sort with such name already exists";
 		savedSorts.put(name, sort);
-		toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
-		StringBuilder sb = new StringBuilder();
-		for (Map.Entry<String, Map<Sorters, Boolean>> e : savedSorts.entrySet()) {
-			sb.append(e.getKey());
-			sb.append(';');
-			sb.append(SortUtils.writeSort(new ArrayList<>(e.getValue().entrySet())));
-			sb.append(System.lineSeparator());
-		}
-		Jdotxt.userPrefs.put("savedSorts", sb.toString());
+        writeSorts();
 		return "OK";
 	}
 
-	public void loadSorts() {
+	private void writeSorts() {
+        toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Map<Sorters, Boolean>> e : savedSorts.entrySet()) {
+            sb.append(e.getKey());
+            sb.append(';');
+            sb.append(SortUtils.writeSort(new ArrayList<>(e.getValue().entrySet())));
+            sb.append(System.lineSeparator());
+        }
+        Jdotxt.userPrefs.put("savedSorts", sb.toString());
+    }
+
+	private void loadSorts() {
 		String sorts = Jdotxt.userPrefs.get("savedSorts", "");
 		if (sorts == null || "".equals(sorts)) {
 			this.savedSorts = new HashMap<>();

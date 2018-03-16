@@ -1,8 +1,6 @@
 package com.chschmid.jdotxt.gui.controls;
 
-import com.chschmid.jdotxt.Jdotxt;
 import com.chschmid.jdotxt.gui.JdotxtGUI;
-import com.chschmid.jdotxt.gui.utils.SortUtils;
 import com.todotxt.todotxttouch.task.sorter.Sorters;
 
 import javax.swing.*;
@@ -21,10 +19,24 @@ public class JdotxtSortDialog extends JDialog {
     private JTable current, add;
     private JButton saveButton;
     private JTextField name;
+    private String nameStr;
+    private JButton ok;
+    private boolean edit;
 
-    public JdotxtSortDialog(Map<Sorters, Boolean> sort) {
+    public JdotxtSortDialog(Map<Sorters, Boolean> sort, boolean edit, String name) {
         super();
+        init(sort, edit, name);
+    }
+
+    public JdotxtSortDialog(Map<Sorters, Boolean> sort, boolean edit) {
+        super();
+        init(sort, edit, "");
+    }
+
+    private void init(Map<Sorters, Boolean> sort, boolean edit, String name) {
         this.sort = sort;
+        this.edit = edit;
+        this.nameStr = name;
         prepareData();
         initGUI();
     }
@@ -114,10 +126,13 @@ public class JdotxtSortDialog extends JDialog {
 
         Box save = new Box(BoxLayout.X_AXIS);
         name = new JTextField();
-        saveButton = new JButton();
-        saveButton.setText("Save");
+        name.setText(nameStr);
         save.add(name);
-        save.add(saveButton);
+        if (!edit) {
+            saveButton = new JButton();
+            saveButton.setText("Save");
+            save.add(saveButton);
+        }
 
         cols = new Vector<>();
         cols.setSize(2);
@@ -150,7 +165,7 @@ public class JdotxtSortDialog extends JDialog {
 
         Box buttons = new Box(BoxLayout.X_AXIS);
         buttons.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 3));
-        JButton ok = new JButton(JdotxtGUI.lang.getWord("OK"));
+        ok = new JButton(JdotxtGUI.lang.getWord("OK"));
         JButton cancel = new JButton(JdotxtGUI.lang.getWord("Cancel"));
 
         ok.setFont(JdotxtGUI.fontR);
@@ -167,7 +182,6 @@ public class JdotxtSortDialog extends JDialog {
         ok.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Jdotxt.userPrefs.put("sort", SortUtils.writeSort(sortList));
                 JdotxtSortDialog.this.dispose();
             }
         });
@@ -191,7 +205,11 @@ public class JdotxtSortDialog extends JDialog {
         pack();
     }
 
-    class EditDisabledTableModel extends DefaultTableModel {
+    public JButton getOk() {
+        return ok;
+    }
+    static class EditDisabledTableModel extends DefaultTableModel {
+
 
         EditDisabledTableModel(Vector vector, Vector vector1) {
             super(vector, vector1);
@@ -201,10 +219,10 @@ public class JdotxtSortDialog extends JDialog {
         public boolean isCellEditable(int i, int i1) {
             return false;
         }
+
     }
 
-
-    private MouseListener createMouseListener(final JTable table, final ClickHandler ch) {
+    public static MouseListener createMouseListener(final JTable table, final ClickHandler ch) {
         return new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
