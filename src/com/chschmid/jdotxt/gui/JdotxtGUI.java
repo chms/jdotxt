@@ -169,6 +169,40 @@ public class JdotxtGUI extends JFrame {
 				taskList.updateTaskList();
 			}
 		});
+		toolbar.getToggleCopy().setToggleAction(new Runnable() {
+            @Override
+            public void run() {
+                boolean toggle = toolbar.getToggleCopy().isToggle();
+                Jdotxt.userPrefs.putBoolean("copyMetadata", toggle);
+                taskList.setCopyProjectsContexts2NewTask(toggle);
+            }
+        });
+		toolbar.getToggleFuture().setToggleAction(new Runnable() {
+            @Override
+            public void run() {
+                boolean toggle = toolbar.getToggleFuture().isToggle();
+                Jdotxt.userPrefs.putBoolean("showThreshold", toggle);
+                showThreshold = toggle;
+                forwardFilter2TaskList();
+            }
+        });
+		toolbar.getToggleHide().setToggleAction(new Runnable() {
+			@Override
+			public void run() {
+				boolean toggle = toolbar.getToggleHide().isToggle();
+				Jdotxt.userPrefs.putBoolean("showHide", toggle);
+				showHidden = toggle;
+				forwardFilter2TaskList();
+			}
+		});
+		toolbar.getTogglePrepend().setToggleAction(new Runnable() {
+			@Override
+			public void run() {
+				boolean toggle = toolbar.getTogglePrepend().isToggle();
+				Jdotxt.userPrefs.putBoolean("prependMetadata", toggle);
+				taskList.setPrependMetadata(toggle);
+			}
+		});
 		//toolbar.setVisibleSaveReload(!Jdotxt.userPrefs.getBoolean("autosave", false));
 		
 		// Other GUI element listeners
@@ -376,6 +410,7 @@ public class JdotxtGUI extends JFrame {
 		boolean currentAutoSave = Jdotxt.userPrefs.getBoolean("autosave", false);
 		
 		settingsDialog.setVisible(true);
+        toolbar.refreshSettingsToggles();
 		
 		// Settings after the dialog was closed
 		String newPath = Jdotxt.userPrefs.get("dataDir", Jdotxt.DEFAULT_DIR);

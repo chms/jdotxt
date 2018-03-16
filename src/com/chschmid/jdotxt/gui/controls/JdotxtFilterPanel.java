@@ -81,6 +81,8 @@ public class JdotxtFilterPanel extends JPanel {
 		projects.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent keyEvent) {
+				if (!isPrintableChar(keyEvent.getKeyChar()))
+					return;
 				final FilterField f = new FilterField(keyEvent.getKeyChar()) {
 					@Override
 					public void onType(String typed) {
@@ -127,6 +129,8 @@ public class JdotxtFilterPanel extends JPanel {
 		contexts.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyTyped(KeyEvent keyEvent) {
+				if (!isPrintableChar(keyEvent.getKeyChar()))
+					return;
 				final FilterField f = new FilterField(keyEvent.getKeyChar()) {
 					@Override
 					public void onType(String typed) {
@@ -191,6 +195,14 @@ public class JdotxtFilterPanel extends JPanel {
 		
 		initPaneLayout();
 		reset();
+	}
+
+	public boolean isPrintableChar( char c ) {
+		Character.UnicodeBlock block = Character.UnicodeBlock.of( c );
+		return (!Character.isISOControl(c)) &&
+				c != KeyEvent.CHAR_UNDEFINED &&
+				block != null &&
+				block != Character.UnicodeBlock.SPECIALS;
 	}
 	
 	public void setTaskBag(TaskBag taskBag) {
@@ -274,7 +286,7 @@ public class JdotxtFilterPanel extends JPanel {
 		ArrayList<String> myProjects = new ArrayList<>();
 
 		for (String e : taskBag.getProjects(false)) {
-			if (e.contains(matchProjects)) {
+			if (e.toLowerCase().contains(matchProjects.toLowerCase())) {
 				myProjects.add(e);
 			}
 		}
@@ -282,7 +294,7 @@ public class JdotxtFilterPanel extends JPanel {
 		ArrayList<String> myContexts = new ArrayList<>();
 
 		for (String e : taskBag.getContexts(false)) {
-			if (e.contains(matchContexts)) {
+			if (e.toLowerCase().contains(matchContexts.toLowerCase())) {
 				myContexts.add(e);
 			}
 		}
