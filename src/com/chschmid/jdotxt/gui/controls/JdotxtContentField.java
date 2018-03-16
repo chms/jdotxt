@@ -43,6 +43,12 @@ public class JdotxtContentField extends JTextField{
 		super(text);
 		addKeyListener(new KeyAdapter(){
 			@Override
+			public void keyPressed(KeyEvent keyEvent) {
+				if (mode != AutocompletionModes.PLAIN && (keyEvent.getKeyCode() == KeyEvent.VK_DOWN || keyEvent.getKeyCode() == KeyEvent.VK_UP))
+					keyEvent.consume();
+			}
+
+			@Override
 			public void keyReleased(KeyEvent keyEvent) {
 				processKey(keyEvent);
 			}
