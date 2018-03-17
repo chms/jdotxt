@@ -48,11 +48,13 @@ public class Task implements Serializable {
 	private String completionDate;
 	private String prependedDate;
 	private String relativeAge = "";
+	private Date thresholdDate;
 	private List<String> contexts;
 	private List<String> projects;
 	private List<String> mailAddresses;
 	private List<URL> links;
 	private List<String> phoneNumbers;
+	private boolean hidden;
 
 	public Task(long id, String rawText, Date defaultPrependedDate) {
 		this.id = id;
@@ -92,6 +94,8 @@ public class Task implements Serializable {
 		this.links = LinkParser.getInstance().parse(text);
 		this.phoneNumbers = PhoneNumberParser.getInstance().parse(text);
 		this.deleted = Strings.isEmptyOrNull(text);
+		this.hidden = HiddenParser.getInstance().parse(text);
+		this.thresholdDate = ThresholdDateParser.getInstance().parse(rawText);
 
 		if (defaultPrependedDate != null
 				&& Strings.isEmptyOrNull(this.prependedDate)) {
@@ -168,6 +172,14 @@ public class Task implements Serializable {
 
 	public boolean isCompleted() {
 		return completed;
+	}
+
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	public Date getThresholdDate() {
+		return thresholdDate;
 	}
 
 	public String getCompletionDate() {
