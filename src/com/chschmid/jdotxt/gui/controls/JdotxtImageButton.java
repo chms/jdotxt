@@ -19,18 +19,9 @@
 
 package com.chschmid.jdotxt.gui.controls;
 
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 @SuppressWarnings("serial")
 public class JdotxtImageButton extends JLabel {
@@ -138,7 +129,7 @@ public class JdotxtImageButton extends JLabel {
 	public void setBackgroundColor(Color color) { cBackground = color; setBackground(); }
 	
 	public Color getHoverColor() { return cHover; }
-	public Color getPressedColor() { return cHover; }
+	public Color getPressedColor() { return cPressed; }
 	public Color getBackgroundColor() { return cBackground; }
 	
     public void addActionListener(ActionListener l) {

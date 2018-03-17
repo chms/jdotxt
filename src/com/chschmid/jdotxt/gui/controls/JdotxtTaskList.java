@@ -30,8 +30,12 @@ import com.todotxt.todotxttouch.task.sorter.Sorters;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("serial")
 public class JdotxtTaskList extends JPanel implements Scrollable {
@@ -311,8 +315,12 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 		@Override
 		public void taskCreated(Task t) {
 		}
+
+		private final Pattern dueDate = Pattern.compile("due:(\\d{4}-\\d{2}-\\d{2})");
+
 		@Override
 		public void taskUpdated(Task t, short field) {
+			checkRec(t, field);
 			taskBag.update(t);
 			if (field != JdotxtTaskPanel.CONTENT) updateTaskList(t, field);
 			for (int i = taskListenerList.size()-1; i >= 0; i--) taskListenerList.get(i).taskUpdated(t, field);
@@ -343,9 +351,62 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 			if (!isUpToDate(tasks)) {
 				JdotxtTaskList.this.requestFocus();
 				Runnable postprocessing ;
-				if (field == JdotxtTaskPanel.COMPLETED && t.isCompleted()) postprocessing = new RequestFocus(null, (short)0);
+				if (field == JdotxtTaskPanel.COMPLETED && t.isCompleted())
+					postprocessing = new RequestFocus(null, (short)0);
 				else postprocessing = new RequestFocus(t, field);
 				forceUpdateTaskList(tasks, postprocessing);
+			}
+		}
+
+		private void checkRec(Task t, short field) {
+			if (t.isCompleted() && field == JdotxtTaskPanel.COMPLETED && t.isRec()) {
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				String task = t.toString();
+				Calendar c = Calendar.getInstance();
+				c.setTime(new Date());
+				Date due = null;
+
+				//dealing with due date
+				try {
+					Matcher m = dueDate.matcher(task);
+					if (m.find()) {
+						String date = m.group(0);
+						if (t.isFromThreshold()) {
+							c.setTime(sdf.parse(m.group(1)));
+						} else {
+							due = sdf.parse(m.group(1));
+						}
+						c.add(t.getDuration(), t.getAmount());
+						String toInsert = "due:" + sdf.format(c.getTime());
+						task = task.replace(date, toInsert);
+					}
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+
+				//dealing with threshold date
+				if (t.getThresholdDate() != null) {
+					String toReplace = "t:" + sdf.format(t.getThresholdDate());
+					if (t.isFromThreshold()) {
+						c.setTime(t.getThresholdDate());
+						c.add(t.getDuration(), t.getAmount());
+					} else if (due != null) {
+						//we should step back from due if we have it
+						Long deadlineTime = due.getTime() - t.getThresholdDate().getTime();
+						Long curTime = c.getTime().getTime();
+						c.setTime(new Date(curTime - deadlineTime));
+					} else {
+						c.add(t.getDuration(), t.getAmount());
+					}
+					String replace = "t:" + sdf.format(c.getTime());
+					task = task.replace(toReplace, replace);
+				}
+
+				if (task.startsWith("x ")) {
+					task = task.replaceFirst("x ", "").replaceFirst(t.getPrependedDate() + " ", "");
+				}
+				Task nt = taskBag.addAsTask(task);
+				updateTaskList(nt, JdotxtTaskPanel.ADDNEW);
 			}
 		}
 		

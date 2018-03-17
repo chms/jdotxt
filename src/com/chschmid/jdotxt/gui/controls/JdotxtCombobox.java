@@ -4,12 +4,22 @@ import javax.swing.*;
 import java.util.Collection;
 import java.util.Vector;
 
-public class JdotxtSavedSortCombobox extends JComboBox<String> {
-    private String placeholder = "Select a predefined sort";
+public class JdotxtCombobox extends JComboBox<String> {
+    private String placeholder;
     private Vector<String> sorts = new Vector<>();
     private boolean firstSelect = true;
-    public JdotxtSavedSortCombobox() {
+    private String more = "More...";
+
+    public JdotxtCombobox(String placeholder) {
         super();
+        this.placeholder = placeholder;
+        initGUI();
+    }
+
+    public JdotxtCombobox(String placeholder, String more) {
+        super();
+        this.placeholder = placeholder;
+        this.more = more;
         initGUI();
     }
 
@@ -18,12 +28,16 @@ public class JdotxtSavedSortCombobox extends JComboBox<String> {
         setMaximumSize(getPreferredSize());
     }
 
-    public void setSorts(Collection<String> newSorts) {
+    public void setValues(Collection<String> newValues) {
         sorts.clear();
-        sorts.addAll(newSorts);
-        Vector<String> toShow = new Vector<>(newSorts);
-        toShow.add("Manage...");
+        sorts.addAll(newValues);
+        Vector<String> toShow = new Vector<>(newValues);
+        toShow.add(more);
         setModel(new PlaceholderComboBoxModel<>(placeholder, toShow));
+    }
+
+    public String getMore() {
+        return more;
     }
 
     class PlaceholderComboBoxModel<E> extends DefaultComboBoxModel<E> {

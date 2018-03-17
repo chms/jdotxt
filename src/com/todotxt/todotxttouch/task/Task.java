@@ -22,16 +22,17 @@
  */
 package com.todotxt.todotxttouch.task;
 
+import com.todotxt.todotxttouch.util.RelativeDate;
+import com.todotxt.todotxttouch.util.Strings;
+
 import java.io.Serializable;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import com.todotxt.todotxttouch.util.RelativeDate;
-import com.todotxt.todotxttouch.util.Strings;
 
 @SuppressWarnings("serial")
 public class Task implements Serializable {
@@ -54,6 +55,12 @@ public class Task implements Serializable {
 	private List<String> mailAddresses;
 	private List<URL> links;
 	private List<String> phoneNumbers;
+
+	private boolean rec;
+	private boolean isFromThreshold;
+	private int duration;
+	private int amount;
+
 	private boolean hidden;
 
 	public Task(long id, String rawText, Date defaultPrependedDate) {
@@ -96,6 +103,22 @@ public class Task implements Serializable {
 		this.deleted = Strings.isEmptyOrNull(text);
 		this.hidden = HiddenParser.getInstance().parse(text);
 		this.thresholdDate = ThresholdDateParser.getInstance().parse(rawText);
+		String[] parsedRec = RecParser.getInstance().parse(rawText);
+
+		rec = parsedRec != null;
+		if (rec) {
+			isFromThreshold = !(parsedRec[0].isEmpty());
+			amount = Integer.parseInt(parsedRec[1]);
+			if ("d".equals(parsedRec[2])) {
+				duration = Calendar.DAY_OF_YEAR;
+			} else if ("w".equals(parsedRec[2])) {
+				duration = Calendar.WEEK_OF_YEAR;
+			} else if ("m".equals(parsedRec[2])) {
+				duration = Calendar.MONTH;
+			} else if ("y".equals(parsedRec[2])) {
+				duration = Calendar.YEAR;
+			}
+		}
 
 		if (defaultPrependedDate != null
 				&& Strings.isEmptyOrNull(this.prependedDate)) {
@@ -184,6 +207,22 @@ public class Task implements Serializable {
 
 	public String getCompletionDate() {
 		return completionDate;
+	}
+
+	public boolean isRec() {
+		return rec;
+	}
+
+	public boolean isFromThreshold() {
+		return isFromThreshold;
+	}
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public int getAmount() {
+		return amount;
 	}
 
 	public void markComplete(Date date) {
