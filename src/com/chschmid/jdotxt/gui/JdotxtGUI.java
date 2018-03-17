@@ -37,10 +37,9 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("serial")
 // The application main window
@@ -83,6 +82,7 @@ public class JdotxtGUI extends JFrame {
 	private JdotxtStatusBar statusBar;
 
 	private Map<String, Map<Sorters, Boolean>> savedSorts = new HashMap<>();
+	private LinkedList<String> locations = new LinkedList<>();
 	
 	// Task filters
 	private ArrayList<Priority> filterPrios  = new ArrayList<Priority>();
@@ -134,7 +134,7 @@ public class JdotxtGUI extends JFrame {
 					@Override
 					public void actionPerformed(ActionEvent actionEvent) {
 						saveSort(d.getSortName(), d.getSort());
-						toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+						toolbar.getSavedSortCombobox().setValues(savedSorts.keySet());
 					}
 				});
 				d.setVisible(true);
@@ -143,20 +143,20 @@ public class JdotxtGUI extends JFrame {
 				taskList.updateTaskList();
 			}
 		});
-		loadSorts();
-		toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+        loadToolboxData();
+        toolbar.getSavedSortCombobox().setValues(savedSorts.keySet());
 		toolbar.getSavedSortCombobox().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent actionEvent) {
 				Object item = toolbar.getSavedSortCombobox().getSelectedItem();
-				if ("Manage...".equals(item)) {
+				if (toolbar.getSavedSortCombobox().getMore().equals(item)) {
                     final JdotxtSavedSortDialog d = new JdotxtSavedSortDialog(savedSorts);
                     d.getOk().addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent actionEvent) {
                             savedSorts = d.getSorts();
                             writeSorts();
-							toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+							toolbar.getSavedSortCombobox().setValues(savedSorts.keySet());
                         }
                     });
                     d.setVisible(true);
@@ -169,6 +169,46 @@ public class JdotxtGUI extends JFrame {
 				taskList.updateTaskList();
 			}
 		});
+        toolbar.getFileLocationCombobox().setValues(locations);
+		toolbar.getFileLocationCombobox().addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Object item = toolbar.getFileLocationCombobox().getSelectedItem();
+				String old = Jdotxt.userPrefs.get("dataDir", "");
+				String location = null;
+                if (toolbar.getFileLocationCombobox().getMore().equals(item)) {
+					JFileChooser chooser = new JFileChooser();
+					chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+					chooser.setCurrentDirectory(new File(old));
+					int returnVal = chooser.showDialog(JdotxtGUI.this, null);
+					if (returnVal == JFileChooser.APPROVE_OPTION) location = chooser.getSelectedFile().getAbsolutePath();
+                } else {
+                	location = item.toString();
+				}
+                if (location == null || old.equals(location))
+                	return;
+
+                if (taskBag.hasChanged()) {
+					int result = JOptionPane.showOptionDialog(
+							JdotxtGUI.this,
+							lang.getWord("Text_save_changes_before_changes"),
+							lang.getWord("jdotxt"),
+							JOptionPane.YES_NO_CANCEL_OPTION,
+							JOptionPane.WARNING_MESSAGE,
+							null,
+							null,
+							null);
+					if (result == JOptionPane.OK_OPTION) Jdotxt.storeTodos();
+					if (result == JOptionPane.CANCEL_OPTION) return;
+				}
+
+				addLocation(location);
+				Jdotxt.userPrefs.put("dataDir", location);
+				reloadTasks();
+				toolbar.getFileLocationCombobox().setValues(locations);
+				toolbar.getFileLocationCombobox().setSelectedItem(location);
+            }
+        });
 		toolbar.getToggleCopy().setToggleAction(new Runnable() {
             @Override
             public void run() {
@@ -317,8 +357,13 @@ public class JdotxtGUI extends JFrame {
 		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 		manager.addKeyEventDispatcher(new KeyDispatcher());
 	}
-	
-	private void showReloadDialog() {
+
+    private void loadToolboxData() {
+        loadSorts();
+        loadLocations();
+    }
+
+    private void showReloadDialog() {
 		reloadDialogVisible = true;
 		int result = JOptionPane.showOptionDialog(JdotxtGUI.this, lang.getWord("Text_modified"), lang.getWord("Reload"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
 		reloadDialogVisible = false;
@@ -423,7 +468,12 @@ public class JdotxtGUI extends JFrame {
 		taskList.setCopyProjectsContexts2NewTask(copyMetadata);
 		filterPanel.setVisible(calculateVisibility());
 		filterPanel.setSwitchPanels(Jdotxt.userPrefs.getBoolean("switchPanels", false));
-		if (!currentPath.equals(newPath)) reloadTasks();
+		if (!currentPath.equals(newPath)) {
+			reloadTasks();
+			addLocation(newPath);
+			toolbar.getFileLocationCombobox().setValues(locations);
+			toolbar.getFileLocationCombobox().setSelectedItem(newPath);
+		}
 		else if (currentCompactMode != newCompactMode) refreshGUI();
 		if (currentAutoSave != autoSave) {
 			if (!autoSave) taskList.removeTaskListener(autoSaveListener);
@@ -501,7 +551,7 @@ public class JdotxtGUI extends JFrame {
 	}
 
 	private void writeSorts() {
-        toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+        toolbar.getSavedSortCombobox().setValues(savedSorts.keySet());
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Map<Sorters, Boolean>> e : savedSorts.entrySet()) {
             sb.append(e.getKey());
@@ -525,6 +575,37 @@ public class JdotxtGUI extends JFrame {
 			this.savedSorts.put(nameAndSort[0], sort);
 		}
 	}
+
+	private void addLocation(String location) {
+		locations.remove(location);
+		locations.push(location);
+		while (locations.size() > 10)
+			locations.removeLast();
+		writeLocations();
+	}
+
+	private void loadLocations() {
+	    String locations = Jdotxt.userPrefs.get("recentlyUsed", "");
+        if (locations == null || "".equals(locations)) {
+            this.locations.clear();
+            return;
+        }
+        this.locations = new LinkedList<>();
+        this.locations.addAll(Arrays.asList(locations.split(":")));
+    }
+
+    private void writeLocations() {
+	    if (locations.isEmpty()) {
+            Jdotxt.userPrefs.put("recentlyUsed", "");
+            return;
+        }
+	    StringBuilder sb = new StringBuilder(locations.get(0));
+	    for (int i = 1; i < locations.size(); i++) {
+	        sb.append(":");
+	        sb.append(locations.get(i));
+        }
+        Jdotxt.userPrefs.put("recentlyUsed", sb.toString());
+    }
 	
 	// File operations can be done in a separate thread, so that the GUI thread is not blocked by file IO
 	private class TaskLoader implements Runnable {

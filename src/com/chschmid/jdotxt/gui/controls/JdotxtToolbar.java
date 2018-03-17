@@ -38,7 +38,8 @@ public class JdotxtToolbar extends Box{
 	private JdotxtImageButton buttonArchive;
 	private JdotxtImageButton buttonSettings;
 	private JdotxtImageButton buttonSort;
-	private JdotxtSavedSortCombobox savedSortCombobox;
+	private JdotxtCombobox savedSortCombobox;
+	private JdotxtCombobox fileLocationCombobox;
 	private JdotxtToggleImageButton toggleHide;
 	private JdotxtToggleImageButton toggleFuture;
 	private JdotxtToggleImageButton togglePrepend;
@@ -87,7 +88,8 @@ public class JdotxtToolbar extends Box{
 		toggleFuture	= new JdotxtToggleImageButton(iconFuture);
 		styleJdotxtImageButton(toggleFuture, JdotxtGUI.lang.getWord("Show_tasks_with_threshold"));
 		buttonArchive   = new JdotxtImageButton(iconArchive);
-		savedSortCombobox = new JdotxtSavedSortCombobox();
+		savedSortCombobox = new JdotxtCombobox("Select a predefined sort");
+		fileLocationCombobox = new JdotxtCombobox("Select file location", "Open new location...");
 		styleJdotxtImageButton(buttonArchive, JdotxtGUI.lang.getWord("Archive"));
 		buttonSort 		= new JdotxtImageButton(iconSort);
 		styleJdotxtImageButton(buttonSort, JdotxtGUI.lang.getWord("Save"));
@@ -100,12 +102,13 @@ public class JdotxtToolbar extends Box{
 		this.add(buttonSave);
 		this.add(buttonReload);
 		this.add(buttonArchive);
-		this.add(savedSortCombobox);
+		this.add(fileLocationCombobox);
 		this.add(toggleCopy);
 		this.add(togglePrepend);
 		this.add(toggleFuture);
 		this.add(toggleHide);
 		this.add(Box.createHorizontalGlue());
+		this.add(savedSortCombobox);
 		this.add(buttonSort);
 		this.add(textfieldSearch);
 		this.add(Box.createRigidArea(new Dimension(4,1)));
@@ -149,6 +152,10 @@ public class JdotxtToolbar extends Box{
 		return toggleCopy;
 	}
 
+	public JdotxtCombobox getFileLocationCombobox() {
+		return fileLocationCombobox;
+	}
+
 	// Enable/disable all controls
 	public void setEnabled (boolean enabled){
 		this.enabled = enabled;
@@ -166,7 +173,7 @@ public class JdotxtToolbar extends Box{
 		buttonReload.setVisible(visible);
 	}
 
-	public JdotxtSavedSortCombobox getSavedSortCombobox() {
+	public JdotxtCombobox getSavedSortCombobox() {
 		return savedSortCombobox;
 	}
 
