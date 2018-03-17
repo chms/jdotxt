@@ -19,28 +19,19 @@
 
 package com.chschmid.jdotxt.gui.controls;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Rectangle;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.Scrollable;
-
+import com.chschmid.jdotxt.Jdotxt;
 import com.chschmid.jdotxt.gui.JdotxtGUI;
-import com.todotxt.todotxttouch.task.Filter;
-import com.todotxt.todotxttouch.task.FilterFactory;
-import com.todotxt.todotxttouch.task.Priority;
-import com.todotxt.todotxttouch.task.Sort;
-import com.todotxt.todotxttouch.task.Task;
-import com.todotxt.todotxttouch.task.TaskBag;
+import com.chschmid.jdotxt.gui.utils.SortUtils;
+import com.todotxt.todotxttouch.task.*;
+import com.todotxt.todotxttouch.task.sorter.PredefinedSorters;
+import com.todotxt.todotxttouch.task.sorter.Sorter;
+import com.todotxt.todotxttouch.task.sorter.Sorters;
+
+import javax.swing.*;
+import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.List;
 
 @SuppressWarnings("serial")
 public class JdotxtTaskList extends JPanel implements Scrollable {
@@ -61,6 +52,8 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 	
 	private boolean prependMetadata = false;
 	private boolean copyMetadata = false;
+
+	private Map<Sorters, Boolean> sort = new LinkedHashMap<>();
 	
 	TasksPanelListener taskPanelListener = new TasksPanelListener();
 	NewTaskPanelListener newTaskPanelListener = new NewTaskPanelListener();
@@ -71,6 +64,7 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 	
 	public JdotxtTaskList() {
 		initGUI();
+		refreshSort();
 	}
 	
 	private void initGUI() {
@@ -179,7 +173,7 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 	
 	public void updateTaskList(Runnable postProcessing) {
 		if (taskBag == null) return;
-		List<Task> tasks = taskBag.getTasks(filter, Sort.PRIORITY_DESC.getComparator());
+		List<Task> tasks = taskBag.getTasks(filter, getSort());
 		if (!isUpToDate(tasks)) forceUpdateTaskList(tasks, postProcessing);
 	}
 	
@@ -217,7 +211,39 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 		revalidate();
 		repaint();
 	}
-	
+
+	public void refreshSort() {
+		String sortString = Jdotxt.userPrefs.get("sort", null);
+		if (sortString == null) {
+			sort = new LinkedHashMap<>();
+			return;
+		}
+		sort.clear();
+		sort.putAll(SortUtils.parseSort(sortString));
+	}
+
+	private Sorter<Task> getSort() {
+		if (sort == null || sort.isEmpty())
+			return PredefinedSorters.DEFAULT;
+
+		Sorter<Task> s = null;
+
+		for (Map.Entry<Sorters, Boolean> e : sort.entrySet()) {
+			Sorter<Task> next = e.getValue() ? e.getKey().ascending() : e.getKey().descending();
+			if (s == null)
+				s = next;
+			else
+				s = s.then(next);
+		}
+		return s.then(Sorters.ID.ascending());
+	}
+
+	public Map<Sorters, Boolean> getSortMap() {
+		if (sort == null)
+			return new LinkedHashMap<>();
+		return new LinkedHashMap<>(sort);
+	}
+
 	private class TaskPanelAdder implements Runnable {
 		Task t;
 		
@@ -297,7 +323,7 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 		public void taskDeleted(Task t) {
 			//System.out.println("taskDeleted: " + "-, " + t.getId() + ", " + t.inFileFormat());
 			taskBag.delete(t);
-			tasks = taskBag.getTasks(filter, Sort.PRIORITY_DESC.getComparator());
+			tasks = taskBag.getTasks(filter, getSort());
 			JdotxtTaskList.this.remove(getGUItask(t).panel);
 			revalidate();
 			repaint();
@@ -313,7 +339,7 @@ public class JdotxtTaskList extends JPanel implements Scrollable {
 		
 		private void updateTaskList(Task t, short field) {
 			if (taskBag == null) return;
-			List<Task> tasks = taskBag.getTasks(filter, Sort.PRIORITY_DESC.getComparator());
+			List<Task> tasks = taskBag.getTasks(filter, getSort());
 			if (!isUpToDate(tasks)) {
 				JdotxtTaskList.this.requestFocus();
 				Runnable postprocessing ;

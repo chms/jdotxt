@@ -19,54 +19,28 @@
 
 package com.chschmid.jdotxt.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.KeyEventDispatcher;
-import java.awt.KeyboardFocusManager;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
-import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
-
-import res.lang.LanguagesController;
-
 import com.chschmid.jdotxt.Jdotxt;
-import com.chschmid.jdotxt.gui.controls.JdotxtFilterPanel;
-import com.chschmid.jdotxt.gui.controls.JdotxtStatusBar;
-import com.chschmid.jdotxt.gui.controls.JdotxtTaskList;
-import com.chschmid.jdotxt.gui.controls.JdotxtTaskPanel;
-import com.chschmid.jdotxt.gui.controls.JdotxtToolbar;
-import com.chschmid.jdotxt.gui.controls.TaskListener;
+import com.chschmid.jdotxt.gui.controls.*;
+import com.chschmid.jdotxt.gui.utils.SortUtils;
 import com.chschmid.jdotxt.util.DelayedActionHandler;
 import com.chschmid.jdotxt.util.FileModifiedListener;
 import com.todotxt.todotxttouch.task.Priority;
 import com.todotxt.todotxttouch.task.Task;
 import com.todotxt.todotxttouch.task.TaskBag;
+import com.todotxt.todotxttouch.task.sorter.Sorters;
 import com.todotxt.todotxttouch.util.Util;
+import res.lang.LanguagesController;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 // The application main window
@@ -107,6 +81,8 @@ public class JdotxtGUI extends JFrame {
 	private JScrollPane tasksPane;
 	private JdotxtTaskList taskList;
 	private JdotxtStatusBar statusBar;
+
+	private Map<String, Map<Sorters, Boolean>> savedSorts = new HashMap<>();
 	
 	// Task filters
 	private ArrayList<Priority> filterPrios  = new ArrayList<Priority>();
@@ -144,6 +120,55 @@ public class JdotxtGUI extends JFrame {
 		toolbar.getButtonReload().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { reloadTasks(); } });
 		toolbar.getButtonArchive().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { archiveTasks(); } });
 		toolbar.getButtonSettings().addActionListener(new ActionListener() { public void actionPerformed(ActionEvent arg0) { showSettingsDialog(); } });
+		toolbar.getButtonSort().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				final JdotxtSortDialog d = new JdotxtSortDialog(taskList.getSortMap(), false);
+				d.getOk().addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent actionEvent) {
+                        Jdotxt.userPrefs.put("sort", SortUtils.writeSort(new ArrayList<>(d.getSort().entrySet())));
+                    }
+                });
+				d.getSaveButton().addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent actionEvent) {
+						saveSort(d.getSortName(), d.getSort());
+						toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+					}
+				});
+				d.setVisible(true);
+
+				taskList.refreshSort();
+				taskList.updateTaskList();
+			}
+		});
+		loadSorts();
+		toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+		toolbar.getSavedSortCombobox().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				Object item = toolbar.getSavedSortCombobox().getSelectedItem();
+				if ("Manage...".equals(item)) {
+                    final JdotxtSavedSortDialog d = new JdotxtSavedSortDialog(savedSorts);
+                    d.getOk().addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent actionEvent) {
+                            savedSorts = d.getSorts();
+                            writeSorts();
+							toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+                        }
+                    });
+                    d.setVisible(true);
+                    return;
+                }
+				Map<Sorters, Boolean> sort = savedSorts.get(item);
+				Jdotxt.userPrefs.put("sort", SortUtils.writeSort(new ArrayList<>(sort.entrySet())));
+
+				taskList.refreshSort();
+				taskList.updateTaskList();
+			}
+		});
 		//toolbar.setVisibleSaveReload(!Jdotxt.userPrefs.getBoolean("autosave", false));
 		
 		// Other GUI element listeners
@@ -430,6 +455,40 @@ public class JdotxtGUI extends JFrame {
 		if (Jdotxt.userPrefs.getBoolean("showProjectsPanel", true)) visibility = JdotxtFilterPanel.VISIBILITY_PROJECTS;
 		if (Jdotxt.userPrefs.getBoolean("showContextsPanel", true)) visibility = (short) (visibility + JdotxtFilterPanel.VISIBILITY_CONTEXTS);
 		return visibility;
+	}
+
+	private String saveSort(String name, Map<Sorters, Boolean> sort) {
+		if (savedSorts.containsKey(name))
+			return "Saved sort with such name already exists";
+		savedSorts.put(name, sort);
+        writeSorts();
+		return "OK";
+	}
+
+	private void writeSorts() {
+        toolbar.getSavedSortCombobox().setSorts(savedSorts.keySet());
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Map<Sorters, Boolean>> e : savedSorts.entrySet()) {
+            sb.append(e.getKey());
+            sb.append(';');
+            sb.append(SortUtils.writeSort(new ArrayList<>(e.getValue().entrySet())));
+            sb.append(System.lineSeparator());
+        }
+        Jdotxt.userPrefs.put("savedSorts", sb.toString());
+    }
+
+	private void loadSorts() {
+		String sorts = Jdotxt.userPrefs.get("savedSorts", "");
+		if (sorts == null || "".equals(sorts)) {
+			this.savedSorts = new HashMap<>();
+			return;
+		}
+		String[] savedArray = sorts.split(System.lineSeparator());
+		for (String saved : savedArray) {
+			String[] nameAndSort = saved.split(";");
+			Map<Sorters, Boolean> sort = SortUtils.parseSort(nameAndSort[1]);
+			this.savedSorts.put(nameAndSort[0], sort);
+		}
 	}
 	
 	// File operations can be done in a separate thread, so that the GUI thread is not blocked by file IO
