@@ -243,7 +243,7 @@ public class JdotxtSortDialog extends JDialog {
     }
 
     public Map<Sorters, Boolean> getSort() {
-        Map<Sorters, Boolean> res = new HashMap<>();
+        Map<Sorters, Boolean> res = new LinkedHashMap<>();
 
         for (Map.Entry<Sorters, Boolean> s: sortList) {
             res.put(s.getKey(), s.getValue());
