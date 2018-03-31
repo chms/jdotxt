@@ -591,7 +591,7 @@ public class JdotxtGUI extends JFrame {
             return;
         }
         this.locations = new LinkedList<>();
-        this.locations.addAll(Arrays.asList(locations.split(":")));
+        this.locations.addAll(Arrays.asList(locations.split(";")));
     }
 
     private void writeLocations() {
@@ -601,7 +601,7 @@ public class JdotxtGUI extends JFrame {
         }
 	    StringBuilder sb = new StringBuilder(locations.get(0));
 	    for (int i = 1; i < locations.size(); i++) {
-	        sb.append(":");
+	        sb.append(";");
 	        sb.append(locations.get(i));
         }
         Jdotxt.userPrefs.put("recentlyUsed", sb.toString());
