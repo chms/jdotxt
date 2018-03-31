@@ -68,11 +68,7 @@ public enum Sorters {
             return new GenericSorter<Task>() {
                 @Override
                 public int compare(Task t1, Task t2) {
-
-                    String d1 = t1.getPrependedDate();
-                    String d2 = t2.getPrependedDate();
-
-                    return (d1 == null ? d2 == null ? 0 : -1 : d1.compareTo(d2)) * (ascending ? 1 : -1);
+                    return compareDates(t1.getPrependedDate(), t2.getPrependedDate(), ascending);
                 }
             };
         }
@@ -83,9 +79,8 @@ public enum Sorters {
             return new GenericSorter<Task>() {
                 @Override
                 public int compare(Task t1, Task t2) {
-                    String d1 = t1.getCompletionDate();
-                    String d2 = t2.getCompletionDate();
-                    return (d1 == null ? d2 == null ? 0 : -1 : d1.compareTo(d2)) * (ascending ? 1 : -1);
+                    // FIXME: Seems like this is an error, it uses completion date instead of due date.
+                    return compareDates(t1.getCompletionDate(), t2.getCompletionDate(), ascending);
                 }
             };
         }
@@ -124,10 +119,7 @@ public enum Sorters {
             return new GenericSorter<Task>() {
                 @Override
                 public int compare(Task t1, Task t2) {
-                    Date d1 = t1.getThresholdDate();
-                    Date d2 = t2.getThresholdDate();
-
-                    return (d1 == null ? (d2 == null ? 0 : -1) : (d2 == null ? 1 : d1.compareTo(d2))) * (ascending ? 1 : -1);
+                    return compareDates(t1.getThresholdDate(), t2.getThresholdDate(), ascending);
                 }
             };
         }
@@ -161,5 +153,23 @@ public enum Sorters {
                 return res;
         }
         return l1.size() > l2.size() ? 1 : -1;
+    }
+
+    public static <E extends Comparable> int compareDates(E d1, E d2, final boolean ascending) {
+        int result = 0;
+
+        // Similar to priorities -- we want tasks with threshold date go first.
+
+        if      (d1 == null && d2 == null) { result =  0; }
+        else if (d1 == null              ) { result =  1; }
+        else if (d2 == null              ) { result = -1; }
+        else {
+          result = d1.compareTo(d2);
+        }
+
+        if (!ascending)
+          result = -result;
+
+        return result;
     }
 }
