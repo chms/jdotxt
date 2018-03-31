@@ -123,6 +123,35 @@ public enum Sorters {
                 }
             };
         }
+    },
+    COMPLETION ("Completion") {
+        @Override
+        public Sorter<Task> get(final boolean ascending) {
+            return new GenericSorter<Task>() {
+                @Override
+                public int compare(Task t1, Task t2) {
+                    if (t1 == null || t2 == null) {
+                        throw new NullPointerException(
+                                "Null task passed into comparator");
+                    }
+
+                    final boolean c1 = t1.isCompleted();
+                    final boolean c2 = t2.isCompleted();
+                    int result = 0;
+
+                    if      (c1 == c2) { result =  0; }
+                    else if (c1      ) { result =  1; }
+                    else {
+                      result = -1;
+                    }
+
+                    if (!ascending)
+                      result = -result;
+
+                    return result;
+                }
+            };
+        }
     }
     ;
 
