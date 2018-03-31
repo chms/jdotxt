@@ -46,7 +46,7 @@ public enum Sorters {
             };
         }
     },
-    TEXT ("Task text") {
+    TEXT ("Task Text") {
         @Override
         Sorter<Task> get(final boolean ascending) {
             return new GenericSorter<Task>() {
@@ -62,7 +62,7 @@ public enum Sorters {
             };
         }
     },
-    DATE ("Creation date") {
+    DATE ("Creation Date") {
         @Override
         Sorter<Task> get(final boolean ascending) {
             return new GenericSorter<Task>() {
@@ -73,7 +73,7 @@ public enum Sorters {
             };
         }
     },
-    COMPLETION_DATE("Due date") {
+    COMPLETION_DATE("Due Date") {
         @Override
         Sorter<Task> get(final boolean ascending) {
             return new GenericSorter<Task>() {
@@ -113,7 +113,7 @@ public enum Sorters {
             };
         }
     },
-    THRESHOLD_DATE("Threshold date") {
+    THRESHOLD_DATE("Threshold Date") {
         @Override
         Sorter<Task> get(final boolean ascending) {
             return new GenericSorter<Task>() {
