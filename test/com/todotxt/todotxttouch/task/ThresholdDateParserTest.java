@@ -14,25 +14,52 @@ public class ThresholdDateParserTest {
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyy-MM-dd");
 
     @Test
-    public void correctDateParseTest() throws ParseException {
+    public void correctThresholdDateParseTest() throws ParseException {
         String task = "Threshold date t:2018-01-01";
         Date expected = FORMAT.parse("2018-01-01");
-        Date actual = ThresholdDateParser.getInstance().parse(task);
+        Date actual = ThresholdDateParser.getInstance().parseThresholdDate(task);
         assertEquals(expected, actual);
     }
 
     @Test
     public void noDateParseTest() {
         String task = "Threshold date";
-        Date actual = ThresholdDateParser.getInstance().parse(task);
+        Date thr = ThresholdDateParser.getInstance().parseThresholdDate(task);
+        Date due = ThresholdDateParser.getInstance().parseDueDate(task);
+        assertNull(thr);
+        assertNull(due);
+    }
+
+    @Test
+    public void incorrectThresholdDateParseTest() {
+        String task = "Threshold date t:2018-01-32";
+        Date actual = ThresholdDateParser.getInstance().parseThresholdDate(task);
         assertNull(actual);
     }
 
     @Test
-    public void incorrectDateParseTest() {
-        String task = "Threshold date t:2018-01-32";
-        Date actual = ThresholdDateParser.getInstance().parse(task);
+    public void correctDueDateParseTest() throws ParseException {
+        String task = "Threshold date due:2018-01-01";
+        Date expected = FORMAT.parse("2018-01-01");
+        Date actual = ThresholdDateParser.getInstance().parseDueDate(task);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void incorrectDueDateParseTest() {
+        String task = "Threshold date due:2018-01-32";
+        Date actual = ThresholdDateParser.getInstance().parseDueDate(task);
         assertNull(actual);
     }
 
+    @Test
+    public void dueThresholdTogetherParseTest() throws ParseException {
+        String task = "Threshold date due:2018-01-30 t:2018-01-29";
+        Date due = ThresholdDateParser.getInstance().parseDueDate(task);
+        Date thr = ThresholdDateParser.getInstance().parseThresholdDate(task);
+        Date due_expected = FORMAT.parse("2018-01-30");
+        Date thr_expected = FORMAT.parse("2018-01-29");
+        assertEquals(due_expected, due);
+        assertEquals(thr_expected, thr);
+    }
 }

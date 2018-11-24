@@ -151,6 +151,17 @@ public enum Sorters {
                 }
             };
         }
+    },
+    DUE_DATE("Due Date") {
+        @Override
+        Sorter<Task> get(final boolean ascending) {
+            return new GenericSorter<Task>() {
+                @Override
+                public int compare(Task t1, Task t2) {
+                    return compareDates(t1.getDueDate(), t2.getDueDate(), ascending);
+                }
+            };
+        }
     }
     ;
 

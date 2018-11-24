@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 public class ThresholdDateParser {
 
     private static final Pattern THRESHOLD_DATE_PATTERN = Pattern.compile("(?:\\s|^)t:(\\d{4}-\\d{1,2}-\\d{1,2})(?:\\s|$)");
+    private static final Pattern DUE_DATE_PATTERN = Pattern.compile("(?:\\s|^)due:(\\d{4}-\\d{1,2}-\\d{1,2})(?:\\s|$)");
     private static final ThresholdDateParser INSTANCE = new ThresholdDateParser();
     private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -19,10 +20,18 @@ public class ThresholdDateParser {
         return INSTANCE;
     }
 
-    public Date parse(String text) {
+    public Date parseThresholdDate(String text) {
+      return this.parse(text, THRESHOLD_DATE_PATTERN);
+    }
+
+    public Date parseDueDate(String text) {
+      return this.parse(text, DUE_DATE_PATTERN);
+    }
+
+    private Date parse(String text, Pattern pattern) {
         if (text == null)
             return null;
-        Matcher m = THRESHOLD_DATE_PATTERN.matcher(text);
+        Matcher m = pattern.matcher(text);
         while (m.find()) {
             String possDate = m.group(1).trim();
             try {
