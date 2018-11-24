@@ -73,13 +73,12 @@ public enum Sorters {
             };
         }
     },
-    COMPLETION_DATE("Due Date") {
+    COMPLETION_DATE("Completion Date") {
         @Override
         Sorter<Task> get(final boolean ascending) {
             return new GenericSorter<Task>() {
                 @Override
                 public int compare(Task t1, Task t2) {
-                    // FIXME: Seems like this is an error, it uses completion date instead of due date.
                     return compareDates(t1.getCompletionDate(), t2.getCompletionDate(), ascending);
                 }
             };
@@ -149,6 +148,17 @@ public enum Sorters {
                       result = -result;
 
                     return result;
+                }
+            };
+        }
+    },
+    DUE_DATE("Due Date") {
+        @Override
+        Sorter<Task> get(final boolean ascending) {
+            return new GenericSorter<Task>() {
+                @Override
+                public int compare(Task t1, Task t2) {
+                    return compareDates(t1.getDueDate(), t2.getDueDate(), ascending);
                 }
             };
         }

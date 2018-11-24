@@ -50,6 +50,7 @@ public class Task implements Serializable {
 	private String prependedDate;
 	private String relativeAge = "";
 	private Date thresholdDate;
+	private Date dueDate;
 	private List<String> contexts;
 	private List<String> projects;
 	private List<String> mailAddresses;
@@ -102,7 +103,8 @@ public class Task implements Serializable {
 		this.phoneNumbers = PhoneNumberParser.getInstance().parse(text);
 		this.deleted = Strings.isEmptyOrNull(text);
 		this.hidden = HiddenParser.getInstance().parse(text);
-		this.thresholdDate = ThresholdDateParser.getInstance().parse(rawText);
+		this.thresholdDate = ThresholdDateParser.getInstance().parseThresholdDate(rawText);
+		this.dueDate = ThresholdDateParser.getInstance().parseDueDate(rawText);
 		String[] parsedRec = RecParser.getInstance().parse(rawText);
 
 		rec = parsedRec != null;
@@ -203,6 +205,10 @@ public class Task implements Serializable {
 
 	public Date getThresholdDate() {
 		return thresholdDate;
+	}
+
+	public Date getDueDate() {
+		return dueDate;
 	}
 
 	public String getCompletionDate() {
