@@ -19,27 +19,17 @@
 
 package com.chschmid.jdotxt.gui.controls;
 
-import java.awt.Color;
-import java.awt.Dimension;
+import com.chschmid.jdotxt.Jdotxt;
+import com.chschmid.jdotxt.gui.JdotxtGUI;
+import com.todotxt.todotxttouch.util.Util;
+
+import javax.swing.*;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.event.DocumentListener;
-
-import com.chschmid.jdotxt.gui.JdotxtGUI;
-import com.todotxt.todotxttouch.util.Util;
 
 public class JdotxtToolbar extends Box{
 
@@ -47,6 +37,13 @@ public class JdotxtToolbar extends Box{
 	private JdotxtImageButton buttonReload;
 	private JdotxtImageButton buttonArchive;
 	private JdotxtImageButton buttonSettings;
+	private JdotxtImageButton buttonSort;
+	private JdotxtCombobox savedSortCombobox;
+	private JdotxtCombobox fileLocationCombobox;
+	private JdotxtToggleImageButton toggleHide;
+	private JdotxtToggleImageButton toggleFuture;
+	private JdotxtToggleImageButton togglePrepend;
+	private JdotxtToggleImageButton toggleCopy;
 	private SearchField textfieldSearch;
 	
 	private boolean enabled;
@@ -56,14 +53,20 @@ public class JdotxtToolbar extends Box{
 	public JdotxtToolbar() {
 		super(BoxLayout.X_AXIS);
 		initGUI();
+		refreshSettingsToggles();
 	}
-	
+
 	private void initGUI() {
 		// Load images
 		ImageIcon iconSave     = Util.createImageIcon("/res/drawable/save.png");
 		ImageIcon iconReload   = Util.createImageIcon("/res/drawable/reload.png");
 		ImageIcon iconArchive  = Util.createImageIcon("/res/drawable/archive.png");
 		ImageIcon iconSettings = Util.createImageIcon("/res/drawable/settings.png");
+		ImageIcon iconSort = Util.createImageIcon("/res/drawable/sort.png");
+		ImageIcon iconCopy = Util.createImageIcon("/res/drawable/copy.png");
+		ImageIcon iconHide = Util.createImageIcon("/res/drawable/hide.png");
+		ImageIcon iconPrepend = Util.createImageIcon("/res/drawable/prepend.png");
+		ImageIcon iconFuture = Util.createImageIcon("/res/drawable/future.png");
 		//ImageIcon border       = Util.createImageIcon("/res/drawable/toolbar-border.png");
 		
 		// Style toolbar
@@ -76,8 +79,21 @@ public class JdotxtToolbar extends Box{
 		styleJdotxtImageButton(buttonSave, JdotxtGUI.lang.getWord("Save"));
 		buttonReload    = new JdotxtImageButton(iconReload);
 		styleJdotxtImageButton(buttonReload, JdotxtGUI.lang.getWord("Reload"));
+		toggleCopy 		= new JdotxtToggleImageButton(iconCopy);
+		styleJdotxtImageButton(toggleCopy, JdotxtGUI.lang.getWord("Copy_projects_contexts"));
+		togglePrepend	= new JdotxtToggleImageButton(iconPrepend);
+		styleJdotxtImageButton(togglePrepend, JdotxtGUI.lang.getWord("Prepend_projects_contexts"));
+		toggleHide 		= new JdotxtToggleImageButton(iconHide);
+		styleJdotxtImageButton(toggleHide, JdotxtGUI.lang.getWord("Show_hidden_tasks"));
+		toggleFuture	= new JdotxtToggleImageButton(iconFuture);
+		styleJdotxtImageButton(toggleFuture, JdotxtGUI.lang.getWord("Show_tasks_with_threshold"));
 		buttonArchive   = new JdotxtImageButton(iconArchive);
+		savedSortCombobox = new JdotxtCombobox("Select a predefined sort");
+		fileLocationCombobox = new JdotxtCombobox("Select file location", "Open new location...");
 		styleJdotxtImageButton(buttonArchive, JdotxtGUI.lang.getWord("Archive"));
+		buttonSort 		= new JdotxtImageButton(iconSort);
+		styleJdotxtImageButton(buttonSort, JdotxtGUI.lang.getWord("Save"));
+
 		textfieldSearch = new SearchField(JdotxtGUI.lang.getWord("Search..."));
 		buttonSettings  = new JdotxtImageButton(iconSettings);
 		styleJdotxtImageButton(buttonSettings, JdotxtGUI.lang.getWord("Preferences"));
@@ -86,10 +102,24 @@ public class JdotxtToolbar extends Box{
 		this.add(buttonSave);
 		this.add(buttonReload);
 		this.add(buttonArchive);
+		this.add(fileLocationCombobox);
+		this.add(toggleCopy);
+		this.add(togglePrepend);
+		this.add(toggleFuture);
+		this.add(toggleHide);
 		this.add(Box.createHorizontalGlue());
+		this.add(savedSortCombobox);
+		this.add(buttonSort);
 		this.add(textfieldSearch);
 		this.add(Box.createRigidArea(new Dimension(4,1)));
 		this.add(buttonSettings);
+	}
+
+	public void refreshSettingsToggles() {
+		toggleHide.setToggle(Jdotxt.userPrefs.getBoolean("showHidden", true));
+		toggleFuture.setToggle(Jdotxt.userPrefs.getBoolean("showThreshold", true));
+		toggleCopy.setToggle(Jdotxt.userPrefs.getBoolean("copyMetadata", false));
+		togglePrepend.setToggle(Jdotxt.userPrefs.getBoolean("prependMetadata", false));
 	}
 	
 	private void styleJdotxtImageButton(JdotxtImageButton button, String toolTipText) {
@@ -105,7 +135,27 @@ public class JdotxtToolbar extends Box{
 	public JdotxtImageButton getButtonArchive()   { return buttonArchive; }
 	public JdotxtImageButton getButtonSettings()  { return buttonSettings; }
 	public SearchField       getTextfieldSearch() { return textfieldSearch; }
-	
+	public JdotxtImageButton getButtonSort() 	  { return buttonSort; }
+	public JdotxtToggleImageButton getToggleHide() {
+		return toggleHide;
+	}
+
+	public JdotxtToggleImageButton getToggleFuture() {
+		return toggleFuture;
+	}
+
+	public JdotxtToggleImageButton getTogglePrepend() {
+		return togglePrepend;
+	}
+
+	public JdotxtToggleImageButton getToggleCopy() {
+		return toggleCopy;
+	}
+
+	public JdotxtCombobox getFileLocationCombobox() {
+		return fileLocationCombobox;
+	}
+
 	// Enable/disable all controls
 	public void setEnabled (boolean enabled){
 		this.enabled = enabled;
@@ -122,7 +172,11 @@ public class JdotxtToolbar extends Box{
 		buttonSave.setVisible(visible);
 		buttonReload.setVisible(visible);
 	}
-	
+
+	public JdotxtCombobox getSavedSortCombobox() {
+		return savedSortCombobox;
+	}
+
 	// The search box
     @SuppressWarnings("serial")
 	public static class SearchField extends Box{
