@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  build:
+    
+    working_directory: ~/jdotxt-build
+
+    docker:
+      - image: circleci/openjdk:8-jdk-browsers
+
+    steps:
+
+      - checkout
+
+      - restore_cache:
+          key: jdotxt-build-{{ checksum "build.xml" }}     
+      
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: jdotxt-build-{{ checksum "build.xml" }}
+      
+      - run: cd jdotxt; ant
+      
+      - store_test_results:
+          path: target/surefire-reports
+      
+      - store_artifacts:
+          path: target/demo-java-spring-0.0.1-SNAPSHOT.jar
