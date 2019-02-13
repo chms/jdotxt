@@ -21,5 +21,8 @@ jobs:
       
       - run: ant      
       
+      - store_test_results:
+          path: build/test/reports
+      
       - store_artifacts:
           path: jar/jdotxt.jar
