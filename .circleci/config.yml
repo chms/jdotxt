@@ -10,14 +10,6 @@ jobs:
     steps:
 
       - checkout
-
-      - restore_cache:
-          key: jdotxt-build-{{ checksum "build.xml" }}     
-      
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: jdotxt-build-{{ checksum "build.xml" }}
       
       - run: ant      
       
