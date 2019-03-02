@@ -1,6 +1,8 @@
 jdotxt
 ======
 
+[![CircleCI](https://circleci.com/gh/nicdnb/jdotxt/tree/master.svg?style=svg)](https://circleci.com/gh/nicdnb/jdotxt/tree/master)
+
 Copyright 2013-2018 Christian M. Schmid
 
 another open source cross-platform GUI for the todo.txt file format

@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    
+    working_directory: ~/jdotxt-build
+
+    docker:
+      - image: circleci/openjdk:8-jdk-browsers
+
+    steps:
+
+      - checkout
+      
+      - run: ant      
+      
+      - store_test_results:
+          path: build/test/reports
+      
+      - store_artifacts:
+          path: jar/jdotxt.jar
