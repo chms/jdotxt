@@ -91,4 +91,6 @@ public interface TaskBag {
 	
 	// CS MODIFICATIONS
 	boolean hasChanged();
+
+	byte[] getLastSaveChecksum();
 }

@@ -88,8 +88,8 @@ public class LocalFileTaskRepository implements LocalTaskRepository {
 	}
 
 	@Override
-	public void store(ArrayList<Task> tasks) {
-		TaskIo.writeToFile(tasks, TODO_TXT_FILE);
+	public byte[] store(ArrayList<Task> tasks) {
+		return TaskIo.writeToFile(tasks, TODO_TXT_FILE);
 	}
 
 	@Override

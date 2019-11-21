@@ -38,7 +38,7 @@ interface LocalTaskRepository {
 
 	ArrayList<Task> load();
 
-	void store(ArrayList<Task> tasks);
+	byte[] store(ArrayList<Task> tasks);
 
 	void archive(ArrayList<Task> tasks);
 

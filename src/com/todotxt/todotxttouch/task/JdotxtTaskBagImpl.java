@@ -23,6 +23,7 @@
 package com.todotxt.todotxttouch.task;
 
 import com.todotxt.todotxttouch.task.sorter.PredefinedSorters;
+import javax.xml.bind.DatatypeConverter;
 
 import java.util.*;
 
@@ -37,13 +38,17 @@ class JdotxtTaskBagImpl implements TaskBag {
 	private Date lastReload = null;
 	private Date lastWrite  = null;
 	private Date lastChange = null;
+	private byte[] lastSaveChecksum = null;
 
 	public JdotxtTaskBagImpl(LocalTaskRepository localRepository) {
 		this.localRepository = localRepository;
 	}
 
 	public void store(ArrayList<Task> tasks) {
-		if (lastChange != null && (lastWrite == null || lastChange.after(lastWrite))) localRepository.store(tasks);
+		if (lastChange != null && (lastWrite == null || lastChange.after(lastWrite))) {
+			lastSaveChecksum = localRepository.store(tasks);
+			// System.out.println("Saved: " + DatatypeConverter.printHexBinary(lastSaveChecksum));
+		}
 		
 		lastWrite = new Date();
 		lastReload = null;
@@ -60,6 +65,7 @@ class JdotxtTaskBagImpl implements TaskBag {
 			localRepository.archive(tasks);
 			lastReload = null;
 			lastWrite = new Date();
+			lastSaveChecksum = null;
 		} catch (Exception e) {
 			throw new TaskPersistException("An error occurred while archiving",
 					e);
@@ -103,6 +109,7 @@ class JdotxtTaskBagImpl implements TaskBag {
 			lastReload = new Date();
 			lastWrite  = new Date();
 			lastChange = null;
+			lastSaveChecksum = null;
 		}
 	}
 
@@ -113,6 +120,7 @@ class JdotxtTaskBagImpl implements TaskBag {
 		lastReload = null;
 		lastWrite  = null;
 		lastChange = null;
+		lastSaveChecksum = null;
 	}
 
 	@Override
@@ -279,4 +287,7 @@ class JdotxtTaskBagImpl implements TaskBag {
 		return (lastChange != null);
 	}
 
+	public byte[] getLastSaveChecksum() {
+		return lastSaveChecksum;
+	}
 }

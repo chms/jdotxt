@@ -40,6 +40,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import javax.xml.bind.DatatypeConverter;
 
 @SuppressWarnings("serial")
 // The application main window
@@ -343,6 +344,20 @@ public class JdotxtGUI extends JFrame {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
+						// System.out.println("Entering fileModified:");
+						// First, check whether the checksum has changed. Since
+						// recently, something has changed with Dropbox, and
+						// the app now constantly shows "file modified" dialog,
+						// on each and every modification to task list.  So,
+						// adding this check.
+						try {
+							byte[] lastSaveChecksum = taskBag.getLastSaveChecksum();
+							byte[] newChecksum = Jdotxt.getTodoFileChecksum();
+							// System.out.println("Checking: " + DatatypeConverter.printHexBinary(lastSaveChecksum) + " vs. " + DatatypeConverter.printHexBinary(newChecksum));
+							if (Arrays.equals(lastSaveChecksum, newChecksum)) return;
+						} catch (Exception e) {
+							// System.out.println(e.getMessage());
+						}
 						if (reloadDialogVisible == false && JdotxtGUI.this.isFocused()) showReloadDialog();
 					}
 				});
