@@ -33,6 +33,9 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.security.MessageDigest;
+import java.security.DigestOutputStream;
+
 import org.mozilla.universalchardet.UniversalDetector;
 
 import com.todotxt.todotxttouch.task.Task;
@@ -102,17 +105,20 @@ public class TaskIo {
 		return items;
 	}
 
-	public static void writeToFile(List<Task> tasks, File file) {
-		writeToFile(tasks, file, false);
+	public static byte[] writeToFile(List<Task> tasks, File file) {
+		return writeToFile(tasks, file, false);
 	}
 
-	public static void writeToFile(List<Task> tasks, File file, boolean append) {
+	public static byte[] writeToFile(List<Task> tasks, File file, boolean append) {
 		try {
 			if (!Util.isDeviceWritable()) {
 				throw new IOException("Device is not writable!");
 			}
 			Util.createParentDirectory(file);
-			OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(file, append), encoding);
+			FileOutputStream fos = new FileOutputStream(file, append);
+			MessageDigest digest = MessageDigest.getInstance("MD5");
+			DigestOutputStream dis = new DigestOutputStream(fos, digest);
+			OutputStreamWriter fw = new OutputStreamWriter(dis, encoding);
 			//FileWriter fw = new FileWriter(file, append);
 			for (int i = 0; i < tasks.size(); ++i) {
 				String fileFormat = tasks.get(i).inFileFormat();
@@ -126,9 +132,11 @@ public class TaskIo {
 				}
 			}
 			fw.close();
+			return digest.digest();
 		} catch (Exception e) {
 			System.out.printf(TAG, e.getMessage());
 		}
+		return null;
 	}
 	
 	private static String detectEncoding(File file) throws IOException {

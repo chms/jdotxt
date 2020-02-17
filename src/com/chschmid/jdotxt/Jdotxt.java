@@ -21,8 +21,10 @@ package com.chschmid.jdotxt;
 
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.prefs.Preferences;
+import java.security.MessageDigest;
 
 import com.chschmid.jdotxt.gui.JdotxtGUI;
 import com.chschmid.jdotxt.gui.JdotxtWelcomeDialog;
@@ -138,6 +140,28 @@ public class Jdotxt {
 		}
 	}
 	
+	public static byte[] getTodoFileChecksum() throws Exception {
+		return getFileChecksum(LocalFileTaskRepository.TODO_TXT_FILE);
+	}
+
+	private static byte[] getFileChecksum(File file) throws Exception {
+		FileInputStream stream =  new FileInputStream(file.getPath());
+
+		byte[] buffer = new byte[1024];
+		MessageDigest digest = MessageDigest.getInstance("MD5");
+		int bytesRead;
+
+		do {
+			bytesRead = stream.read(buffer);
+			if (bytesRead > 0) {
+				digest.update(buffer, 0, bytesRead);
+			}
+		} while (bytesRead != -1);
+
+		stream.close();
+		return digest.digest();
+	}
+
 	public static void addFileModifiedListener(FileModifiedListener fileModifiedListener) {
 		fileModifiedWatcher.addFileModifiedListener(fileModifiedListener);
 	}
