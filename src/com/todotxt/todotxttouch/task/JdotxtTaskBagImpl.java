@@ -47,7 +47,7 @@ class JdotxtTaskBagImpl implements TaskBag {
 	public void store(ArrayList<Task> tasks) {
 		if (lastChange != null && (lastWrite == null || lastChange.after(lastWrite))) {
 			lastSaveChecksum = localRepository.store(tasks);
-			// System.out.println("Saved: " + DatatypeConverter.printHexBinary(lastSaveChecksum));
+			// System.out.println("Saved 1: " + DatatypeConverter.printHexBinary(lastSaveChecksum));
 		}
 		
 		lastWrite = new Date();
