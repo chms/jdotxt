@@ -39,8 +39,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import javax.xml.bind.DatatypeConverter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+
 
 @SuppressWarnings("serial")
 // The application main window
