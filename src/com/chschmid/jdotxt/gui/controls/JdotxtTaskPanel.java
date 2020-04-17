@@ -30,16 +30,7 @@ import java.awt.event.InputEvent;
 import java.util.ArrayList;
 import java.util.Date;
 
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultEditorKit;
@@ -145,7 +136,6 @@ public class JdotxtTaskPanel extends JPanel {
 		textContent.setFont(JdotxtGUI.fontR);
 		textContent.setBorder(BorderFactory.createLineBorder(Color.WHITE,4));
 		textContent.setSelectionColor(JdotxtGUI.COLOR_PRESSED);
-		textContent.setPreferredSize(new Dimension(0, textContent.getPreferredSize().height));
 		textContent.getDocument().addDocumentListener(new TextListener());
 		textContent.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("ENTER"), "ENTER");
 		textContent.getActionMap().put("ENTER", new EnterAction(CONTENT));
@@ -221,7 +211,8 @@ public class JdotxtTaskPanel extends JPanel {
 		if (!compactMode) panelTodoInfo.add(textDate); // No-Date-mod
 		panelTodoInfo.setBorder(BorderFactory.createEmptyBorder());
 		panelTodoInfo.setBackground(Color.WHITE);
-		panelTodoInfo.setMaximumSize(new Dimension(Integer.MAX_VALUE, panelTodoInfo.getPreferredSize().height));
+		panelTodoInfo.setMaximumSize(new Dimension(Integer.MAX_VALUE,
+					  (int) 2.5 * panelTodoInfo.getPreferredSize().height));
 		panelTodoInfo.setAlignmentY(TOP_ALIGNMENT);
 		
 		if (!compactMode) panelTodoCommands.setLayout(new BoxLayout(panelTodoCommands, BoxLayout.Y_AXIS));
