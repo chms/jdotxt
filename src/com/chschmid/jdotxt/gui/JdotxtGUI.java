@@ -284,8 +284,9 @@ public class JdotxtGUI extends JFrame {
 		
 		// Add GUI elements to main window
 		this.add(toolbar, BorderLayout.PAGE_START);
-		this.add(filterPanel, BorderLayout.LINE_START);
-		this.add(tasksPane, BorderLayout.CENTER);
+		this.add(new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
+						filterPanel, tasksPane),
+				BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.PAGE_END);
 		
 		// Set window position and dimensions
