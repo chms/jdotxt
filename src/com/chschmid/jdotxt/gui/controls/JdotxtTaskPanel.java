@@ -418,7 +418,9 @@ public class JdotxtTaskPanel extends JPanel {
 	
 	private class DeleteListener extends AbstractAction {
 		public void actionPerformed(ActionEvent e) {
-			fireTaskDeleted();
+			if (JOptionPane.showConfirmDialog(null, "Really delete task?", "Delete Task?",
+				  JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+				fireTaskDeleted();
 		}
 	}
 	
