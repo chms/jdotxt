@@ -20,6 +20,7 @@
 package com.chschmid.jdotxt.gui.controls;
 
 import com.chschmid.jdotxt.Jdotxt;
+import com.chschmid.jdotxt.gui.UndoTool;
 
 import javax.swing.*;
 import java.awt.*;
@@ -41,6 +42,9 @@ public class JdotxtContentField extends JTextField{
 
 	public JdotxtContentField(String text) {
 		super(text);
+
+		UndoTool.addUndoFunctionality(this);
+
 		addKeyListener(new KeyAdapter(){
 			@Override
 			public void keyPressed(KeyEvent keyEvent) {
