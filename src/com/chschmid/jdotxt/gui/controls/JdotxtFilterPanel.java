@@ -42,7 +42,7 @@ public class JdotxtFilterPanel extends JPanel {
 	public static final short  VISIBILITY_CONTEXTS = 2;
 	public static final short  VISIBILITY_ALL      = VISIBILITY_PROJECTS + VISIBILITY_CONTEXTS;
 	
-	public static final int DEFAULT_WIDTH = 250;
+	public static final int DEFAULT_WIDTH = 200;
 	
 	private TaskBag taskBag;
 	
@@ -180,15 +180,15 @@ public class JdotxtFilterPanel extends JPanel {
 	    loading2.setEnabled(false);
 		
 		pane1.setBorder(BorderFactory.createEmptyBorder());
-		pane1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		pane1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		pane1.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		pane1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		pane1.setViewportBorder(null);
 		pane1.getVerticalScrollBar().setBackground(Color.WHITE);
 		pane1.getVerticalScrollBar().setOpaque(true);
 		
 		pane2.setBorder(BorderFactory.createEmptyBorder());
-		pane2.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		pane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		pane2.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		pane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		pane2.setViewportBorder(null);
 		pane2.getVerticalScrollBar().setBackground(Color.WHITE);
 		pane2.getVerticalScrollBar().setOpaque(true);
