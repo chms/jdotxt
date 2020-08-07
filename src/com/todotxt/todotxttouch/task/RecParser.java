@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class RecParser {
     private static final RecParser INSTANCE = new RecParser();
-    private final Pattern p = Pattern.compile("rec:(\\+?)([0-9]+)([dwmy])");
+    private final Pattern p = Pattern.compile("(?:\\s|^)rec:(\\+?)([0-9]+)([dwmy])(?:\\s|$)");
 
     private RecParser() {}
 
