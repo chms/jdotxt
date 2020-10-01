@@ -25,7 +25,7 @@ to set up your build system.
 
 To build jdotxt
 
-1. Download the latest sources from github (e.g., "git clone https://github.com/chms/jdotxt.git")
+1. Download the latest sources from github (e.g., "git clone https://github.com/t7ko/jdotxt")
 
 2. Move into the directory (e.g., "cd jdotxt")
 
