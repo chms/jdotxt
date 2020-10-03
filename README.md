@@ -25,15 +25,15 @@ to set up your build system.
 
 To build jdotxt
 
-1. Download the latest sources from github (e.g., "git clone https://github.com/t7ko/jdotxt")
+1. Download the latest sources from github (e.g., `git clone https://github.com/t7ko/jdotxt`)
 
-2. Move into the directory (e.g., "cd jdotxt")
+2. Move into the directory (e.g., `cd jdotxt`)
 
-3. Run ant (i.e., "ant")
+3. Run ant (i.e., `ant`)
 
 You can run the resulting jar file by executing
 
-java -jar jar/jdotxt.jar
+`java -jar jar/jdotxt.jar`
 
 #### Third Party Code
 
