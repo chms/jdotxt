@@ -23,7 +23,6 @@
 package com.todotxt.todotxttouch.task;
 
 import com.todotxt.todotxttouch.task.sorter.PredefinedSorters;
-import javax.xml.bind.DatatypeConverter;
 
 import java.util.*;
 

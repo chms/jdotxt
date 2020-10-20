@@ -41,7 +41,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import javax.xml.bind.DatatypeConverter;
 
 @SuppressWarnings("serial")
 // The application main window
