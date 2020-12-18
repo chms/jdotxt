@@ -35,6 +35,10 @@ You can run the resulting jar file by executing
 
 `java -jar jar/jdotxt.jar`
 
+Or, to run GUI-only on Windows, with detached console:
+
+`javaw -jar jar/jdotxt.jar`
+
 #### Third Party Code
 
 jdotxt uses code and libraries from the following open source projects:
