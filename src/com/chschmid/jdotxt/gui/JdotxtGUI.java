@@ -663,6 +663,9 @@ public class JdotxtGUI extends JFrame {
 	        		tasksPane.getVerticalScrollBar().setValue(0);
 	        		taskList.requestFocusNewTask(); // New task
 	        	}
+				if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_D) {
+					toolbar.switchTodoFile();
+				}
 	        }
 	        //Allow the event to be redispatched
 	        return false;

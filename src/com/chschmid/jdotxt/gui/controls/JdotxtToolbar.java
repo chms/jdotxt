@@ -305,4 +305,10 @@ public class JdotxtToolbar extends Box{
 	        public void actionPerformed(ActionEvent ev) { search.setText(""); }
 	    }
     }
+
+	public void switchTodoFile() {
+		if (fileLocationCombobox.getItemCount() <= 1)
+			return;
+		fileLocationCombobox.setSelectedItem(fileLocationCombobox.getItemAt(1));
+	}
 }
