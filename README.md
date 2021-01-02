@@ -34,6 +34,10 @@ Another open source cross-platform GUI for the todo.txt file format
    * `CTRL-N` -- "New Task", jumps to New Task entry field.
    * `CTRL-D` -- jump to previously open todo.txt file.
 
+#### Downloads
+
+Go to "Releases" section of the GitHub project to get the latest version.
+
 #### Website
 
 - [jdotxt](http://jdotxt.chschmid.com/), where you will find downloads for different operating systems and a quick guide video
