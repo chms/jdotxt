@@ -32,6 +32,7 @@ Another open source cross-platform GUI for the todo.txt file format
    * `CTRL-R` -- reload todo.txt (reloads automatically if detects that file
      has changed underneath).
    * `CTRL-N` -- "New Task", jumps to New Task entry field.
+   * `CTRL-D` -- jump to previously open todo.txt file.
 
 #### Website
 
