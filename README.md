@@ -36,11 +36,11 @@ Another open source cross-platform GUI for the todo.txt file format
 
 #### Downloads
 
-Go to "Releases" section of the GitHub project to get the latest version.
+Go to "[Releases](https://github.com/t7ko/jdotxt/releases)" section of the GitHub project to get the latest version.
 
-#### Website
+#### Original Author's jdotxt Home Page
 
-- [jdotxt](http://jdotxt.chschmid.com/), where you will find downloads for different operating systems and a quick guide video
+http://jdotxt.chschmid.com/, where you will find original (older version) downloads for different operating systems and a quick guide video.
 
 #### Building jdotxt
 
