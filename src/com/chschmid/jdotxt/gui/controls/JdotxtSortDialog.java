@@ -70,7 +70,6 @@ public class JdotxtSortDialog extends JDialog {
         this.setModal(true);
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setTitle(JdotxtGUI.lang.getWord("jdotxt") + " " + JdotxtGUI.lang.getWord("Sort"));
-        this.setResizable(false);
 
         Vector<String> cols = new Vector<>();
         cols.setSize(5);
@@ -80,11 +79,10 @@ public class JdotxtSortDialog extends JDialog {
         current.setRowSelectionAllowed(false);
         current.setCellSelectionEnabled(false);
         current.setIntercellSpacing(new Dimension(0,0));
-        current.getColumnModel().getColumn(1).setMaxWidth(17);
-        current.getColumnModel().getColumn(2).setMaxWidth(17);
-        current.getColumnModel().getColumn(3).setMaxWidth(17);
-        current.getColumnModel().getColumn(4).setMaxWidth(17);
-        current.setFont(new Font("Serif", Font.PLAIN, 14));
+        current.getColumnModel().getColumn(1).setMaxWidth(20);
+        current.getColumnModel().getColumn(2).setMaxWidth(20);
+        current.getColumnModel().getColumn(3).setMaxWidth(20);
+        current.getColumnModel().getColumn(4).setMaxWidth(20);
         current.setShowGrid(false);
         current.addMouseListener(createMouseListener(current, new ClickHandler() {
             @Override
@@ -141,9 +139,8 @@ public class JdotxtSortDialog extends JDialog {
         add.setRowSelectionAllowed(false);
         add.setCellSelectionEnabled(false);
         add.setIntercellSpacing(new Dimension(0,0));
-        add.getColumnModel().getColumn(1).setMaxWidth(17);
+        add.getColumnModel().getColumn(1).setMaxWidth(20);
         add.setShowGrid(false);
-        add.setFont(new Font("Serif", Font.PLAIN, 14));
         add.addMouseListener(createMouseListener(add, new ClickHandler() {
             @Override
             public void click(int row, int col) {
