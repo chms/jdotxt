@@ -21,6 +21,7 @@ package com.chschmid.jdotxt.gui.controls;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Component;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -209,7 +210,7 @@ public class JdotxtTaskPanel extends JPanel {
 		buttonDelete.setHoverColor(JdotxtGUI.COLOR_HOVER);
 		buttonDelete.setPressedColor(JdotxtGUI.COLOR_PRESSED);
 		buttonDelete.setBackgroundColor(null);
-		buttonDelete.addActionListener(new DeleteListener());
+		buttonDelete.addActionListener(new DeleteListener(this));
 		buttonDelete.addFocusListener(new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent arg0) { fireFocusLost(DELETE); }
@@ -262,7 +263,7 @@ public class JdotxtTaskPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) { checkDone.setSelected(!checkDone.isSelected()); }
 		});
-        am.put(DELETE_ACTION, new DeleteListener());
+        am.put(DELETE_ACTION, new DeleteListener(this));
 		
 		if (task.isCompleted()) markComplete();
 	}
@@ -427,8 +428,12 @@ public class JdotxtTaskPanel extends JPanel {
 	}
 	
 	private class DeleteListener extends AbstractAction {
+		java.awt.Component comp;
+		public DeleteListener(java.awt.Component c) {
+			comp = c;
+		}
 		public void actionPerformed(ActionEvent e) {
-			if (JOptionPane.showConfirmDialog(null, "Really delete task?", "Delete Task?",
+			if (JOptionPane.showConfirmDialog(comp, "Really delete task?", "Delete Task?",
 				  JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
 				fireTaskDeleted();
 		}
