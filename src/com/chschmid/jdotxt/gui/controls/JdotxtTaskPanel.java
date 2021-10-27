@@ -218,12 +218,15 @@ public class JdotxtTaskPanel extends JPanel {
 		});
 		
 		panelTodoInfo.setLayout(new BoxLayout(panelTodoInfo, BoxLayout.Y_AXIS));
+		textContent.setMinimumSize(new Dimension(10,10));
 		panelTodoInfo.add(textContent);
+
 		if (!compactMode) panelTodoInfo.add(textDate); // No-Date-mod
+
 		panelTodoInfo.setBorder(BorderFactory.createEmptyBorder());
 		panelTodoInfo.setBackground(Color.WHITE);
 		panelTodoInfo.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-					  (int) 2.5 * panelTodoInfo.getPreferredSize().height));
+					  (int) 5.5 * panelTodoInfo.getPreferredSize().height));
 		panelTodoInfo.setAlignmentY(TOP_ALIGNMENT);
 		
 		if (!compactMode) panelTodoCommands.setLayout(new BoxLayout(panelTodoCommands, BoxLayout.Y_AXIS));
