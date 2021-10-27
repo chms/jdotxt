@@ -29,7 +29,7 @@ import java.util.*;
 import java.util.List;
 
 @SuppressWarnings("serial")
-public class JdotxtContentField extends JTextField{
+public class JdotxtContentField extends JTextArea {
 
 	private AutocompletionModes mode = AutocompletionModes.PLAIN;
 
@@ -42,6 +42,10 @@ public class JdotxtContentField extends JTextField{
 
 	public JdotxtContentField(String text) {
 		super(text);
+		super.setLineWrap(true);
+		super.setWrapStyleWord(true);
+		super.setRows(0);
+
 
 		UndoTool.addUndoFunctionality(this);
 
