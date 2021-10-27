@@ -403,7 +403,7 @@ public class JdotxtGUI extends JFrame {
 			toolbar.getButtonSave().setEnabled(true);
 			if (Jdotxt.userPrefs.getBoolean("autosave", false)) {
 				saveTasks(true);
-				System.out.println("Save update");
+				// System.out.println("Save update");
 			}
 		}
 	}
