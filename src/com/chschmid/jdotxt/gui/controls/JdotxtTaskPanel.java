@@ -210,7 +210,7 @@ public class JdotxtTaskPanel extends JPanel {
 		buttonDelete.setHoverColor(JdotxtGUI.COLOR_HOVER);
 		buttonDelete.setPressedColor(JdotxtGUI.COLOR_PRESSED);
 		buttonDelete.setBackgroundColor(null);
-		buttonDelete.addActionListener(new DeleteListener(this));
+		buttonDelete.addActionListener(new DeleteListener(buttonDelete));
 		buttonDelete.addFocusListener(new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent arg0) { fireFocusLost(DELETE); }
