@@ -91,7 +91,7 @@ public class JdotxtGUI extends JFrame {
 	private LinkedList<String> locations = new LinkedList<>();
 	
 	// Task filters
-	private ArrayList<Priority> filterPrios  = new ArrayList<Priority>();
+	private final ArrayList<Priority> filterPrios  = new ArrayList<Priority>();
 	private ArrayList<String> filterContexts;
 	private boolean showHidden = Jdotxt.userPrefs.getBoolean("showHidden", true);
 	private boolean showThreshold = Jdotxt.userPrefs.getBoolean("showThreshold", true);
@@ -271,7 +271,7 @@ public class JdotxtGUI extends JFrame {
 		// Style taskPane
 		tasksPane.setBorder(BorderFactory.createEmptyBorder());
 		tasksPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		tasksPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		tasksPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		tasksPane.setViewportBorder(null);
 		tasksPane.getVerticalScrollBar().setBackground(Color.WHITE);
 		tasksPane.getVerticalScrollBar().setOpaque(true);
@@ -285,8 +285,9 @@ public class JdotxtGUI extends JFrame {
 		
 		// Add GUI elements to main window
 		this.add(toolbar, BorderLayout.PAGE_START);
-		this.add(filterPanel, BorderLayout.LINE_START);
-		this.add(tasksPane, BorderLayout.CENTER);
+		this.add(new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
+						filterPanel, tasksPane),
+				BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.PAGE_END);
 		
 		// Set window position and dimensions
@@ -528,13 +529,13 @@ public class JdotxtGUI extends JFrame {
 	
 	// Fonts and stuff
 	public static void loadLookAndFeel(String language) {
-		fontR  = new Font("Ubuntu", Font.PLAIN, 14);
-    	fontRI = new Font("Ubuntu Light", Font.ITALIC, 14);
-    	fontB  = new Font("Ubuntu", Font.PLAIN, 14);
+		fontR  = new Font("Ubuntu", Font.PLAIN, 13);
+    	fontRI = new Font("Ubuntu Light", Font.ITALIC, 13);
+    	fontB  = new Font("Ubuntu", Font.BOLD, 14);
     	
     	
     	// Fonts are not available
-    	if (!fontR.getFamily().equals("Ubuntu Light") || !fontB.getFamily().equals("Ubuntu")) {
+    	if (!fontR.getFamily().equals("Ubuntu") || !fontB.getFamily().equals("Ubuntu")) {
     		try {
             	fontR  = Font.createFont(Font.TRUETYPE_FONT, Jdotxt.class.getResourceAsStream("/res/fonts/Ubuntu-R.ttf")).deriveFont(14f);
             	fontRI = Font.createFont(Font.TRUETYPE_FONT, Jdotxt.class.getResourceAsStream("/res/fonts/Ubuntu-MI.ttf")).deriveFont(14f);
@@ -548,14 +549,17 @@ public class JdotxtGUI extends JFrame {
     	
 		// Set System Look & Feel
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (ClassNotFoundException e) {
-			// No problem, will also work with another L&F
-		} catch (InstantiationException e) {
-			// No problem, will also work with another L&F
-		} catch (IllegalAccessException e) {
-			// No problem, will also work with another L&F
-		} catch (UnsupportedLookAndFeelException e) {
+			for (javax.swing.UIManager.LookAndFeelInfo info : UIManager
+					.getInstalledLookAndFeels()) {
+				if ("Nimbus".equals(info.getName())) {
+					UIManager.setLookAndFeel(info.getClassName());
+					// SwingUtilities.updateComponentTreeUI(this);
+					break;
+				}
+			}
+			// UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			// SwingUtilities.updateComponentTreeUI(this);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
 			// No problem, will also work with another L&F
 		}
         
