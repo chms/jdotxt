@@ -29,7 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class ProjectParser {
-	private final static Pattern CONTEXT_PATTERN = Pattern
+	private final static Pattern PROJECT_PATTERN = Pattern
 			.compile("(?:^|\\s)\\+([\\w_\\.\\-\\:\\/]+)", Pattern.UNICODE_CHARACTER_CLASS);
 	private static final ProjectParser INSTANCE = new ProjectParser();
 
@@ -44,7 +44,7 @@ class ProjectParser {
 		if (inputText == null) {
 			return Collections.emptyList();
 		}
-		Matcher m = CONTEXT_PATTERN.matcher(inputText);
+		Matcher m = PROJECT_PATTERN.matcher(inputText);
 		List<String> projects = new ArrayList<String>();
 		while (m.find()) {
 			String project = m.group(1).trim();
