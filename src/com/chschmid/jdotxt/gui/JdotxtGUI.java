@@ -254,6 +254,7 @@ public class JdotxtGUI extends JFrame {
 		// Other GUI element listeners
 		// What to do when the filters change
 		filterPanel.addFilterChangeListener(new MyFilterChangeListener()); 
+		filterPanel.addTaskBagUpdatedListener(new MyTaskBagUpdatedListener());
 		// What to do when some task changes
 		taskList.addTaskListener(new StatusUpdateListener());
 		taskList.addTaskListener(new FilterUpdateListener());
@@ -429,7 +430,7 @@ public class JdotxtGUI extends JFrame {
 		);
 		taskList.updateTaskList();
 	}
-	
+
 	// Reset all GUI elements to default (= "Loading")
 	public void reset() {
 		toolbar.setEnabled(false);
@@ -750,13 +751,21 @@ public class JdotxtGUI extends JFrame {
 	}
 	
 	// After someone has selected some filters
-	public class MyFilterChangeListener implements com.chschmid.jdotxt.gui.controls.JdotxtFilterPanel.FilterChangeListener {
+	public class MyFilterChangeListener implements JdotxtFilterPanel.FilterChangeListener {
 		@Override
 		public void filterChanged(ArrayList<String> filterContexts, ArrayList<String> filterProjects) {
 			JdotxtGUI.this.filterContexts = filterContexts;
 			JdotxtGUI.this.filterProjects = filterProjects;
 			JdotxtGUI.this.forwardFilter2TaskList();
 			setDefaultStatusText();
+		}
+	}
+
+	public class MyTaskBagUpdatedListener implements JdotxtFilterPanel.TaskBagUpdatedListener {
+		@Override
+		public void taskBagUpdated() {
+			saveTasks(true);
+			reloadTasks();
 		}
 	}
 

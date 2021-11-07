@@ -13,6 +13,7 @@ Another open source cross-platform GUI for the todo.txt file format
    * Multiple selection.
    * Quick filter by typed keystrokes (put focus on the pane and start
      typing).
+   * Context menu with option to rename project/context.
 * Auto-add context/project to new entry (copied from currently selected
   entry).
 * Support for hidden entries (h:1).

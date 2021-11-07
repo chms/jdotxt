@@ -28,10 +28,13 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +66,7 @@ public class JdotxtFilterPanel extends JPanel {
 	private FilterSelectionListener projectsListener, contextsListener;
 	
 	private ArrayList<FilterChangeListener> filterChangeListenerList = new ArrayList<FilterChangeListener>();
+	private ArrayList<TaskBagUpdatedListener> taskBagUpdatedListenerList = new ArrayList<TaskBagUpdatedListener>();
 	
 	private boolean switchPanels = false;
 	private short visibility = VISIBILITY_ALL;
@@ -120,6 +124,7 @@ public class JdotxtFilterPanel extends JPanel {
 				f.setVisible(true);
 			}
 		});
+		projects.addMouseListener(new ListMouseListener(this, ListMouseListener.PROJECT));
 
 		contexts.setFont(JdotxtGUI.fontR);
 		contexts.setSelectionBackground(JdotxtGUI.COLOR_PRESSED);
@@ -169,6 +174,7 @@ public class JdotxtFilterPanel extends JPanel {
 				f.setVisible(true);
 			}
 		});
+		contexts.addMouseListener(new ListMouseListener(this, ListMouseListener.CONTEXT));
 
 		String[] loadingString = new String[1];
 	    loadingString[0] = JdotxtGUI.lang.getWord("Loading...");
@@ -258,9 +264,6 @@ public class JdotxtFilterPanel extends JPanel {
 		this.switchPanels = switchPanels;
 		initPaneLayout();
 	}
-	
-	public void addFilterChangeListener(FilterChangeListener filterChangeListener) { filterChangeListenerList.add(filterChangeListener); }
-	public void removeFilterChangeListener(FilterChangeListener filterChangeListener) { filterChangeListenerList.remove(filterChangeListener); }
 	
 	public boolean isFilterPaneUpToDate() {
 		ArrayList<String> myProjects = taskBag.getProjects(false);
@@ -414,12 +417,35 @@ public class JdotxtFilterPanel extends JPanel {
 	    }
 	}
 	
-	private void fireFilterChange() {
-		for (int i = filterChangeListenerList.size()-1; i >= 0; i--) filterChangeListenerList.get(i).filterChanged(filterContexts, filterProjects);
-	}
-	
 	public interface FilterChangeListener {
-		public void filterChanged(ArrayList<String> filterContexts, ArrayList<String> filterProjects);
+		public void filterChanged(ArrayList<String> filterContexts,
+		                          ArrayList<String> filterProjects);
+	}
+	public void addFilterChangeListener(FilterChangeListener filterChangeListener) {
+		filterChangeListenerList.add(filterChangeListener);
+	}
+	public void removeFilterChangeListener(FilterChangeListener filterChangeListener) {
+		filterChangeListenerList.remove(filterChangeListener);
+	}
+	private void fireFilterChange() {
+		for (int i = filterChangeListenerList.size()-1; i >= 0; i--) {
+			filterChangeListenerList.get(i).filterChanged(filterContexts, filterProjects);
+		}
+	}
+
+	public interface TaskBagUpdatedListener {
+		public void taskBagUpdated();
+	}
+	public void addTaskBagUpdatedListener(TaskBagUpdatedListener taskBagUpdatedListener) {
+		taskBagUpdatedListenerList.add(taskBagUpdatedListener);
+	}
+	public void removeTaskBagUpdatedListener(TaskBagUpdatedListener taskBagUpdatedListener) {
+		taskBagUpdatedListenerList.remove(taskBagUpdatedListener);
+	}
+	private void fireTaskBagUpdated() {
+		for (int i = taskBagUpdatedListenerList.size()-1; i >= 0; i--) {
+			taskBagUpdatedListenerList.get(i).taskBagUpdated();
+		}
 	}
 
 	abstract class FilterField extends JDialog {
@@ -470,5 +496,77 @@ public class JdotxtFilterPanel extends JPanel {
 		public abstract void onFinish();
 		public abstract void selectNext();
 		public abstract void selectPrev();
+	}
+
+	class ListMouseListener extends MouseAdapter {
+
+		public final static int PROJECT = 1;
+		public final static int CONTEXT = 2;
+
+		private JList list;
+		private int kind;
+		private JdotxtFilterPanel filterPanel;
+		private String prefixCharacter;
+
+		public ListMouseListener(JdotxtFilterPanel filterPanel, int kind) {
+			this.filterPanel = filterPanel;
+			this.kind = kind;
+			if (kind == PROJECT) {
+				this.list = filterPanel.projects;
+				this.prefixCharacter = "+";
+			} else if (kind == CONTEXT) {
+				this.list = filterPanel.contexts;
+				this.prefixCharacter = "@";
+			}
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+			showPopup(e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			showPopup(e);
+		}
+
+		private void showPopup(MouseEvent e) {
+			if (!e.isPopupTrigger()) {
+				return;
+			}
+
+			int clicked = list.locationToIndex(e.getPoint());
+			if(clicked != -1 && list.getCellBounds(clicked, clicked).contains(e.getPoint())) {
+				list.setSelectedIndex(clicked);
+
+				JPopupMenu menu = new JPopupMenu();
+
+				menu.add(new AbstractAction("Rename"){
+					public void actionPerformed(ActionEvent e) {
+						String projectName = (String)list.getModel().getElementAt(clicked);
+						String newName = JOptionPane.showInputDialog(
+								filterPanel,
+								"Rename " + projectName + " to:");
+						if (newName == null) {
+							return;
+						}
+						if (newName.equals("")) {
+							int r = JOptionPane.showConfirmDialog(
+									filterPanel,
+									"Are you sure? This will delete tag from all entries!");
+							if (r != JOptionPane.OK_OPTION) {
+								return;
+							}
+						} else {
+							newName = prefixCharacter + newName;
+						}
+						filterPanel.taskBag.renameProject(projectName, newName);
+						filterPanel.forceUpdateFilterPanes();
+						filterPanel.fireTaskBagUpdated();
+					}
+				});
+				menu.show(list, e.getX(), e.getY());
+			}
+		}
 	}
 }

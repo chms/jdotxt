@@ -26,6 +26,7 @@ import com.todotxt.todotxttouch.task.sorter.PredefinedSorters;
 // import javax.xml.bind.DatatypeConverter; // for debug printout
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Implementation of the TaskBag interface
@@ -260,6 +261,25 @@ class JdotxtTaskBagImpl implements TaskBag {
 			throw new TaskPersistException(
 					"Error loading tasks from remote file", e);
 		}*/
+	}
+
+	@Override
+	public boolean renameProject(String from, String to) {
+		String regexpStr = "(?<=^|\\s)" + Pattern.quote(from) + "(?=$|\\s)";
+		Pattern pattern = Pattern.compile(regexpStr, Pattern.UNICODE_CHARACTER_CLASS);
+		boolean changed = false;
+		for (Task item : tasks) {
+			String text = item.toString();
+			String newText = pattern.matcher(text).replaceAll(to);
+			if (!text.equals(newText)) {
+				item.update(newText);
+				changed = true;
+			}
+		}
+		if (changed) {
+			lastChange = new Date();
+		}
+		return changed;
 	}
 
 	@Override

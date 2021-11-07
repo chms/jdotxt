@@ -62,6 +62,8 @@ public interface TaskBag {
 
 	ArrayList<Priority> getPriorities();
 
+	boolean renameProject(String from, String to);
+
 	/* REMOTE APIs */
 	// FUTURE make this syncWithRemote()
 	/**
