@@ -208,14 +208,59 @@ class JdotxtTaskBagImpl implements TaskBag {
 		}
 	}
 
+	/* REMOTE APIS */
 	@Override
-	public void pushToRemote(boolean overwrite) { /* Remote API not implemented*/ }
+	public void pushToRemote(boolean overwrite) {
+		/* Remote API not implemented*/
+		// pushToRemote(false, overwrite);
+	}
+
 	@Override
-	public void pushToRemote(boolean overridePreference, boolean overwrite) { /* Remote API not implemented*/ }
+	public void pushToRemote(boolean overridePreference, boolean overwrite) {
+		/* Remote API not implemented*/
+		/*if (!this.preferences.isManualModeEnabled() || overridePreference) {
+			File doneFile = null;
+			if (localRepository.doneFileModifiedSince(lastSync)) {
+				doneFile = LocalFileTaskRepository.DONE_TXT_FILE;
+			}
+			remoteClientManager.getRemoteClient().pushTodo(
+					LocalFileTaskRepository.TODO_TXT_FILE, doneFile, overwrite);
+			lastSync = new Date();
+		}*/
+	}
+
 	@Override
-	public void pullFromRemote() { /* Remote API not implemented*/ }
+	public void pullFromRemote() {
+		/* Remote API not implemented*/
+		// pullFromRemote(false);
+	}
+
 	@Override
-	public void pullFromRemote(boolean overridePreference) { /* Remote API not implemented*/ }
+	public void pullFromRemote(boolean overridePreference) {
+		/* Remote API not implemented*/
+		/*try {
+			if (!this.preferences.isManualModeEnabled() || overridePreference) {
+				PullTodoResult result = remoteClientManager.getRemoteClient()
+						.pullTodo();
+				File todoFile = result.getTodoFile();
+				if (todoFile != null && todoFile.exists()) {
+					ArrayList<Task> remoteTasks = TaskIo
+							.loadTasksFromFile(todoFile);
+					store(remoteTasks);
+					reload();
+				}
+
+				File doneFile = result.getDoneFile();
+				if (doneFile != null && doneFile.exists()) {
+					localRepository.storeDoneTasks(doneFile);
+				}
+				lastSync = new Date();
+			}
+		} catch (IOException e) {
+			throw new TaskPersistException(
+					"Error loading tasks from remote file", e);
+		}*/
+	}
 
 	@Override
 	public ArrayList<Priority> getPriorities() {
